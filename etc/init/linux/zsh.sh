@@ -1,1 +1,1 @@
-../common/zsh.sh
+common/zsh.sh

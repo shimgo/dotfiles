@@ -1,1 +1,1 @@
-../common/powerline.sh
+common/powerline.sh
