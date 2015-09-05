@@ -230,7 +230,7 @@ if stridx(&runtimepath, $NEOBUNDLEPATH) != -1
   "NeoBundle 'severin-lemaignan/vim-minimap'
   "NeoBundle 'thinca/vim-scouter'
   "NeoBundle 'thinca/vim-ref'
-  "NeoBundle 'thinca/vim-quickrun'
+  NeoBundle 'thinca/vim-quickrun'
   "NeoBundle 'thinca/vim-unite-history'
   "NeoBundle 'thinca/vim-splash'
   "NeoBundle 'thinca/vim-portal'
@@ -264,7 +264,7 @@ if stridx(&runtimepath, $NEOBUNDLEPATH) != -1
   "NeoBundle 'tpope/vim-markdown'
   "NeoBundle 'tpope/vim-fugitive'
   "NeoBundle 'osyo-manga/vim-anzu'
-  "NeoBundle 'cohama/lexima.vim'
+  NeoBundle 'cohama/lexima.vim'
   "NeoBundle 'cohama/vim-insert-linenr'
   "NeoBundle 'cohama/agit.vim'
   "NeoBundle 'LeafCage/yankround.vim'
@@ -316,7 +316,7 @@ if stridx(&runtimepath, $NEOBUNDLEPATH) != -1
   NeoBundle 'vim-jp/vital.vim'
 
   " Colorschemes
-  "NeoBundle 'b4b4r07/solarized.vim', { "base" : $HOME."/.vim/colors" }
+  NeoBundle 'altercation/vim-colors-solarized'
   "NeoBundle 'nanotech/jellybeans.vim', { "base" : $HOME."/.vim/colors" }
   "NeoBundle 'tomasr/molokai', { "base" : $HOME."/.vim/colors" }
   "NeoBundle 'w0ng/vim-hybrid', { "base" : $HOME."/.vim/colors" }
@@ -420,21 +420,21 @@ endif
 ""  endif
 ""endfunction
 ""
-""" func s:has_plugin() {{{2
-""" @params string
-""" @return bool
-"""
-""function! s:has_plugin(name)
-""  " Check {name} plugin whether there is in the runtime path
-""  let nosuffix = a:name =~? '\.vim$' ? a:name[:-5] : a:name
-""  let suffix   = a:name =~? '\.vim$' ? a:name      : a:name . '.vim'
-""  return &rtp =~# '\c\<' . nosuffix . '\>'
-""        \   || globpath(&rtp, suffix, 1) != ''
-""        \   || globpath(&rtp, nosuffix, 1) != ''
-""        \   || globpath(&rtp, 'autoload/' . suffix, 1) != ''
-""        \   || globpath(&rtp, 'autoload/' . tolower(suffix), 1) != ''
-""endfunction
-""
+" func s:has_plugin() {{{2
+" @params string
+" @return bool
+"
+function! s:has_plugin(name)
+  " Check {name} plugin whether there is in the runtime path
+  let nosuffix = a:name =~? '\.vim$' ? a:name[:-5] : a:name
+  let suffix   = a:name =~? '\.vim$' ? a:name      : a:name . '.vim'
+  return &rtp =~# '\c\<' . nosuffix . '\>'
+        \   || globpath(&rtp, suffix, 1) != ''
+        \   || globpath(&rtp, nosuffix, 1) != ''
+        \   || globpath(&rtp, 'autoload/' . suffix, 1) != ''
+        \   || globpath(&rtp, 'autoload/' . tolower(suffix), 1) != ''
+endfunction
+
 """ func s:b4b4r07() {{{2
 """ @params -
 """ @return -
@@ -1988,58 +1988,59 @@ endif
 """==============================================================================
 ""
 """ Essentials
-""syntax enable
-""syntax on
+syntax enable
+syntax on
 ""
-""set number
-""if hostname() =~# '^z1z1r07'
-""  "setlocal columns=160
-""  "setlocal lines=60
-""else
-""  "setlocal columns=160
-""  "setlocal lines=50
-""endif
-""
+set number
+if hostname() =~# '^z1z1r07'
+  "setlocal columns=160
+  "setlocal lines=60
+else
+  "setlocal columns=160
+  "setlocal lines=50
+endif
+
 """ Colorscheme
 """set background=dark "{{{2
-""set background=dark
-""if !has('gui_running')
-""  set background=dark
-""endif
-""set t_Co=256
-""if &t_Co < 256
-""  colorscheme default
-""else
-""  if has('gui_running') && !s:is_windows
-""    " For MacVim, only
-""    if s:has_plugin('solarized.vim')
-""      try
-""        colorscheme solarized-cui
-""      catch
-""        colorscheme solarized
-""      endtry
-""    endif
-""  else
-""    " Vim for CUI
-""    if s:has_plugin('solarized.vim')
-""      try
-""        colorscheme solarized-cui
-""      catch
-""        colorscheme solarized
-""      endtry
-""    elseif s:has_plugin('jellybeans.vim')
-""      colorscheme jellybeans
-""    elseif s:has_plugin('vim-hybrid')
-""      colorscheme hybrid
-""    else
-""      if s:is_windows
-""        colorscheme default
-""      else
-""        colorscheme desert
-""      endif
-""    endif
-""  endif
-""endif
+set background=dark
+"if !has('gui_running')
+"  set background=dark
+"endif
+let g:solarized_termtrans=1
+set t_Co=256
+if &t_Co < 256
+  colorscheme default
+else
+  if has('gui_running') && !s:is_windows
+    " For MacVim, only
+    if s:has_plugin('solarized.vim')
+      try
+        colorscheme solarized-cui
+      catch
+        colorscheme solarized
+      endtry
+    endif
+  else
+    " Vim for CUI
+    if s:has_plugin('solarized.vim')
+      try
+        colorscheme solarized-cui
+      catch
+        colorscheme solarized
+      endtry
+    elseif s:has_plugin('jellybeans.vim')
+      colorscheme jellybeans
+    elseif s:has_plugin('vim-hybrid')
+      colorscheme hybrid
+    else
+      if s:is_windows
+        colorscheme default
+      else
+        colorscheme desert
+      endif
+    endif
+  endif
+endif
 ""
 """ Tabpages {{{2
 ""set showtabline=2
@@ -2314,15 +2315,15 @@ endif
 ""  syntax match ZenkakuSpace containedin=ALL /　/
 ""endfunction
 ""
-""" Options: {{{1
-""" Set options (boolean, number, string). General vim behavior.
-""" For more information about options, see :help 'option-list'.
-"""==============================================================================
+" Options: {{{1
+" Set options (boolean, number, string). General vim behavior.
+" For more information about options, see :help 'option-list'.
+"==============================================================================
 ""
 ""set pumheight=10
 ""
 """ Don't redraw while executing macros
-""set lazyredraw
+set lazyredraw
 ""
 """ Fast terminal connection
 ""set ttyfast
@@ -2333,23 +2334,23 @@ endif
 """ The length of the mode line
 ""set modelines=5
 ""
-""" Vim internal help with the command K
-""set keywordprg=:help
+" Vim internal help with the command K
+set keywordprg=:help
 ""
-""" Language help
-""set helplang& helplang=ja
+" Language help
+set helplang& helplang=ja
 ""
-""" Ignore case
-""set ignorecase
-""
-""" Smart ignore case
-""set smartcase
-""
-""" Enable the incremental search
-""set incsearch
-""
-""" Emphasize the search pattern
-""set hlsearch
+" Ignore case
+set ignorecase
+
+" Smart ignore case
+set smartcase
+
+" Enable the incremental search
+set incsearch
+
+" Emphasize the search pattern
+set hlsearch
 ""
 """ Have Vim automatically reload changed files on disk. Very useful when using
 """ git and switching between branches
@@ -2369,8 +2370,8 @@ endif
 """set noexpandtab
 ""set expandtab
 ""
-""" When starting a new line, indent in automatic
-""set autoindent
+" When starting a new line, indent in automatic
+set autoindent
 ""
 """ The function of the backspace
 ""set backspace=indent,eol,start
@@ -2378,18 +2379,18 @@ endif
 """ When the search is finished, search again from the BOF
 ""set wrapscan
 ""
-""" Emphasize the matching parenthesis
-""set showmatch
+" Emphasize the matching parenthesis
+set showmatch
 ""
 """ Blink on matching brackets
-""set matchtime=1
+set matchtime=1
 ""
 """ Increase the corresponding pairs
 ""set matchpairs& matchpairs+=<:>
 ""
-""" Extend the command line completion
-""set wildmenu
-""
+" Extend the command line completion
+set wildmenu
+
 """ Wildmenu mode
 ""set wildmode=longest,full
 ""
@@ -2401,44 +2402,45 @@ endif
 ""set wildignore+=*.swp,*.swo,*.swn
 ""set wildignore+=*.DS_Store
 ""
-""" Show line and column number
-""set ruler
-""set rulerformat=%m%r%=%l/%L
+" Show line and column number
+set ruler
+set rulerformat=%m%r%=%l/%L
 ""
-""" 1 tab == 4 spaces
-""set shiftwidth=4
-""set tabstop=4
-""
+" 1 tab == 4 spaces
+set shiftwidth=4
+set tabstop=4
+
+" Blank is inserted only the number of 'shiftwidth'.
+set smarttab
+  
 """ String to put at the start of lines that have been wrapped.
 ""let &showbreak = '+++ '
-""
-""" Always display a status line
-""set laststatus=2
-""
-""" Set command window height to reduce number of 'Press ENTER...' prompts
-""set cmdheight=2
-""
-""" Show current mode (insert, visual, normal, etc.)
-""set showmode
-""
-""" Show last command in status line
-""set showcmd
-""
+
+" Always display a status line
+set laststatus=2
+
+" Set command window height to reduce number of 'Press ENTER...' prompts
+set cmdheight=2
+
+" Show current mode (insert, visual, normal, etc.)
+set showmode
+
+" Show last command in status line
+set showcmd
+
 """ Lets vim set the title of the console
 ""set notitle
 ""
-""" When you create a new line, perform advanced automatic indentation
-""set smartindent
-""
-""" Blank is inserted only the number of 'shiftwidth'.
-""set smarttab
+" When you create a new line, perform advanced automatic indentation
+set smartindent
+
 ""
 """ Moving the cursor left and right will be modern.
 ""set whichwrap=b,s,h,l,<,>,[,]
 ""
-""" Hide buffers instead of unloading them
-""set hidden
-""
+" Hide buffers instead of unloading them
+set hidden
+
 """ The maximum width of the input text
 ""set textwidth=0
 ""
@@ -2449,15 +2451,15 @@ endif
 ""set formatoptions-=o
 ""set formatoptions-=v
 ""set formatoptions+=l
-""
-""" Identifying problems and bringing them to the foreground
-""set list
-""set listchars=tab:>-,trail:-,nbsp:%,extends:>,precedes:<,eol:<
-""set listchars=eol:<,tab:>.
-""
-""" Increase or decrease items
-""set nrformats=alpha,hex
-""
+
+" Identifying problems and bringing them to the foreground
+set list
+set listchars=tab:>-,trail:-,nbsp:%,extends:>,precedes:<,eol:<
+set listchars=eol:<,tab:>.
+
+" Increase or decrease items
+set nrformats=alpha,hex
+
 """ Do not use alt key on Win
 ""set winaltkeys=no
 ""
@@ -2468,30 +2470,30 @@ endif
 """ Automatically equal size when opening
 ""set noequalalways
 ""
-""" History size
-""set history=10000
-""set wrap
-""
+" History size
+set history=10000
+set wrap
+
 """set helpheight=999
 ""set mousehide
-""set virtualedit=block
-""set virtualedit& virtualedit+=block
-""
-""" Make it normal in UTF-8 in Unix.
-""set encoding=utf-8
-""
-""" Select newline character (either or both of CR and LF depending on system) automatically
-""" Default fileformat.
-""set fileformat=unix
-""" Automatic recognition of a new line cord.
-""set fileformats=unix,dos,mac
-""" A fullwidth character is displayed in vim properly.
-""if exists('&ambiwidth')
-""  set ambiwidth=double
-""endif
-""
-""set fileencodings=iso-2022-jp,cp932,sjis,euc-jp,utf-8
-""
+set virtualedit=block
+set virtualedit& virtualedit+=block
+
+" Make it normal in UTF-8 in Unix.
+set encoding=utf-8
+
+" Select newline character (either or both of CR and LF depending on system) automatically
+" Default fileformat.
+set fileformat=unix
+" Automatic recognition of a new line cord.
+set fileformats=unix,dos,mac
+" A fullwidth character is displayed in vim properly.
+if exists('&ambiwidth')
+  set ambiwidth=double
+endif
+
+set fileencodings=iso-2022-jp,cp932,sjis,euc-jp,utf-8
+
 ""set foldenable
 """set foldmethod=marker
 """set foldopen=all
@@ -2502,12 +2504,12 @@ endif
 ""
 """ IM settings
 """ IM off when starting up
-""set iminsert=0 imsearch=0
+set iminsert=0 imsearch=0
 """ Use IM always
 """set noimdisable
-""" Disable IM on cmdline
-""set noimcmdline
-""
+" Disable IM on cmdline
+set noimcmdline
+
 """ Change some neccesary settings for win
 ""if s:is_windows
 ""  set shellslash "Exchange path separator
@@ -2518,11 +2520,11 @@ endif
 ""  let &undodir = $DOTVIM . '/undo'
 ""  call s:mkdir(&undodir)
 ""endif
-""
-""" Use clipboard
-""if has('clipboard')
-""  set clipboard=unnamed
-""endif
+
+" Use clipboard
+if has('clipboard')
+  set clipboard=unnamed
+endif
 ""
 ""if has('patch-7.4.338')
 ""  set breakindent
@@ -2763,10 +2765,10 @@ endif
 ""vnoremap : ;
 ""
 """ Make less complex to escaping {{{2
-""inoremap jj <ESC>
+inoremap jj <ESC>
 ""cnoremap <expr> j getcmdline()[getcmdpos()-2] ==# 'j' ? "\<BS>\<C-c>" : 'j'
-""vnoremap <C-j><C-j> <ESC>
-""onoremap jj <ESC>
+vnoremap <C-j><C-j> <ESC>
+onoremap jj <ESC>
 ""inoremap j[Space] j
 ""onoremap j[Space] j
 ""
@@ -2840,15 +2842,17 @@ endif
 ""nnoremap <silent> tc :<C-u>tabclose<CR>
 ""nnoremap <silent> to :<C-u>tabonly<CR>
 ""
-""" Inser matching bracket automatically {{{2
-""if s:has_plugin("lexima.vim")
-""  inoremap [ []<LEFT>
-""  inoremap ( ()<LEFT>
-""  inoremap " ""<LEFT>
-""  inoremap ' ''<LEFT>
-""  inoremap ` ``<LEFT>
-""endif
-""
+" Insert matching bracket automatically {{{2
+"if s:has_plugin("lexima.vim")
+"  inoremap { {}<LEFT>
+"  inoremap [ []<LEFT>
+"  inoremap ( ()<LEFT>
+"  inoremap " ""<LEFT>
+"  inoremap ' ''<LEFT>
+"  inoremap ` ``<LEFT>
+"  inoremap < <><LEFT>
+"endif
+
 """ Make cursor-moving useful {{{2
 ""inoremap <C-h> <Backspace>
 ""inoremap <C-d> <Delete>
