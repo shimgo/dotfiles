@@ -34,10 +34,15 @@ if ! has "python"; then
     fi
 fi
 
-if has "pip"; then
-    pip install --user powerline-status
+if ! has "pip"; then
+    if is_linux; then
+        curl -kL https://raw.github.com/pypa/pip/master/contrib/get-pip.py | python
+        pip install --user powerline-status
+    else
+        log_info "you need pip"
+        exit 1
+    fi
 else
-    log_info "you need pip"
-    exit 1
+    pip install --user powerline-status
 fi
  
