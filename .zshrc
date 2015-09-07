@@ -1,5 +1,7 @@
 # Path to your oh-my-zsh installation.
-export ZSH=/Users/shingo/.oh-my-zsh
+if [ -d "${HOME}/.oh-my-zsh" ]; then
+    export ZSH=${HOME}/.oh-my-zsh
+fi
 
 # Set name of the theme to load.
 # Look in ~/.oh-my-zsh/themes/
@@ -81,7 +83,9 @@ fi
 
 powerline-daemon -q
 
-source $ZSH/oh-my-zsh.sh
+if [ -r "$ZSH/oh-my-zsh.sh" ]; then 
+    source $ZSH/oh-my-zsh.sh
+fi
 
 # You may need to manually set your language environment
 # export LANG=en_US.UTF-8

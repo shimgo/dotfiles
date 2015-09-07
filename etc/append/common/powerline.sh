@@ -5,12 +5,15 @@ set -eu
 
 . "$DOTPATH"/etc/lib/vital.sh
 
-if [ ${EUID:-${UID}} != 0 ]; then
-    log_info "${0:-zsh.sh} must be executed as user root."
-    log_info "you should run 'su root; chsh -s \$(which zsh)'"
+#if [ ${EUID:-${UID}} != 0 ]; then
+#    log_info "${0:-zsh.sh} must be executed as user root."
+#    log_info "you should run 'su root; chsh -s \$(which zsh)'"
+#    exit
+#fi
+if [ -r "powerline" ]; then
+    log_info "powerline already has been installed"
     exit
 fi
-
 if ! has "python"; then
     if is_osx; then
         if has "brew"; then
@@ -43,6 +46,6 @@ if ! has "pip"; then
         exit 1
     fi
 else
-    pip install --user powerline-status
+	pip install --user powerline-status
 fi
  

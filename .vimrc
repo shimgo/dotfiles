@@ -321,10 +321,10 @@ if stridx(&runtimepath, $NEOBUNDLEPATH) != -1
   "NeoBundle 'tomasr/molokai', { "base" : $HOME."/.vim/colors" }
   "NeoBundle 'w0ng/vim-hybrid', { "base" : $HOME."/.vim/colors" }
 
-  " Disable plugins
-  if !has('gui_running')
-    NeoBundleDisable lightline.vim
-  endif
+"  " Disable plugins
+"  if !has('gui_running')
+"    NeoBundleDisable lightline.vim
+"  endif
   "NeoBundleDisable mru.vim
   "NeoBundleDisable vim-buftabs
 
