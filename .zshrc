@@ -85,7 +85,7 @@ if [ -r "$ZSH/oh-my-zsh.sh" ]; then
     source $ZSH/oh-my-zsh.sh
 fi
 [ -n "${REMOTEHOST}${SSH_CONNECTION}" ] && 
-        PROMPT="%{^[[37m%}${HOST%%.*} ${PROMPT}"
+        PROMPT="%K{cyan}%F{white}SSH %f%k%F{cyan}${SEGMENT_SEPARATOR}%f${PROMPT}"
 
 #case ${OSTYPE} in
 #    darwin*)
