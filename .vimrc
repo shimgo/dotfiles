@@ -2118,6 +2118,16 @@ endif
 ""endfunction "}}}
 ""
 """ StatusLine {{{2
+" Powerline
+if has("python")
+    python from powerline.vim import setup as powerline_setup
+    python powerline_setup()
+    python del powerline_setup
+    set laststatus=2
+    set showtabline=2
+    set noshowmode
+endif
+
 ""set laststatus=2
 ""
 ""highlight BlackWhite ctermfg=black ctermbg=white cterm=none guifg=black guibg=white gui=none
@@ -2366,10 +2376,7 @@ set hlsearch
 """ Moves the cursor to the same column when cursor move
 ""set nostartofline
 ""
-""" Use tabs instead of spaces
-"""set noexpandtab
-""set expandtab
-""
+"
 " When starting a new line, indent in automatic
 set autoindent
 ""
@@ -2401,7 +2408,11 @@ set wildmenu
 ""set wildignore+=*.o,*.obj,*.exe,*.dll,*.manifest,*.so,*.out,*.class
 ""set wildignore+=*.swp,*.swo,*.swn
 ""set wildignore+=*.DS_Store
-""
+
+"" Use tabs instead of spaces
+"set noexpandtab
+set expandtab
+
 " Show line and column number
 set ruler
 set rulerformat=%m%r%=%l/%L

@@ -1,6 +1,6 @@
 # Path to your oh-my-zsh installation.
 if [ -d "${HOME}/.oh-my-zsh" ]; then
-    export ZSH=${HOME}/.oh-my-zsh
+    export ZSH="${HOME}/.oh-my-zsh"
 fi
 
 # Set name of the theme to load.
@@ -10,7 +10,6 @@ fi
 #ZSH_THEME="michelebologna"
 #ZSH_THEME="robbyrussell"
 ZSH_THEME="agnoster"
-
 # Uncomment the following line to use case-sensitive completion.
 # CASE_SENSITIVE="true"
 
@@ -61,7 +60,6 @@ plugins=(git ruby osx bundler brew rails emoji-clock)
 #export PATH="/usr/bin:/bin:/usr/sbin:/sbin"
 
 # For OSX
-#export PATH=$PATH:${HOME}/bin:~/Library/Python/2.7/bin
 if [ -d "${HOME}/Library/Python/2.7/bin" ]; then
     export PATH=$PATH:${HOME}/Library/Python/2.7/bin
 fi
@@ -69,8 +67,6 @@ fi
 if [[ -r ~/Library/Python/2.7/lib/python/site-packages/powerline/bindings/zsh/powerline.zsh ]]; then
     source ~/Library/Python/2.7/lib/python/site-packages/powerline/bindings/zsh/powerline.zsh
 fi
-
-#. ~/Library/Python/2.7/lib/python/site-packages/powerline/bindings/zsh/powerline.zsh
 
 # For Linux
 if [ -d "$HOME/.local/bin" ]; then
@@ -81,14 +77,33 @@ if [[ -r /usr/local/lib/python2.7/dist-packages/powerline/bindings/zsh/powerline
     source /usr/local/lib/python2.7/dist-packages/powerline/bindings/zsh/powerline.zsh
 fi
 
-powerline-daemon -q
+if [[ -x `whence -p powerline-daemon` ]]; then
+    powerline-daemon -q
+fi
 
 if [ -r "$ZSH/oh-my-zsh.sh" ]; then 
     source $ZSH/oh-my-zsh.sh
 fi
+[ -n "${REMOTEHOST}${SSH_CONNECTION}" ] && 
+        PROMPT="%{^[[37m%}${HOST%%.*} ${PROMPT}"
+
+#case ${OSTYPE} in
+#    darwin*)
+#        PROMPT="%K{blue}OSX${PROMPT}%k"
+#    ;;
+#esac
+
+# Title of terminal
+case "${TERM}" in
+kterm*|xterm)
+    precmd() {
+        echo -ne "\033]0;${USER}@${HOST%%.*}:${PWD}\007"
+    }
+    ;;
+esac
 
 # You may need to manually set your language environment
-# export LANG=en_US.UTF-8
+export LANG=ja_JP.UTF-8
 
 # Preferred editor for local and remote sessions
 # if [[ -n $SSH_CONNECTION ]]; then
