@@ -51,13 +51,11 @@
 "
 " Thank you.
 "==============================================================================
-
 " Startup: {{{1
 " Skip initialization for vim-tiny or vim-small
 " take account of '-eval'
 "if !1 | finish | endif
 if 0 | endif
-
 " Use plain vim
 " when vim was invoked by 'sudo' command
 " or, invoked as 'git difftool'
@@ -2339,7 +2337,7 @@ set lazyredraw
 ""set ttyfast
 ""
 """ Enable the mode line
-""set modeline
+set modeline
 ""
 """ The length of the mode line
 ""set modelines=5
@@ -2767,6 +2765,8 @@ endif
 """ Easy typing tilda insted of backslash
 ""cnoremap <expr> <Bslash> HomedirOrBackslash()
 ""
+" Omni completion
+imap <C-f> <C-x><C-o>
 """ Swap semicolon for colon {{{2
 ""nnoremap ; :
 ""vnoremap ; :
@@ -2854,15 +2854,16 @@ onoremap jj <ESC>
 ""nnoremap <silent> to :<C-u>tabonly<CR>
 ""
 " Insert matching bracket automatically {{{2
-"if s:has_plugin("lexima.vim")
-"  inoremap { {}<LEFT>
-"  inoremap [ []<LEFT>
-"  inoremap ( ()<LEFT>
-"  inoremap " ""<LEFT>
-"  inoremap ' ''<LEFT>
-"  inoremap ` ``<LEFT>
-"  inoremap < <><LEFT>
-"endif
+if s:has_plugin("lexima.vim")
+call lexima#add_rule({'at': '\%#.*[-0-9a-zA-Z_,:]', 'char': '{', 'input': '{'})
+  inoremap { {}<LEFT>
+  inoremap [ []<LEFT>
+  inoremap ( ()<LEFT>
+  inoremap " ""<LEFT>
+  inoremap ' ''<LEFT>
+  inoremap ` ``<LEFT>
+  inoremap < <><LEFT>
+endif
 
 """ Make cursor-moving useful {{{2
 ""inoremap <C-h> <Backspace>
