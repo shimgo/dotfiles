@@ -2501,7 +2501,7 @@ if exists('&ambiwidth')
   set ambiwidth=double
 endif
 
-set fileencodings=iso-2022-jp,cp932,sjis,euc-jp,utf-8
+set fileencodings=utf-8,iso-2022-jp,cp932,sjis,euc-jp
 
 ""set foldenable
 """set foldmethod=marker
@@ -2856,12 +2856,12 @@ onoremap jj <ESC>
 " Insert matching bracket automatically {{{2
 if s:has_plugin("lexima.vim")
 call lexima#add_rule({'at': '\%#.*[-0-9a-zA-Z_,:]', 'char': '{', 'input': '{'})
-  inoremap { {}<LEFT>
-  inoremap [ []<LEFT>
-  inoremap ( ()<LEFT>
-  inoremap " ""<LEFT>
-  inoremap ' ''<LEFT>
-  inoremap ` ``<LEFT>
+""  inoremap { {}<LEFT>
+""  inoremap [ []<LEFT>
+""  inoremap ( ()<LEFT>
+""  inoremap " ""<LEFT>
+""  inoremap ' ''<LEFT>
+""  inoremap ` ``<LEFT>
   inoremap < <><LEFT>
 endif
 
