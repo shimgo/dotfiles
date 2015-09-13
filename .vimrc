@@ -307,6 +307,7 @@ if stridx(&runtimepath, $NEOBUNDLEPATH) != -1
   "NeoBundle 'rhysd/try-colorscheme.vim'
   "NeoBundle 'rhysd/github-complete.vim'
   "NeoBundle 'junegunn/fzf'
+  NeoBundle 'vim-scripts/dbext.vim'
 
   " Japanese help
   NeoBundle 'vim-jp/vimdoc-ja'
@@ -399,25 +400,25 @@ endif
 """ has been described in the setting position.
 """==============================================================================
 ""
-""" func s:bundle() {{{2
-""" @params string
-""" @return bool
-"""
-""function! s:bundled(bundle)
-""  if !isdirectory($VIMBUNDLE)
-""    return s:false
-""  endif
-""  if stridx(&runtimepath, $NEOBUNDLEPATH) == -1
-""    return s:false
-""  endif
-""
-""  if a:bundle ==# 'neobundle.vim'
-""    return s:true
-""  else
-""    return neobundle#is_installed(a:bundle)
-""  endif
-""endfunction
-""
+" func s:bundle() {{{2
+" @params string
+" @return bool
+"
+function! s:bundled(bundle)
+  if !isdirectory($VIMBUNDLE)
+    return s:false
+  endif
+  if stridx(&runtimepath, $NEOBUNDLEPATH) == -1
+    return s:false
+  endif
+
+  if a:bundle ==# 'neobundle.vim'
+    return s:true
+  else
+    return neobundle#is_installed(a:bundle)
+  endif
+endfunction
+
 " func s:has_plugin() {{{2
 " @params string
 " @return bool
@@ -2983,11 +2984,11 @@ endif
 ""inoremap <C-m> <CR>
 ""
 """ Plugin: {{{1
-""
-""function! s:neobundled(bundle)
-""  return s:bundled(a:bundle) && neobundle#tap(a:bundle)
-""endfunction
-""
+
+function! s:neobundled(bundle)
+  return s:bundled(a:bundle) && neobundle#tap(a:bundle)
+endfunction
+
 """ template
 """ username/vim-plugin {\{{2
 """ if s:neobundled('vim-plugin')
@@ -4545,7 +4546,20 @@ endif
 ""
 ""  call neobundle#untap()
 ""endif
-""
+" vim-scripts/dbext.vim {{{2
+if s:neobundled('dbext.vim')
+  let dbext_default_profile=""
+  let dbext_default_type="MYSQL"
+  let dbext_default_user="root"
+  let dbext_default_passwd="password"
+  " To change dbname: :DBSetOption dbname=mydb 
+  let dbext_default_dbname=""
+  let dbext_default_host="localhost"
+  let dbext_default_buffer_lines=20
+  call neobundle#untap()
+endif
+
+
 """ Misc: {{{1
 """ Experimental setup and settings that do not belong to any section
 """ will be described in this section.
