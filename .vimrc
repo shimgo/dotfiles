@@ -1989,7 +1989,7 @@ endfunction
 """ Essentials
 syntax enable
 syntax on
-""
+
 set number
 if hostname() =~# '^z1z1r07'
   "setlocal columns=160
@@ -2305,25 +2305,47 @@ endif
 ""endif
 ""
 """ ZEN-KAKU
-""" Display zenkaku-space {{{2
-""augroup hilight-idegraphic-space
-""  autocmd!
-""  "autocmd VimEnter,ColorScheme * highlight IdeographicSpace term=underline ctermbg=DarkGreen guibg=DarkGreen
-""  "autocmd WinEnter * match IdeographicSpace /　/
-""  autocmd VimEnter,ColorScheme * call <SID>hl_trailing_spaces()
-""  autocmd VimEnter,ColorScheme * call <SID>hl_zenkaku_space()
-""augroup END
-""
-""function! s:hl_trailing_spaces()
-""  highlight! link TrailingSpaces Error
-""  syntax match TrailingSpaces containedin=ALL /\s\+$/
-""endfunction
-""
-""function! s:hl_zenkaku_space()
-""  highlight! link ZenkakuSpace Error
-""  syntax match ZenkakuSpace containedin=ALL /　/
-""endfunction
-""
+"" Display zenkaku-space {{{2
+"augroup hilight-idegraphic-space
+"  autocmd!
+"  "autocmd VimEnter,ColorScheme * highlight IdeographicSpace term=underline ctermbg=DarkGreen guibg=DarkGreen
+"  "autocmd WinEnter * match IdeographicSpace /　/
+"  autocmd VimEnter,ColorScheme * call <SID>hl_trailing_spaces()
+"  autocmd VimEnter,ColorScheme * call <SID>hl_zenkaku_space()
+"augroup END
+"
+"function! s:hl_trailing_spaces()
+"  highlight! link TrailingSpaces Error
+"  syntax match TrailingSpaces containedin=ALL /\s\+$/
+"endfunction
+"
+"function! s:hl_zenkaku_space()
+"  highlight! link ZenkakuSpace Error
+"  syntax match ZenkakuSpace containedin=ALL /　/
+"endfunction
+
+
+"コメント以外で全角スペースを指定しているので scriptencodingと、
+"このファイルのエンコードが一致するよう注意！
+"全角スペースが強調表示されない場合、ここでscriptencodingを指定すると良い。
+scriptencoding cp932
+"デフォルトのZenkakuSpaceを定義
+function! ZenkakuSpace()
+  highlight ZenkakuSpace cterm=underline ctermbg=lightGreen gui=underline guifg=darkgrey
+endfunction
+
+if has('syntax')
+  augroup ZenkakuSpace
+    autocmd!
+    " ZenkakuSpaceをカラーファイルで設定するなら次の行は削除
+    autocmd ColorScheme       * call ZenkakuSpace()
+    " 全角スペースのハイライト指定
+    autocmd VimEnter,WinEnter * match ZenkakuSpace /　/
+    autocmd VimEnter,WinEnter * match ZenkakuSpace '\%u3000'
+  augroup END
+  call ZenkakuSpace()
+endif
+
 " Options: {{{1
 " Set options (boolean, number, string). General vim behavior.
 " For more information about options, see :help 'option-list'.
