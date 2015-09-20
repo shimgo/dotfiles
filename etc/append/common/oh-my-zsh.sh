@@ -11,7 +11,7 @@ set -eu
 #    exit
 #fi
 
-if [-d "$HOME/.oh-my-zsh"]; then
+if [ -d "$HOME/.oh-my-zsh" ]; then
     log_info "oh-my-zsh has been already installed"
     exit
 fi
