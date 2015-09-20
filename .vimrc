@@ -254,7 +254,7 @@ if stridx(&runtimepath, $NEOBUNDLEPATH) != -1
   "NeoBundle has('gui_running') ? 'itchyny/lightline.vim' : 'b4b4r07/vim-buftabs'
   "NeoBundle 'b4b4r07/vim-buftabs'
   "NeoBundle 'itchyny/calendar.vim'
-  "NeoBundle 'nathanaelkane/vim-indent-guides'
+  NeoBundle 'nathanaelkane/vim-indent-guides'
   "NeoBundle 'scrooloose/syntastic'
   NeoBundle 'scrooloose/nerdtree'
   "NeoBundle 'tpope/vim-surround'
@@ -4196,16 +4196,16 @@ endfunction
 ""  call neobundle#untap()
 ""endif
 ""
-""" nathanaelkane/vim-indent-guides {{{2
-""if s:neobundled('vim-indent-guides')
-""  hi IndentGuidesOdd  ctermbg=DarkGreen
-""  hi IndentGuidesEven ctermbg=Black
-""  let g:indent_guides_enable_on_vim_startup = 0
-""  let g:indent_guides_start_level = 1
-""  let g:indent_guides_auto_colors = 0
-""  let g:indent_guides_guide_size = 1
-""endif
-""
+" nathanaelkane/vim-indent-guides {{{2
+if s:neobundled('vim-indent-guides')
+  hi IndentGuidesOdd  ctermbg=235
+  hi IndentGuidesEven ctermbg=Black
+  let g:indent_guides_enable_on_vim_startup = 1
+"  let g:indent_guides_start_level = 1
+  let g:indent_guides_auto_colors = 0
+"  let g:indent_guides_guide_size = 1
+endif
+
 """ sjl/gundo.vim {{{2
 ""if s:neobundled('gundo.vim')
 ""  call neobundle#config({
