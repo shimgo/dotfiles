@@ -3035,6 +3035,14 @@ endfunction
 """   call neobundle#untap()
 """ endif
 ""
+
+""" gtags.vim {{{2
+imap <C-g> :Gtags 
+map <C-h> :Gtags -f %<CR>
+map <C-j> :GtagsCursor<CR>
+map <C-n> :cn<CR>
+map <C-p> :cp<CR>
+
 """ b4b4r07/mru.vim {{{2
 ""if s:neobundled('mru.vim')
 ""  call neobundle#config({
