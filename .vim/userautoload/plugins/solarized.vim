@@ -1,5 +1,6 @@
 let g:solarized_termtrans=1
 set t_Co=256
+
 if &t_Co < 256
   colorscheme default
 else

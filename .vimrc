@@ -1,7 +1,12 @@
 " Load default runtimepath to be reloadable
 set runtimepath&
+
+" Additional runtimepathes
+" Required. If you delete this line, runtime! command can't load correctly 
 set runtimepath+=~/.vim/userautoload/
-    set runtimepath+=~/.vim/bundle/neobundle.vim/
+
+set runtimepath+=~/.vim/bundle/neobundle.vim/
+
 " Global functions
 source ~/.vim/userautoload/init/utils.vim
 

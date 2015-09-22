@@ -18,15 +18,17 @@ let g:neobundle_default_git_protocol='https'
 
 NeoBundleFetch 'Shougo/neobundle.vim'
 
-" List pugins to load
-NeoBundle 'thinca/vim-quickrun'
+" List pugins to load {{{2
 
+NeoBundle 'thinca/vim-quickrun'
 " Display indent depth
 NeoBundle 'nathanaelkane/vim-indent-guides'
-NeoBundle 'scrooloose/nerdtree'
+" Bracket completion
 NeoBundle 'cohama/lexima.vim'
 NeoBundle 'vim-scripts/dbext.vim'
-
+NeoBundle 'Shougo/unite.vim'
+NeoBundle 'Shougo/neomru.vim'
+NeoBundle 'kana/vim-submode'
 " Japanese help
 NeoBundle 'vim-jp/vimdoc-ja'
 " Vital
