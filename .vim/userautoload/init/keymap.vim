@@ -1,6 +1,12 @@
 
 let mapleader = "\<Space>"
 
+" Invalidate compatible for vi
+set nocompatible
+
+" one that can be erased by backspace key
+set backspace=indent,eol,start
+
 " Invalidate key {{{2
 nnoremap s <Nop>
 nnoremap Q <Nop>
@@ -14,7 +20,7 @@ onoremap jj <ESC>
 nnoremap  <Leader>ev  :<C-u>edit $MYVIMRC<CR>
 nnoremap  <Leader>eg  :<C-u>edit $MYGVIMRC<CR>
 nnoremap  <Leader>ek  :<C-u>edit $USERAUTOLOAD/init/keymap.vim<CR>
-
+nnoremap  <Leader>en  :<C-u>edit $USERAUTOLOAD/init/neobundle.vim<CR>
 
 " Load .gvimrc after .vimrc edited at GVim.
 nnoremap <silent> <Leader>rv :<C-u>source $MYVIMRC 
@@ -66,7 +72,7 @@ nnoremap gk k
 "==============================================================================
 
 " vim-submode.vim {{{2
-if g:has_plugin('vim-submode')
+if Has_plugin('vim-submode')
     call submode#enter_with('bufmove', 'n', '', 's>', '<C-w>>')
     call submode#enter_with('bufmove', 'n', '', 's<', '<C-w><')
     call submode#enter_with('bufmove', 'n', '', 's+', '<C-w>+')

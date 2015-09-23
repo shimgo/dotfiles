@@ -35,6 +35,12 @@ NeoBundle 'vim-jp/vimdoc-ja'
 NeoBundle 'vim-jp/vital.vim'
 " Colorschemes
 NeoBundle 'altercation/vim-colors-solarized'
+" Require vim compiled with if_lua(:echo has("lua") return 1).
+if has('lua')
+    NeoBundle 'Shougo/neocomplete'
+else
+    echo "you need lua."
+endif
 
 call neobundle#end()
 " Check pugins hasn't been installed
@@ -53,7 +59,7 @@ let $VIMBUNDLE = $DOTVIM . '/bundle'
 let $NEOBUNDLEPATH = $VIMBUNDLE . '/neobundle.vim'
 
 " bundled function
-function! g:bundled(bundle)
+function! Bundled(bundle)
   if !isdirectory($VIMBUNDLE)
     return g:false
   endif
@@ -68,8 +74,8 @@ function! g:bundled(bundle)
   endif
 endfunction
 
-function! g:neobundled(bundle)
-  return g:bundled(a:bundle) && neobundle#tap(a:bundle)
+function! Neobundled(bundle)
+  return Bundled(a:bundle) && neobundle#tap(a:bundle)
 endfunction
 
 

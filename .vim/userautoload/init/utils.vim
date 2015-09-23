@@ -15,7 +15,7 @@ let g:is_linux = !g:is_mac && has('unix')
 " func s:has_plugin() {{{2
 " @params string
 " @return bool
-function! g:has_plugin(name)
+function! Has_plugin(name)
   " Check {name} plugin whether there is in the runtime path
   let nosuffix = a:name =~? '\.vim$' ? a:name[:-5] : a:name
   let suffix   = a:name =~? '\.vim$' ? a:name      : a:name . '.vim'

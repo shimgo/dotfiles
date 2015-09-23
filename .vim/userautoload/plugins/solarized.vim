@@ -6,7 +6,7 @@ if &t_Co < 256
 else
   if has('gui_running') && !g:is_windows
     " For MacVim, only
-    if g:has_plugin('solarized.vim')
+    if Has_plugin('solarized.vim')
       try
         colorscheme solarized-cui
       catch
@@ -15,7 +15,7 @@ else
     endif
   else
     " Vim for CUI
-    if g:has_plugin('solarized.vim')
+    if Has_plugin('solarized.vim')
       try
         colorscheme solarized-cui
       catch

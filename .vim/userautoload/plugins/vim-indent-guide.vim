@@ -1,4 +1,4 @@
-if g:neobundled('vim-indent-guides')
+if Neobundled('vim-indent-guides')
   hi IndentGuidesOdd  ctermbg=235
   hi IndentGuidesEven ctermbg=Black
   let g:indent_guides_enable_on_vim_startup = 1

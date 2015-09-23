@@ -1,4 +1,4 @@
-if g:neobundled('dbext.vim')
+if Neobundled('dbext.vim')
   let dbext_default_profile=""
   let dbext_default_type="MYSQL"
   let dbext_default_user="root"
