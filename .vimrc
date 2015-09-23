@@ -7,26 +7,29 @@ set runtimepath+=~/.vim/userautoload/
 
 set runtimepath+=~/.vim/bundle/neobundle.vim/
 
+" userautoload root
+let $USERAUTOLOAD = expand('$HOME/.vim/userautoload')
+
 " Global functions
-source ~/.vim/userautoload/init/utils.vim
+source $USERAUTOLOAD/init/utils.vim
 
 " Encoding settings
-source ~/.vim/userautoload/init/encoding.vim
+source $USERAUTOLOAD/init/encoding.vim
 
 "Load NeoBundle
-source ~/.vim/userautoload/init/neobundle.vim
+source $USERAUTOLOAD/init/neobundle.vim
 
 " Basic Settings
-source ~/.vim/userautoload/init/basic.vim
+source $USERAUTOLOAD/init/basic.vim
 
 " Keymap
-source ~/.vim/userautoload/init/keymap.vim
+source $USERAUTOLOAD/init/keymap.vim
 
 " Status Line
-source ~/.vim/userautoload/init/statusline.vim
+source $USERAUTOLOAD/init/statusline.vim
 
 " Appearcne
-source ~/.vim/userautoload/init/appearance.vim
+source $USERAUTOLOAD/init/appearance.vim
 
 " Load all plugin settings
 runtime! plugins/*.vim
