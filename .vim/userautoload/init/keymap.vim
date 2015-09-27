@@ -33,6 +33,7 @@ nnoremap <silent> <Leader>rg :<C-u>source $MYGVIMRC<CR>
 nnoremap sN :<C-u>bn<CR>
 nnoremap sP :<C-u>bp<CR>
 nnoremap sQ :<C-u>bd<CR>
+nnoremap sb :<C-u>enew<CR>
 
 " Window  {{{2
 nnoremap ss :<C-u>split<CR>
@@ -63,10 +64,10 @@ inoremap <C-j> <Down>
 inoremap <C-h> <Left>
 inoremap <C-k> <Up>
 inoremap <C-l> <Right>
-nnoremap j gj
-nnoremap k gk
-nnoremap gj j
-nnoremap gk k
+nnoremap <silent>j gj
+nnoremap <silent>k gk
+nnoremap <silent>gj j
+nnoremap <silent>gk k
 
 " Plugin key mapping {{{1
 "==============================================================================
@@ -84,11 +85,13 @@ if Has_plugin('vim-submode')
 endif
 
 " gtags.vim {{{2
-imap <C-g> :Gtags 
-map <C-h> :Gtags -f %<CR>
-map <C-j> :GtagsCursor<CR>
-map <C-n> :cn<CR>
-map <C-p> :cp<CR>
+nmap <C-q> <C-w><C-w><C-w>q
+nmap <C-g> :Gtags -g
+nmap <C-l> :Gtags -f %<CR>
+nmap <C-j> :Gtags <C-r><C-w><CR>
+nmap <C-k> :Gtags -r <C-r><C-w><CR>
+nmap <C-n> :cn<CR>
+nmap <C-p> :cp<CR>
 
 " unite.vim {{{2
 nnoremap [unite]    <Nop>
