@@ -22,6 +22,7 @@ nnoremap <Leader>eg  :<C-u>edit $MYGVIMRC<CR>
 nnoremap <Leader>eb  :<C-u>edit $USERAUTOLOAD/init/basic.vim<CR>
 nnoremap <Leader>ek  :<C-u>edit $USERAUTOLOAD/init/keymap.vim<CR>
 nnoremap <Leader>en  :<C-u>edit $USERAUTOLOAD/init/neobundle.vim<CR>
+nnoremap <Leader>es  :<C-u>edit $USERAUTOLOAD/init/statusline.vim<CR>
 noremap  <Leader>h ^
 nnoremap <Leader>vk  :<C-u>help index.txt@ja<CR>
 noremap  <Leader>l $
@@ -37,6 +38,7 @@ nnoremap <silent> <Leader>rg :<C-u>source $MYGVIMRC<CR>
 nnoremap sN :<C-u>bn<CR>
 nnoremap sP :<C-u>bp<CR>
 nnoremap sQ :<C-u>bd<CR>
+nnoremap sQf :<C-u>bd!<CR>
 nnoremap sb :<C-u>enew<CR>
 
 " Window  {{{2
@@ -55,6 +57,7 @@ nnoremap sr <C-w>r
 " Resize individual windows equally
 nnoremap s= <C-w>=
 nnoremap sq :<C-u>q<CR>
+nnoremap sq :<C-u>q!<CR>
 
 " Tabpage {{{2
 nnoremap sn gt

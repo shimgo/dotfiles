@@ -29,6 +29,8 @@ NeoBundle 'vim-scripts/dbext.vim'
 NeoBundle 'Shougo/unite.vim'
 NeoBundle 'Shougo/neomru.vim'
 NeoBundle 'kana/vim-submode'
+NeoBundle 'itchyny/lightline.vim'
+NeoBundle 'tpope/vim-fugitive'
 " Japanese help
 NeoBundle 'vim-jp/vimdoc-ja'
 " Vital
