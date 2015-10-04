@@ -38,7 +38,7 @@ nnoremap <silent> <Leader>rg :<C-u>source $MYGVIMRC<CR>
 nnoremap sN :<C-u>bn<CR>
 nnoremap sP :<C-u>bp<CR>
 nnoremap sQ :<C-u>bd<CR>
-nnoremap sQf :<C-u>bd!<CR>
+nnoremap sfQ :<C-u>bd!<CR>
 nnoremap sb :<C-u>enew<CR>
 
 " Window  {{{2
@@ -57,7 +57,7 @@ nnoremap sr <C-w>r
 " Resize individual windows equally
 nnoremap s= <C-w>=
 nnoremap sq :<C-u>q<CR>
-nnoremap sq :<C-u>q!<CR>
+nnoremap sfq :<C-u>q!<CR>
 
 " Tabpage {{{2
 nnoremap sn gt
@@ -71,10 +71,14 @@ inoremap <C-j> <Down>
 inoremap <C-h> <Left>
 inoremap <C-k> <Up>
 inoremap <C-l> <Right>
-nnoremap <silent>j gj
-nnoremap <silent>k gk
-nnoremap <silent>gj j
-nnoremap <silent>gk k
+" Move cursor on line of the appearance 
+" These have been taken measures for issue of snippet expansion
+nnoremap j gj
+onoremap j gj
+xnoremap j gj
+nnoremap k gk
+onoremap k gk
+xnoremap k gk
 
 " Plugin key mapping {{{1
 "==============================================================================
@@ -104,8 +108,8 @@ nmap <C-p> :cp<CR>
 nnoremap [unite]    <Nop>
 nmap     <Leader>u [unite]
 nnoremap <silent> [unite]a :<C-u>UniteWithCurrentDir buffer file_mru bookmark file<CR>
-nnoremap <silent> [unite]c :<C-u>UniteWithBufferDir file file_mru<CR>
-nnoremap <silent> [unite]d :<C-u>UniteWithCurrentDir file file_mru<CR>
+nnoremap <silent> [unite]c :<C-u>UniteWithBufferDir file file/new file_mru<CR>
+nnoremap <silent> [unite]d :<C-u>UniteWithCurrentDir file file/new file_mru<CR>
 nnoremap <silent> [unite]b :<C-u>Unite buffer<CR>
 nnoremap <silent> [unite]f :<C-u>Unite file<CR>
 nnoremap <silent> [unite]g :<C-u>Unite grep<CR>
