@@ -9,6 +9,15 @@ let g:neocomplete#enable_smart_case = 1
 let g:neocomplete#sources#syntax#min_keyword_length = 3
 let g:neocomplete#lock_buffer_name_pattern = '\*ku\*'
 
+let g:neocomplete#auto_completion_start_length = 3
+let g:neocomplete#enable_ignore_case = 1
+let g:neocomplete#enable_camel_case = 1
+let g:neocomplete#use_vimproc = 1
+
+" Cache limit size
+let g:neocomplete#sources#buffer#cache_limit_size = 1000000
+let g:neocomplete#sources#tags#cache_limit_size   = 30000000
+
 " Define dictionary.
 let g:neocomplete#sources#dictionary#dictionaries = {
     \ 'default' : '',
@@ -26,7 +35,7 @@ let g:neocomplete#keyword_patterns['default'] = '\h\w*'
 
 " Plugin key-mappings.
 inoremap <expr><C-g> neocomplete#undo_completion()
-" inoremap <expr><C-l> neocomplete#complete_common_string()
+inoremap <expr><C-l> neocomplete#complete_common_string()
 
 " Recommended key-mappings.
 " <CR>: close popup and save indent.
@@ -83,4 +92,5 @@ endif
 " For perlomni.vim setting.
 " https://github.com/c9s/perlomni.vim
 let g:neocomplete#sources#omni#input_patterns.perl = '\h\w*->\h\w*\|\h\w*::'
+ 
 

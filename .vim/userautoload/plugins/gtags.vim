@@ -547,3 +547,4 @@ if g:Gtags_Auto_Map == 1
 	:nmap <C-\><C-]> :GtagsCursor<CR>
 endif
 let loaded_gtags = 1
+

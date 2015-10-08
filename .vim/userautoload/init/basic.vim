@@ -89,3 +89,9 @@ augroup vimrc-auto-mkdir  " {{{
         endif
     endfunction  " }}}
 augroup END  " }}}
+
+" Tag file direcroty
+" augroup SetTagsFile
+"     autocmd!
+"     autocmd FileType php set tags+=$HOME/.vim/tags/cakephp/tags
+" augroup END
