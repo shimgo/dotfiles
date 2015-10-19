@@ -18,6 +18,10 @@ vnoremap <C-j><C-j> <ESC>
 onoremap jj <ESC>
 " }}}
 
+" Replace {{{
+nnoremap <C-h> :<C-u>%s/
+" }}}
+
 " Editting vimrc {{{
 nnoremap <Leader>ev  :<C-u>edit $MYVIMRC<CR>
 nnoremap <Leader>eg  :<C-u>edit $MYGVIMRC<CR>
