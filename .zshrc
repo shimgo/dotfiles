@@ -105,6 +105,9 @@ esac
 # You may need to manually set your language environment
 export LANG=ja_JP.UTF-8
 
+# charset of less command
+export LESSCHARSET=utf-8
+
 # Preferred editor for local and remote sessions
 # if [[ -n $SSH_CONNECTION ]]; then
 #   export EDITOR='vim'
