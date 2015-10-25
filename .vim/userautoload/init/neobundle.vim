@@ -43,6 +43,7 @@ NeoBundleLazy 'Shougo/vimshell', {
 \   'mappings' : ['<Plug>(vimshell_switch)']
 \ }}
 NeoBundle 'Shougo/unite.vim'
+NeoBundle 'Shougo/vimfiler'
 NeoBundle 'Shougo/neomru.vim'
 NeoBundle 'kana/vim-submode'
 NeoBundle 'itchyny/lightline.vim'

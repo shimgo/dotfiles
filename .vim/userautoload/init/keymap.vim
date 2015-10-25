@@ -120,9 +120,9 @@ nmap <C-p> :cp<CR>
 nnoremap [unite]    <Nop>
 nmap     <Leader>u [unite]
 nnoremap <silent> [unite]a :<C-u>UniteWithCurrentDir buffer file_mru bookmark file<CR>
-nnoremap <silent> [unite]c :<C-u>UniteWithBufferDir file file/new file_mru<CR>
-nnoremap <silent> [unite]d :<C-u>UniteWithCurrentDir file file/new file_mru<CR>
-nnoremap <silent> [unite]b :<C-u>Unite buffer<CR>
+nnoremap <silent> [unite]b :<C-u>UniteWithBufferDir file file/new file_mru<CR>
+nnoremap <silent> [unite]c :<C-u>UniteWithCurrentDir file file/new file_mru<CR>
+nnoremap <silent> [unite]l :<C-u>Unite buffer<CR>
 nnoremap <silent> [unite]f :<C-u>Unite file<CR>
 nnoremap <silent> [unite]g :<C-u>Unite grep<CR>
 nnoremap <silent> [unite]m :<C-u>Unite file_mru<CR>
@@ -133,4 +133,41 @@ nmap <silent> vs :<C-u>VimShell<CR>
 nmap <silent> vp :<C-u>VimShellPop<CR>
 " }}}
 
+" }}}
+
+" fugitive.vim {{{
+nnoremap [fugitive]    <Nop>
+nmap     <Leader>g [fugitive]
+
+" Display git status on new window
+nnoremap <silent> [fugitive]s :<C-u>Gstatus<CR>
+
+" Display most recent commits of current buffer also you can specify revision
+nnoremap [fugitive]v :<C-u>Gread<Space>
+
+" git add current buffer also you can specify file path
+nnoremap [fugitive]a :<C-u>Gwrite<Space>
+
+" git commit
+nnoremap [fugitive]c :<C-u>Gcommit<Space>
+
+" git blame
+nnoremap <silent> [fugitive]b :<C-u>Gblame<CR>
+
+" Display difference between current buffer and HEAD also you can specify revision
+" ex. :Gdiff master
+nnoremap [fugitive]d :<C-u>Gdiff<Space>
+
+" git-rm current buffer also you can specify file path
+nnoremap [fugitive]r :<C-u>Gremove<Space>
+
+" }}}
+
+" vimfiler.vim {{{
+nnoremap [vimfiler] <Nop>
+nmap     <Leader>f [vimfiler]
+
+" Open VimFiler like IDE
+nnoremap <silent> [vimfiler]b :<C-u>VimFilerBufferDir -split -simple -winwidth=35 -no-quit<CR> 
+nnoremap <silent> [vimfiler]c :<C-u>VimFilerCurrentDir -split -simple -winwidth=35 -no-quit<CR> 
 " }}}
