@@ -48,6 +48,7 @@ NeoBundle 'Shougo/neomru.vim'
 NeoBundle 'kana/vim-submode'
 NeoBundle 'itchyny/lightline.vim'
 NeoBundle 'tpope/vim-fugitive'
+NeoBundle 'scrooloose/syntastic'
 " text alignment
 NeoBundle 'junegunn/vim-easy-align'
 " Japanese help
