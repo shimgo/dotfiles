@@ -78,6 +78,9 @@ if has('clipboard')
   set clipboard=unnamed
 endif
 
+" Swapfile direcroty
+set directory=~/.vim/tmp
+
 " Make direcroty when save file
 augroup vimrc-auto-mkdir  " {{{
     autocmd!
