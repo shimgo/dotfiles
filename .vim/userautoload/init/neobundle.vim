@@ -48,6 +48,8 @@ NeoBundle 'Shougo/neomru.vim'
 NeoBundle 'kana/vim-submode'
 NeoBundle 'itchyny/lightline.vim'
 NeoBundle 'tpope/vim-fugitive'
+" text alignment
+NeoBundle 'junegunn/vim-easy-align'
 " Japanese help
 NeoBundle 'vim-jp/vimdoc-ja'
 " Vital
@@ -58,7 +60,7 @@ NeoBundle 'altercation/vim-colors-solarized'
 if has('lua')
     NeoBundle 'Shougo/neocomplete'
 else
-    echo "you need lua."
+    echo "If you want to use neocomplete, you need lua."
 endif
 
 call neobundle#end()
