@@ -42,14 +42,6 @@ nnoremap <silent> <Leader>rv :<C-u>source $MYVIMRC
 nnoremap <silent> <Leader>rg :<C-u>source $MYGVIMRC<CR>
 " }}}
 
-" Buffer {{{
-nnoremap sN :<C-u>bn<CR>
-nnoremap sP :<C-u>bp<CR>
-nnoremap sQ :<C-u>bd<CR>
-nnoremap sfQ :<C-u>bd!<CR>
-nnoremap sb :<C-u>enew<CR>
-" }}}
-
 " Window  {{{
 nnoremap ss :<C-u>split<CR>
 nnoremap sv :<C-u>vsplit<CR>
@@ -65,13 +57,21 @@ nnoremap sH <C-w>H
 nnoremap sr <C-w>r
 " Resize individual windows equally
 nnoremap s= <C-w>=
-nnoremap sq :<C-u>q<CR>
-nnoremap sfq :<C-u>q!<CR>
+nnoremap sQ :<C-u>q<CR>
+nnoremap sfQ :<C-u>q!<CR>
+" }}}
+
+" Buffer {{{
+nnoremap sn :<C-u>bn<CR>
+nnoremap sp :<C-u>bp<CR>
+nnoremap sq :<C-u>bd<CR>
+nnoremap sfq :<C-u>bd!<CR>
+nnoremap sb :<C-u>enew<CR>
 " }}}
 
 " Tabpage {{{
-nnoremap sn gt
-nnoremap sp gT
+nnoremap sN gt
+nnoremap sP gT
 nnoremap so <C-w>_<C-w>|
 nnoremap st :<C-u>tabnew<CR>
 nnoremap sT :<C-u>Unite tab<CR>
