@@ -2,6 +2,7 @@
 if [ -d "${HOME}/.oh-my-zsh" ]; then
     export ZSH="${HOME}/.oh-my-zsh"
 fi
+export PATH=/usr/local/bin:$PATH
 
 # Set name of the theme to load.
 # Look in ~/.oh-my-zsh/themes/
