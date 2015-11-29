@@ -4,6 +4,10 @@ if [ -d "${HOME}/.oh-my-zsh" ]; then
 fi
 export PATH=/usr/local/bin:$PATH
 
+if [ -e "$HOME/.zshrc_loacl" ]; then
+    source "$HOME/.zshrc_loacl"
+fi
+
 # Set name of the theme to load.
 # Look in ~/.oh-my-zsh/themes/
 # Optionally, if you set this to "random", it'll load a random theme each
