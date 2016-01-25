@@ -26,7 +26,7 @@ if ! has "python"; then
 fi
 
 if ! has "pip"; then
-    curl -kL https://raw.github.com/pypa/pip/master/contrib/get-pip.py | python
+    curl -kL https://bootstrap.pypa.io/get-pip.py | python
     pip install --user Pygments
 else
     pip install --user Pygments
@@ -36,7 +36,7 @@ if ! has "ctags"; then
     if has "apt-get"; then
         sudo apt-get -y install exuberant-ctags
     elif has "yum"; then
-        sudo yum -y install exuberant-ctags
+        sudo yum -y install ctags
     else
         log_fail "You need apt-get or yum"
         exit 1
