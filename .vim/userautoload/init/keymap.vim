@@ -64,7 +64,7 @@ nnoremap sfQ :<C-u>q!<CR>
 " Buffer {{{
 nnoremap sn :<C-u>bn<CR>
 nnoremap sp :<C-u>bp<CR>
-nnoremap sq :<C-u>bd<CR>
+nnoremap sq :<C-u>Ebd<CR>
 nnoremap sfq :<C-u>bd!<CR>
 nnoremap sb :<C-u>enew<CR>
 " }}}
@@ -89,6 +89,29 @@ nnoremap k gk
 onoremap k gk
 xnoremap k gk
 " }}}
+
+" Command difinition and key mapping
+"==============================================================================
+" Close buffer without Closing window
+command! Ebd call EBufdelete()
+function! EBufdelete()
+    let l:currentBufNum = bufnr("%")
+    let l:alternateBufNum = bufnr("#")
+
+    if buflisted(l:alternateBufNum)
+        buffer #
+    else
+        bnext
+    endif
+
+    if buflisted(l:currentBufNum)
+        execute "silent bwipeout".l:currentBufNum
+        " bwipeoutに失敗した場合はウインドウ上のバッファを復元
+        if bufloaded(l:currentBufNum) != 0
+            execute "buffer " . l:currentBufNum
+        endif
+    endif
+endfunction                                        
 
 " Plugin key mapping {{{
 "==============================================================================
