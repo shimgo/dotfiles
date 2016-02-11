@@ -63,6 +63,10 @@ if has('lua')
 else
     echo "If you want to use neocomplete, you need lua."
 endif
+NeoBundle 'NigoroJr/rsense'
+NeoBundleLazy 'supermomonga/neocomplete-rsense.vim', {
+    \ 'autoload' : { 'insert' : 1, 'filetype' : 'ruby', } } 
+NeoBundle 'tpope/vim-endwise'
 
 call neobundle#end()
 " Check pugins hasn't been installed
