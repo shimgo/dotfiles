@@ -63,6 +63,8 @@ if has('lua')
 else
     echo "If you want to use neocomplete, you need lua."
 endif
+NeoBundle 'Shougo/neosnippet'
+NeoBundle 'Shougo/neosnippet-snippets'
 NeoBundle 'NigoroJr/rsense'
 NeoBundleLazy 'supermomonga/neocomplete-rsense.vim', {
     \ 'autoload' : { 'insert' : 1, 'filetype' : 'ruby', } } 
