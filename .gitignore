@@ -6,3 +6,4 @@
 .vim/tags/*
 !.vim/tags/.gitkeep
 .netrwhist
+.gitconfig
