@@ -74,6 +74,7 @@ NeoBundle 'supermomonga/neocomplete-rsense.vim', {
       \ 'depends': ['Shougo/neocomplete.vim', 'marcus/rsense'],
       \ }
 NeoBundle 'tpope/vim-endwise'
+NeoBundle 'kmnk/vim-unite-giti'
 
 call neobundle#end()
 " Check pugins hasn't been installed
