@@ -10,6 +10,8 @@ else
                 \if has('gui_running') | source $MYGVIMRC
     autocmd MyAutoCmd BufWritePost $MYGVIMRC if has('gui_running') | source $MYGVIMRC
 endif
+" Open quickfix window when execute grep
+autocmd QuickFixCmdPost *grep* cwindow
 
 " External grep program
 if executable('ag')
