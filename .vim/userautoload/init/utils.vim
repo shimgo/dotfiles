@@ -26,4 +26,5 @@ function! Has_plugin(name)
         \   || globpath(&rtp, 'autoload/' . tolower(suffix), 1) != ''
 endfunction
 
-
+" Rename current buffer
+command! -nargs=1 -complete=file Rename f <args>|call delete(expand('#'))
