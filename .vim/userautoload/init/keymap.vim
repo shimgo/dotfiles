@@ -301,4 +301,20 @@ endfunction"}}}
 function! s:unite_hooks.giti_branch_all() "{{{
   call self.giti_branch()
 endfunction"}}}
+
+" vim-ruby-refactoring {{{
+:nnoremap <leader>rap  :<C-u>RAddParameter<CR>
+:nnoremap <leader>rcpc :<C-u>RConvertPostConditional<CR>
+:nnoremap <leader>rel  :<C-u>RExtractLet<CR>
+:vnoremap <leader>rec  :<C-u>RExtractConstant<CR>
+:vnoremap <leader>relv :<C-u>RExtractLocalVariable<CR>
+:nnoremap <leader>rit  :<C-u>RInlineTemp<CR>
+:vnoremap <leader>rrlv :<C-u>RRenameLocalVariable<CR>
+:vnoremap <leader>rriv :<C-u>RRenameInstanceVariable<CR>
+:vnoremap <leader>rem  :<C-u>RExtractMethod<CR>
+" }}}
+
+" Qfreplace {{{
+:nnoremap <leader>rrp :<C-u>Qfreplace<CR>
+" }}}
 " }}}
