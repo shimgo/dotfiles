@@ -11,6 +11,11 @@ else
     autocmd MyAutoCmd BufWritePost $MYGVIMRC if has('gui_running') | source $MYGVIMRC
 endif
 
+" External grep program
+if executable('ag')
+    set grepprg=ag\ -a
+endif
+
 " Display number of rows
 set number
 
@@ -54,7 +59,7 @@ set expandtab
 set ruler
 set rulerformat=%m%r%=%l/%L
 
-" 1 tab == 4 spaces
+" tab spaces
 set shiftwidth=4
 set tabstop=4
 

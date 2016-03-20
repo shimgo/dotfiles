@@ -75,6 +75,9 @@ NeoBundle 'supermomonga/neocomplete-rsense.vim', {
       \ }
 NeoBundle 'tpope/vim-endwise'
 NeoBundle 'kmnk/vim-unite-giti'
+NeoBundle 'thinca/vim-qfreplace'
+NeoBundle 'tsaleh/vim-matchit'
+NeoBundle 'ecomba/vim-ruby-refactoring'
 
 call neobundle#end()
 " Check pugins hasn't been installed
