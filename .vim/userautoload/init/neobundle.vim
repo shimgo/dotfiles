@@ -76,7 +76,7 @@ NeoBundle 'supermomonga/neocomplete-rsense.vim', {
 NeoBundle 'tpope/vim-endwise'
 NeoBundle 'kmnk/vim-unite-giti'
 NeoBundle 'thinca/vim-qfreplace'
-NeoBundle 'tsaleh/vim-matchit'
+NeoBundle 'tmhedberg/matchit'
 NeoBundle 'ecomba/vim-ruby-refactoring'
 
 call neobundle#end()
