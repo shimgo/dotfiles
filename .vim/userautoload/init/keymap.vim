@@ -321,4 +321,9 @@ endfunction"}}}
 " Qfreplace {{{
 :nnoremap <leader>rrp :<C-u>Qfreplace<CR>
 " }}}
+
+" tagbar {{{
+nnoremap <Leader>t :TagbarToggle<CR>
+" }}}
+
 " }}}

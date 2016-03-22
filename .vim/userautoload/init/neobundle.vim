@@ -88,6 +88,13 @@ NeoBundleLazy 'alpaca-tc/alpaca_tags', {
     \       ],
     \    }
     \ }
+NeoBundleLazy 'majutsushi/tagbar', {
+      \ "autload": {
+      \   "commands": ["TagbarToggle"],
+      \ },
+      \ "build": {
+      \   "mac": "brew install ctags",
+      \ }}
 
 call neobundle#end()
 " Check pugins hasn't been installed
