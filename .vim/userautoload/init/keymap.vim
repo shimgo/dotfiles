@@ -1,3 +1,4 @@
+" vim:set foldmethod=marker:
 
 let mapleader = "\<Space>"
 
@@ -34,7 +35,7 @@ nnoremap <Leader>vk  :<C-u>help index.txt@ja<CR>
 noremap  <Leader>l $
 " }}}
 
-" Load .gvimrc after .vimrc edited at GVim.
+" Load .gvimrc after .vimrc edited at GVim. {{{
 nnoremap <silent> <Leader>rv :<C-u>source $MYVIMRC 
 \    \| if has('gui_running') 
 \    \| source $MYGVIMRC 
@@ -95,7 +96,7 @@ nnoremap tpy  :<C-u>set paste<CR>
 nnoremap tpn :<C-u>set nopaste<CR>
 " }}}
 
-" Command difinition and key mapping
+" Command difinition and key mapping {{{
 "==============================================================================
 " Close buffer without Closing window
 command! Ebd call EBufdelete()
@@ -117,7 +118,7 @@ function! EBufdelete()
         endif
     endif
 endfunction                                        
-
+" }}}
 " Plugin key mapping {{{
 "==============================================================================
 
@@ -161,7 +162,6 @@ nmap <silent> vs :<C-u>VimShell<CR>
 nmap <silent> vp :<C-u>VimShellPop<CR>
 " }}}
 
-" }}}
 
 " fugitive.vim {{{
 nnoremap [fugitive]    <Nop>
