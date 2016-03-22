@@ -60,6 +60,7 @@ nnoremap sr <C-w>r
 nnoremap s= <C-w>=
 nnoremap sQ :<C-u>q<CR>
 nnoremap sfQ :<C-u>q!<CR>
+nnoremap sa :<C-u>qa<CR>
 " }}}
 
 " Buffer {{{
@@ -68,6 +69,12 @@ nnoremap sp :<C-u>bp<CR>
 nnoremap sq :<C-u>Ebd<CR>
 nnoremap sfq :<C-u>bd!<CR>
 nnoremap sb :<C-u>enew<CR>
+" }}}
+
+" Quickfix {{{
+nnoremap sc <C-w><C-w><C-w>q
+nnoremap <C-n> :cn<CR>
+nnoremap <C-p> :cp<CR>
 " }}}
 
 " Tabpage {{{
@@ -136,13 +143,10 @@ endif
 " }}}
 
 " gtags.vim {{{
-nmap <C-q> <C-w><C-w><C-w>q
-nmap <C-g> :Gtags -g
-nmap <C-l> :Gtags -f %<CR>
-nmap <C-j> :Gtags <C-r><C-w><CR>
-nmap <C-k> :Gtags -r <C-r><C-w><CR>
-nmap <C-n> :cn<CR>
-nmap <C-p> :cp<CR>
+nnoremap <C-g><C-g> :Gtags -g 
+nnoremap <C-g><C-l> :Gtags -f %<CR>
+nnoremap <C-g><C-d> :Gtags <C-r><C-w><CR>
+nnoremap <C-g><C-r> :Gtags -r <C-r><C-w><CR>
 " }}}
 
 " unite.vim {{{
