@@ -146,7 +146,10 @@ endif
 nnoremap <C-g><C-g> :Gtags -g 
 nnoremap <C-g><C-l> :Gtags -f %<CR>
 nnoremap <C-g><C-d> :Gtags <C-r><C-w><CR>
+" Jump reference
 nnoremap <C-g><C-r> :Gtags -r <C-r><C-w><CR>
+" Jump definition
+nnoremap <C-g><C-d> :GtagsCursor<CR>
 " }}}
 
 " unite.vim {{{
