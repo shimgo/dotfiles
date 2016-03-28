@@ -134,3 +134,5 @@ export LESSCHARSET=utf-8
 # Example aliases
 # alias zshconfig="mate ~/.zshrc"
 # alias ohmyzsh="mate ~/.oh-my-zsh"
+#
+alias be="bundle exec"
