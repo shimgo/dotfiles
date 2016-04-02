@@ -34,4 +34,9 @@ source $USERAUTOLOAD/init/appearance.vim
 " Load all plugin settings
 runtime! plugins/*.vim
 
+" Local Settings
+if filereadable( $HOME . "/.vimrc_local" )
+     source ~/.vimrc_local
+endif
+
 set secure
