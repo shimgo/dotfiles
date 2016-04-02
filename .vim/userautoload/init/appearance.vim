@@ -1,5 +1,4 @@
 syntax enable
-syntax on
 
 set background=dark
 
