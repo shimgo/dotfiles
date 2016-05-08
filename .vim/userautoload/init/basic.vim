@@ -101,7 +101,7 @@ augroup vimrc-auto-mkdir  " {{{
 augroup END  " }}}
 
 " Tag file direcroty
-set tags+=.git/ctags
+set tags+=./.git/ctags;
 
 " augroup SetTagsFile
 "     autocmd!
