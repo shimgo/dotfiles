@@ -4,8 +4,12 @@ if [ -d "${HOME}/.oh-my-zsh" ]; then
 fi
 export PATH=/usr/local/bin:$PATH
 
-if [ -e "$HOME/.zshrc_local" ]; then
-    source "$HOME/.zshrc_local"
+if [ -e "${HOME}/.zshrc_local" ]; then
+    source "${HOME}/.zshrc_local"
+fi
+
+if [ -e "${HOME}/.linuxbrewrc" ]; then
+    source "${HOME}/.linuxbrewrc"
 fi
 
 # Set name of the theme to load.
