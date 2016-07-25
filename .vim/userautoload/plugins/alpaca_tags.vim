@@ -6,7 +6,7 @@ let g:alpaca_tags#config = {
 
 augroup AlpacaTags
     autocmd!
-    if exists(':AlpacaTags')
+    if exists(':AlpacaTags') && getftype('.git/ctags') != ""
         autocmd BufWritePost Gemfile AlpacaTagsBundle
         autocmd BufEnter * AlpacaTagsSet
         autocmd BufWritePost * AlpacaTagsUpdate
