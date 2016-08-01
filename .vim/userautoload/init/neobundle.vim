@@ -65,14 +65,6 @@ else
 endif
 NeoBundle 'Shougo/neosnippet'
 NeoBundle 'Shougo/neosnippet-snippets'
-NeoBundleLazy 'NigoroJr/rsense', {
-    \ 'autoload': {
-    \   'filetypes': 'ruby',
-    \ },
-    \ }
-NeoBundle 'supermomonga/neocomplete-rsense.vim', {
-    \ 'depends': ['Shougo/neocomplete.vim', 'marcus/rsense'],
-    \ }
 NeoBundle 'tpope/vim-endwise'
 NeoBundle 'kmnk/vim-unite-giti'
 NeoBundle 'thinca/vim-qfreplace'
