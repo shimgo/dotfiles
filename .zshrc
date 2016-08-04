@@ -140,3 +140,5 @@ export LESSCHARSET=utf-8
 # alias ohmyzsh="mate ~/.oh-my-zsh"
 #
 alias be="bundle exec"
+
+setopt extendedglob
