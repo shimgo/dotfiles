@@ -1,3 +1,4 @@
+let g:neobundle#log_filename = $HOME . "/neobundle.log"
 " neobundle settings {{{
 if has('vim_starting')
     set nocompatible
@@ -20,6 +21,7 @@ NeoBundleFetch 'Shougo/neobundle.vim'
 
 " List pugins to load {{{2
 
+NeoBundle 'mattn/emmet-vim'
 NeoBundle 'thinca/vim-quickrun'
 " Display indent depth
 NeoBundle 'nathanaelkane/vim-indent-guides'
