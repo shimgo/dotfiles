@@ -16,7 +16,7 @@ let g:neocomplete#use_vimproc = 1
 
 " Cache limit size
 let g:neocomplete#sources#buffer#cache_limit_size = 1000000
-let g:neocomplete#sources#tags#cache_limit_size   = 300000000
+let g:neocomplete#sources#tags#cache_limit_size   = 3000000
 
 " Define dictionary.
 let g:neocomplete#sources#dictionary#dictionaries = {
