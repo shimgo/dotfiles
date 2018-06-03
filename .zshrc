@@ -141,4 +141,41 @@ export LESSCHARSET=utf-8
 #
 alias be="bundle exec"
 
+if type "rbenv" > /dev/null 2>&1
+then
+    eval "$(rbenv init -)"
+    export PATH=${PATH}:~/.rbenv/shims
+fi
+
 setopt extendedglob
+
+# fzf settings
+export FZF_DEFAULT_OPTS='--height 40% --reverse --border'
+[ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
+
+# fd - cd to selected directory
+fd() {
+  local dir
+  dir=$(find ${1:-.} -path '*/\.*' -prune \
+                  -o -type d -print 2> /dev/null | fzf +m) &&
+  cd "$dir"
+}
+
+# cf - fuzzy cd from anywhere
+# ex: cf word1 word2 ... (even part of a file name)
+# zsh autoload function
+cf() {
+  local file
+
+  file="$(locate -i -0 $@ | grep -Z -vE '~$' | fzf --read0 -0 -1)"
+
+  if [[ -n $file ]]
+  then
+     if [[ -d $file ]]
+     then
+        cd -- $file
+     else
+        cd -- ${file:h}
+     fi
+  fi
+}

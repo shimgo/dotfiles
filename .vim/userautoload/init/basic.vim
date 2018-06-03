@@ -107,3 +107,6 @@ set tags+=./.git/ctags;
 "     autocmd!
 "     autocmd FileType php set tags+=$HOME/.vim/tags/cakephp/tags
 " augroup END
+"
+" fzf setting when intalled using HomeBrew
+set rtp+=/usr/local/opt/fzf
