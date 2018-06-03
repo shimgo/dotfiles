@@ -106,6 +106,7 @@ NeoBundleLazy 'basyura/unite-rails', {
 NeoBundleLazy 'taka84u9/vim-ref-ri', {
       \ 'depends': ['Shougo/unite.vim', 'thinca/vim-ref'] } 
 NeoBundle 'thinca/vim-ref'
+NeoBundle 'tpope/vim-surround'
 call neobundle#end()
 " Check pugins hasn't been installed
 NeoBundleCheck
