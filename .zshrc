@@ -200,3 +200,17 @@ fgl() {
     fi
   done
 }
+
+# require 'git clone https://github.com/rupa/z.git ~/.zsh.d'
+source ~/.zsh.d/z.sh
+
+zs() {
+    local res=$(z | sort -rn | cut -c 12- | fzf)
+    if [ -n "$res" ]; then
+        BUFFER+="cd $res"
+        zle accept-line
+    else
+        return 1
+    fi
+}
+
