@@ -13,6 +13,12 @@ nnoremap s <Nop>
 nnoremap Q <Nop>
 " }}}
 
+" Pretty formatting {{{
+nnoremap [pretty]    <Nop>
+nmap     <Leader>p [pretty]
+nnoremap <silent> [pretty]xml :<C-u>%s/></>\r</g \| filetype indent on \| setf xml \| normal gg=G<CR>
+" }}}
+
 " Escape {{{
 inoremap jj <ESC>
 vnoremap <C-j><C-j> <ESC>
