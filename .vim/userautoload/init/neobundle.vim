@@ -108,6 +108,7 @@ NeoBundleLazy 'taka84u9/vim-ref-ri', {
 NeoBundle 'thinca/vim-ref'
 NeoBundle 'tpope/vim-obsession'
 NeoBundle 'tpope/vim-surround'
+NeoBundle 'vim-python/python-syntax'
 call neobundle#end()
 " Check pugins hasn't been installed
 NeoBundleCheck
