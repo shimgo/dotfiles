@@ -1,0 +1,33 @@
+{
+  "vim.easymotion": true,
+  "vim.sneak": true,
+  "vim.incsearch": true,
+  "vim.useSystemClipboard": true,
+  "vim.useCtrlKeys": true,
+  "vim.hlsearch": true,
+  "vim.surround": true,
+  "vim.leader": "<space>",
+  "vim.insertModeKeyBindings": [
+    {
+      "before": ["j", "j"],
+      "after": ["<Esc>"],
+    },
+  ]
+  "vim.normalModeKeyBindings": [
+    { "before": ["<leader>", "h"], "after": ["^"] },
+    { "before": ["<leader>", "l"], "after": ["$"] },
+    { "before": ["s", "s"], "commands": ["workbench.action.splitEditorUp"] },
+    { "before": ["s", "v"], "commands": ["workbench.action.splitEditorLeft"] },
+    { "before": ["s", "h"], "commands": ["workbench.action.navigateLeft"] },
+    { "before": ["s", "l"], "commands": ["workbench.action.navigateRight"] },
+    { "before": ["s", "k"], "commands": ["workbench.action.navigateUp"] },
+    { "before": ["s", "j"], "commands": ["workbench.action.navigateDown"] },
+    { "before": ["s", "q"], "commands": ["workbench.action.closeEditorsInGroup"] },
+    { "before": ["s", "t"], "commands": ["workbench.action.nextEditor"] },
+    { "before": ["s", "T"], "commands": ["workbench.action.previousEditor"] },
+    { "before": ["s", "e"], "commands": ["workbench.view.explorer"] },
+    { "before": ["s", "g"], "commands": ["workbench.view.scm"] },
+    { "before": ["s", "f"], "commands": ["workbench.view.search"] },
+    { "before": ["s", "d"], "commands": ["workbench.view.debug"] },
+  ]
+}
