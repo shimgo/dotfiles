@@ -3,7 +3,7 @@
   "vim.sneak": true,
   "vim.incsearch": true,
   "vim.useSystemClipboard": true,
-  "vim.useCtrlKeys": false,
+  "vim.useCtrlKeys": true,
   "vim.hlsearch": true,
   "vim.surround": true,
   "vim.leader": "<space>",
