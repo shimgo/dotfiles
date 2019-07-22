@@ -1,4 +1,5 @@
 {
+  "editor.minimap.enabled": false,
   "vim.easymotion": true,
   "vim.sneak": true,
   "vim.incsearch": true,
