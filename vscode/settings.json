@@ -23,6 +23,8 @@
     },
   ],
   "vim.normalModeKeyBindings": [
+    // visualモードへの切り替え後に続けて<leader>lをしたときにv<leadr>lと認識されるのを回避
+    { "before": ["v"], "after": ["v", ";"] }, 
     { "before": ["<leader>", "h"], "after": ["^"] },
     { "before": ["<leader>", "l"], "after": ["$"] },
     { "before": ["s", "s"], "commands": ["workbench.action.splitEditorUp"] },
@@ -38,5 +40,10 @@
     { "before": ["s", "g"], "commands": ["workbench.view.scm"] },
     { "before": ["s", "f"], "commands": ["workbench.view.search"] },
     { "before": ["s", "d"], "commands": ["workbench.view.debug"] },
-    { "before": ["s", "r"], "commands": ["editor.action.goToDeclaration"],
+    { "before": ["s", "r"], "commands": ["editor.action.goToDeclaration"] }
+  ],
+  "vim.visualModeKeyBindings": [
+    { "before": ["<leader>", "h"], "after": ["^"] },
+    { "before": ["<leader>", "l"], "after": ["$"] }
+  ]
 }
