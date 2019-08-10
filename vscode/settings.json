@@ -38,5 +38,5 @@
     { "before": ["s", "g"], "commands": ["workbench.view.scm"] },
     { "before": ["s", "f"], "commands": ["workbench.view.search"] },
     { "before": ["s", "d"], "commands": ["workbench.view.debug"] },
-  ]
+    { "before": ["s", "r"], "commands": ["editor.action.goToDeclaration"],
 }
