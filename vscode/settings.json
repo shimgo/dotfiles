@@ -45,6 +45,7 @@
     // GitLens
     { "before": ["g", "s"], "commands": ["gitlens.showQuickRepoStatus"] },
     { "before": ["g", "d"], "commands": ["gitlens.diffWithPrevious"] },
+    { "before": ["g", "w"], "commands": ["gitlens.openWorkingFile"] } // diffから抜けるためのworkaround
   ],
   "vim.visualModeKeyBindings": [
     { "before": ["<leader>", "h"], "after": ["^"] },
