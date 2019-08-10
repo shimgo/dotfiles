@@ -3,6 +3,11 @@
   "editor.tabSize": 2,
   "editor.renderWhitespace": false,
 
+  "ruby.intellisense": "rubyLocate",
+  "ruby.useLanguageServer": true,
+  "solargraph.definitions": true,
+  "solargraph.diagnostics": true,
+
   "vim.easymotion": true,
   "vim.sneak": true,
   "vim.incsearch": true,
@@ -16,7 +21,7 @@
       "before": ["j", "j"],
       "after": ["<Esc>"],
     },
-  ]
+  ],
   "vim.normalModeKeyBindings": [
     { "before": ["<leader>", "h"], "after": ["^"] },
     { "before": ["<leader>", "l"], "after": ["$"] },
