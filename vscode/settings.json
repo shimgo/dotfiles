@@ -41,6 +41,10 @@
     { "before": ["s", "f"], "commands": ["workbench.view.search"] },
     { "before": ["s", "d"], "commands": ["workbench.view.debug"] },
     { "before": ["s", "r"], "commands": ["editor.action.goToDeclaration"] }
+
+    // GitLens
+    { "before": ["g", "s"], "commands": ["gitlens.showQuickRepoStatus"] },
+    { "before": ["g", "d"], "commands": ["gitlens.diffWithPrevious"] },
   ],
   "vim.visualModeKeyBindings": [
     { "before": ["<leader>", "h"], "after": ["^"] },
