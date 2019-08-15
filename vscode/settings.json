@@ -23,8 +23,6 @@
     },
   ],
   "vim.normalModeKeyBindings": [
-    // visualモードへの切り替え後に続けて<leader>lをしたときにv<leadr>lと認識されるのを回避
-    { "before": ["v"], "after": ["v", ";"] }, 
     { "before": ["<leader>", "h"], "after": ["^"] },
     { "before": ["<leader>", "l"], "after": ["$"] },
     { "before": ["s", "s"], "commands": ["workbench.action.splitEditorUp"] },
@@ -48,6 +46,9 @@
     { "before": ["g", "w"], "commands": ["gitlens.openWorkingFile"] } // diffから抜けるためのworkaround
   ],
   "vim.visualModeKeyBindings": [
+    // visualモードへの切り替え後に続けて<leader>lをしたときに<leadr>lが働かないのを回避
+    { "before": ["v", "<leader>", "h"], "after": ["^"] },
+    { "before": ["v", "<leader>", "l"], "after": ["$"] },
     { "before": ["<leader>", "h"], "after": ["^"] },
     { "before": ["<leader>", "l"], "after": ["$"] }
   ]
