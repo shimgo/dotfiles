@@ -44,12 +44,28 @@
     { "before": ["g", "s"], "commands": ["gitlens.showQuickRepoStatus"] },
     { "before": ["g", "d"], "commands": ["gitlens.diffWithPrevious"] },
     { "before": ["g", "w"], "commands": ["gitlens.openWorkingFile"] } // diffから抜けるためのworkaround
+    { "before": ["<leader>", "a"], "commands": ["wwm.aligncode"] }
   ],
   "vim.visualModeKeyBindings": [
     // visualモードへの切り替え後に続けて<leader>lをしたときに<leadr>lが働かないのを回避
     { "before": ["v", "<leader>", "h"], "after": ["^"] },
     { "before": ["v", "<leader>", "l"], "after": ["$"] },
     { "before": ["<leader>", "h"], "after": ["^"] },
-    { "before": ["<leader>", "l"], "after": ["$"] }
+    { "before": ["<leader>", "l"], "after": ["$"] },
+    { "before": ["<leader>", "a", "<space>"], "commands": [
+        { "command": "extension.awarestAlignEach",
+          "args": " "
+        }
+    ]},
+    { "before": ["<leader>", "a", "l"], "commands": [
+        { "command": "extension.awarestAlignList",
+          "args": ","
+        }
+    ]},
+    { "before": ["<leader>", "a", "h"], "commands": [
+        { "command": "extension.awarestAlignHtml",
+          "args": " "
+        }
+    ]}
   ]
 }
