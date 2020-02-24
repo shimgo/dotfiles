@@ -71,5 +71,6 @@
           "args": " "
         }
     ]}
-  ]
+  ],
+  "dart.openDevTools": "flutter"
 }
