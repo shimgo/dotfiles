@@ -6,6 +6,7 @@
   "editor.minimap.enabled": false,
   "editor.tabSize": 2,
   "editor.renderWhitespace": false,
+  "editor.acceptSuggestionOnEnter": "off",
 
   "ruby.intellisense": "rubyLocate",
   "ruby.useLanguageServer": true,
