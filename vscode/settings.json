@@ -38,12 +38,12 @@
     { "before": ["s", "g"], "commands": ["workbench.view.scm"] },
     { "before": ["s", "f"], "commands": ["workbench.view.search"] },
     { "before": ["s", "d"], "commands": ["workbench.view.debug"] },
-    { "before": ["s", "r"], "commands": ["editor.action.goToDeclaration"] }
+    { "before": ["s", "r"], "commands": ["editor.action.goToDeclaration"] },
 
     // GitLens
     { "before": ["g", "s"], "commands": ["gitlens.showQuickRepoStatus"] },
     { "before": ["g", "d"], "commands": ["gitlens.diffWithPrevious"] },
-    { "before": ["g", "w"], "commands": ["gitlens.openWorkingFile"] } // diffから抜けるためのworkaround
+    { "before": ["g", "w"], "commands": ["gitlens.openWorkingFile"] }, // diffから抜けるためのworkaround
     { "before": ["<leader>", "a"], "commands": ["wwm.aligncode"] }
   ],
   "vim.visualModeKeyBindings": [
