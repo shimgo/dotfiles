@@ -1,7 +1,3 @@
-# Path to your oh-my-zsh installation.
-if [ -d "${HOME}/.oh-my-zsh" ]; then
-    export ZSH="${HOME}/.oh-my-zsh"
-fi
 export PATH=/usr/local/bin:$PATH
 
 if [ -e "${HOME}/.zshrc_local" ]; then
@@ -12,95 +8,9 @@ if [ -e "${HOME}/.linuxbrewrc" ]; then
     source "${HOME}/.linuxbrewrc"
 fi
 
-# Set name of the theme to load.
-# Look in ~/.oh-my-zsh/themes/
-# Optionally, if you set this to "random", it'll load a random theme each
-# time that oh-my-zsh is loaded.
-#ZSH_THEME="michelebologna"
-#ZSH_THEME="robbyrussell"
-ZSH_THEME="agnoster"
-# Uncomment the following line to use case-sensitive completion.
-# CASE_SENSITIVE="true"
-
-# Uncomment the following line to use hyphen-insensitive completion. Case
-# sensitive completion must be off. _ and - will be interchangeable.
-# HYPHEN_INSENSITIVE="true"
-
-# Uncomment the following line to disable bi-weekly auto-update checks.
-# DISABLE_AUTO_UPDATE="true"
-
-# Uncomment the following line to change how often to auto-update (in days).
-# export UPDATE_ZSH_DAYS=13
-
-# Uncomment the following line to disable colors in ls.
-# DISABLE_LS_COLORS="true"
-
-# Uncomment the following line to disable auto-setting terminal title.
-# DISABLE_AUTO_TITLE="true"
-
-# Uncomment the following line to enable command auto-correction.
-# ENABLE_CORRECTION="true"
-
-# Uncomment the following line to display red dots whilst waiting for completion.
-# COMPLETION_WAITING_DOTS="true"
-
-# Uncomment the following line if you want to disable marking untracked files
-# under VCS as dirty. This makes repository status check for large repositories
-# much, much faster.
-# DISABLE_UNTRACKED_FILES_DIRTY="true"
-
-# Uncomment the following line if you want to change the command execution time
-# stamp shown in the history command output.
-# The optional three formats: "mm/dd/yyyy"|"dd.mm.yyyy"|"yyyy-mm-dd"
-# HIST_STAMPS="mm/dd/yyyy"
-
-# Would you like to use another custom folder than $ZSH/custom?
-# ZSH_CUSTOM=/path/to/new-custom-folder
-
-# Which plugins would you like to load? (plugins can be found in ~/.oh-my-zsh/plugins/*)
-# Custom plugins may be added to ~/.oh-my-zsh/custom/plugins/
-# Example format: plugins=(rails git textmate ruby lighthouse)
-# Add wisely, as too many plugins slow down shell startup.
-plugins=(git ruby osx bundler brew rails emoji-clock)
-
-# User configuration
-
-# export MANPATH="/usr/local/man:$MANPATH"
-#export PATH="/usr/bin:/bin:/usr/sbin:/sbin"
-
-# For OSX
-if [ -d "${HOME}/Library/Python/2.7/bin" ]; then
-    export PATH=$PATH:${HOME}/Library/Python/2.7/bin
-fi
-
-if [[ -r ~/Library/Python/2.7/lib/python/site-packages/powerline/bindings/zsh/powerline.zsh ]]; then
-    source ~/Library/Python/2.7/lib/python/site-packages/powerline/bindings/zsh/powerline.zsh
-fi
-
-# For Linux
-if [ -d "$HOME/.local/bin" ]; then
-    export PATH="$HOME/.local/bin:$PATH"
-fi
-
-if [[ -r /usr/local/lib/python2.7/dist-packages/powerline/bindings/zsh/powerline.zsh ]]; then
-    source /usr/local/lib/python2.7/dist-packages/powerline/bindings/zsh/powerline.zsh
-fi
-
-if [[ -x `whence -p powerline-daemon` ]]; then
-    powerline-daemon -q
-fi
-
-if [ -r "$ZSH/oh-my-zsh.sh" ]; then 
-    source $ZSH/oh-my-zsh.sh
-fi
-[ -n "${REMOTEHOST}${SSH_CONNECTION}" ] && 
-        PROMPT="%K{cyan}%F{white}SSH %f%k%F{cyan}${SEGMENT_SEPARATOR}%f${PROMPT}"
-
-#case ${OSTYPE} in
-#    darwin*)
-#        PROMPT="%K{blue}OSX${PROMPT}%k"
-#    ;;
-#esac
+# pure prompt settings (https://github.com/sindresorhus/pure)
+autoload -U promptinit; promptinit
+prompt pure
 
 # Title of terminal
 case "${TERM}" in
@@ -117,41 +27,10 @@ export LANG=ja_JP.UTF-8
 # charset of less command
 export LESSCHARSET=utf-8
 
-# Preferred editor for local and remote sessions
-# if [[ -n $SSH_CONNECTION ]]; then
-#   export EDITOR='vim'
-# else
-#   export EDITOR='mvim'
-# fi
 
-# Compilation flags
-# export ARCHFLAGS="-arch x86_64"
-
-# ssh
-# export SSH_KEY_PATH="~/.ssh/dsa_id"
-
-# Set personal aliases, overriding those provided by oh-my-zsh libs,
-# plugins, and themes. Aliases can be placed here, though oh-my-zsh
-# users are encouraged to define aliases within the ZSH_CUSTOM folder.
-# For a full list of active aliases, run `alias`.
-#
-# Example aliases
-# alias zshconfig="mate ~/.zshrc"
-# alias ohmyzsh="mate ~/.oh-my-zsh"
-#
-alias be="bundle exec"
-
-if type "rbenv" > /dev/null 2>&1
+if type "asdf" > /dev/null 2>&1
 then
-    eval "$(rbenv init -)"
-    export PATH=${PATH}:~/.rbenv/shims
-fi
-
-if type "pyenv" > /dev/null 2>&1
-then
-    eval "$(pyenv init -)"
-    export PYENV_ROOT="$HOME/.pyenv"
-    export PATH="$PYENV_ROOT/bin:$PATH"
+    . $(brew --prefix asdf)/asdf.sh
 fi
 
 setopt extendedglob
@@ -221,3 +100,10 @@ zs() {
     fi
 }
 
+# fbr - checkout git branch
+fbr() {
+  local branches branch
+  branches=$(git branch -vv) &&
+  branch=$(echo "$branches" | fzf +m) &&
+  git checkout $(echo "$branch" | awk '{print $1}' | sed "s/.* //")
+}
