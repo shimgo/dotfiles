@@ -73,5 +73,7 @@
         }
     ]}
   ],
-  "dart.openDevTools": "flutter"
+  "dart.openDevTools": "flutter",
+  "editor.suggestSelection": "first",
+  "vsintellicode.modify.editor.suggestSelection": "automaticallyOverrodeDefaultValue"
 }
