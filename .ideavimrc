@@ -1,0 +1,94 @@
+set surround
+
+let mapleader = " "
+
+" 検索するときに大文字小文字を区別しない
+set ignorecase
+
+" 検索時に大文字を含んでいたら大/小を区別
+set smartcase
+
+" インクリメンタル検索 (検索ワードの最初の文字を入力した時点で検索が開始)
+set incsearch
+
+" 検索対象をハイライト
+set hlsearch
+
+" 対応する括弧やブレースを表示
+set showmatch matchtime=1
+
+" メッセージ表示欄を2行確保
+set cmdheight=2
+
+" ステータス行を常に表示
+set laststatus=2
+
+" ウィンドウの右下にまだ実行していない入力中のコマンドを表示
+set showcmd
+
+" 省略されずに表示
+set display=lastline
+
+" 行末のスペースを可視化
+set listchars=tab:^\ ,trail:~
+
+" ヤンクでクリップボードにコピー
+set clipboard+=unnamed
+
+" 対応する括弧を強調表示
+set showmatch
+
+" Escの2回押しでハイライト消去
+nnoremap <Esc><Esc> :nohlsearch<CR><ESC>
+
+" インデント幅
+set shiftwidth=2
+
+" タブキー押下時に挿入される文字幅を指定
+set softtabstop=2
+
+"x キー削除でデフォルトレジスタに入れない
+nnoremap x "_x
+vnoremap x "_x
+
+" ヤンクでクリップボードにコピー
+noremap "+y "*y
+noremap "+Y "*Y
+noremap "+p "*p
+noremap "+P "*P
+noremap <C-S-c> "*y
+noremap <C-S-v> "*P
+
+" 折返している場合に行単位に移動せず表示行に対して移動する
+nnoremap j gj
+onoremap j gj
+xnoremap j gj
+nnoremap k gk
+onoremap k gk
+xnoremap k gk
+
+inoremap jj <ESC>
+vnoremap <C-j><C-j> <ESC>
+onoremap jj <ESC>
+noremap  <Leader>h ^
+noremap  <Leader>l $
+
+nnoremap ss :<C-u>split<CR>
+nnoremap sv :<C-u>vsplit<CR>
+nnoremap sj <C-w>j
+nnoremap sk <C-w>k
+nnoremap sl <C-w>l
+nnoremap sh <C-w>h
+
+nnoremap <C-h> :<C-u>%s/
+
+noremap zp "0p
+
+" タブグループを閉じる(CloseAllEditorsはIDEのコマンド)
+noremap sq :action CloseAllEditors<CR>
+
+" 設定ファイル再読み込み
+nnoremap vr :<C-u>source ~/.ideavimrc<CR>
+
+" IDEのコマンド一覧を出す
+nnoremap va :<C-u>actionlist<Space>
