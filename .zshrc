@@ -1,5 +1,9 @@
 export PATH=/usr/local/bin:$PATH
 
+# Golang settings
+export GOPATH=$HOME/go
+export PATH=$PATH:$GOPATH/bin
+
 if [ -e "${HOME}/.zshrc_local" ]; then
     source "${HOME}/.zshrc_local"
 fi
