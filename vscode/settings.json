@@ -75,5 +75,9 @@
   ],
   "dart.openDevTools": "flutter",
   "editor.suggestSelection": "first",
-  "vsintellicode.modify.editor.suggestSelection": "automaticallyOverrodeDefaultValue"
+  "vsintellicode.modify.editor.suggestSelection": "automaticallyOverrodeDefaultValue",
+  // Goの補完が効かなかったことへの対策 https://github.com/golang/vscode-go/issues/839
+  "editor.suggest.snippetsPreventQuickSuggestions": false,
+  "window.zoomLevel": 1,
+  "go.useLanguageServer": true
 }

@@ -6,7 +6,12 @@ eamodio.gitlens
 esbenp.prettier-vscode
 formulahendry.vscode-mysql
 GitHub.vscode-pull-request-github
+golang.go
+GraphQL.vscode-graphql
 kaiwood.endwise
+luyizhi.vscode-graphql
+ms-azuretools.vscode-docker
+ms-vscode-remote.remote-containers
 mtxr.sqltools
 octref.vetur
 rebornix.ruby
