@@ -31,12 +31,6 @@ export LANG=ja_JP.UTF-8
 # charset of less command
 export LESSCHARSET=utf-8
 
-
-if type "asdf" > /dev/null 2>&1
-then
-    . $(brew --prefix asdf)/asdf.sh
-fi
-
 setopt extendedglob
 
 # fzf settings
