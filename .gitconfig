@@ -1,0 +1,10 @@
+[user]
+	name = shimgo
+	email = fen.mex.cyc@gmail.com
+[credential]
+	helper = osxkeychain
+[pull]
+	rebase = false
+[ghq]
+    root = ~/ghq
+    root = ~/go/src

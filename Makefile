@@ -1,5 +1,5 @@
 ALL_DOTFILES := $(wildcard .*)
-EXCLUDES     := . .. .DS_Store .git .gitignore .gitconfig
+EXCLUDES     := . .. .DS_Store .git .gitignore
 TARGETS      := $(filter-out $(EXCLUDES), $(ALL_DOTFILES))
 
 list: ## Show dotfiles to be processed

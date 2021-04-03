@@ -63,6 +63,11 @@ cf() {
      fi
   fi
 }
+
+frl() {
+  cd $(ghq list -p | fzf)
+}
+
 # fshow - git commit browser (enter for show, ctrl-d for diff)
 fgl() {
   local out shas sha q k
