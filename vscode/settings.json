@@ -1,5 +1,5 @@
 {
-  "editor.defaultFormatter": "esbenp.prettier-vscode",
+  // "editor.defaultFormatter": "esbenp.prettier-vscode",
   "[javascript]": {
     "editor.defaultFormatter": "esbenp.prettier-vscode"
   },
@@ -79,5 +79,9 @@
   // Goの補完が効かなかったことへの対策 https://github.com/golang/vscode-go/issues/839
   "editor.suggest.snippetsPreventQuickSuggestions": false,
   "window.zoomLevel": 1,
-  "go.useLanguageServer": true
+  "[go]": {
+    "go.useLanguageServer": true,
+    "go.formatTool": "goimports",
+    "editor.formatOnSave": true
+  }
 }
