@@ -8,3 +8,7 @@
 [ghq]
     root = ~/ghq
     root = ~/go/src
+[alias]
+	see = browse
+	st = status
+	ch = checkout
