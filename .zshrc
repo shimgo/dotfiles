@@ -4,6 +4,13 @@ export PATH=/usr/local/bin:$PATH
 export GOPATH=$HOME/go
 export PATH=$PATH:$GOPATH/bin
 
+# Java settings
+export JAVA_HOME=/Library/Java/JavaVirtualMachines/adoptopenjdk-16.jdk/Contents/Home
+export PATH=$PATH:$JAVA_HOME/bin
+
+# make settings
+export PATH="/usr/local/opt/make/libexec/gnubin:$PATH"
+
 if [ -e "${HOME}/.zshrc_local" ]; then
     source "${HOME}/.zshrc_local"
 fi
@@ -111,7 +118,8 @@ fbr() {
   git checkout $(echo "$branch" | awk '{print $1}' | sed "s/.* //")
 }
 
+
 # alias
 ## git
 alias g="git"
-
+function git(){hub "$@"}
