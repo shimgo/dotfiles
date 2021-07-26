@@ -1,0 +1,9 @@
+[submodule ".vim/pack/all/start/unite.vim"]
+	path = .vim/pack/all/start/unite.vim
+	url = https://github.com/Shougo/unite.vim.git
+[submodule ".vim/pack/all/start/unite-outline"]
+	path = .vim/pack/all/start/unite-outline
+	url = https://github.com/shimgo/unite-outline.git
+[submodule ".vim/pack/all/start/vim-fugitive"]
+	path = .vim/pack/all/start/vim-fugitive
+	url = https://github.com/tpope/vim-fugitive.git

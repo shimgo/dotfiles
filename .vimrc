@@ -5,34 +5,19 @@ set runtimepath&
 " Required. If you delete this line, runtime! command can't load correctly 
 set runtimepath+=~/.vim/userautoload/
 
-set runtimepath+=~/.vim/bundle/neobundle.vim/
-
-" userautoload root
-let $USERAUTOLOAD = expand('$HOME/.vim/userautoload')
-
-" Global functions
-source $USERAUTOLOAD/init/utils.vim
-
-" Encoding settings
-source $USERAUTOLOAD/init/encoding.vim
-
-"Load NeoBundle
-source $USERAUTOLOAD/init/neobundle.vim
+let $VIM_INIT = expand('$HOME/.vim/init')
 
 " Basic Settings
-source $USERAUTOLOAD/init/basic.vim
+source $VIM_INIT/basic.vim
 
 " Keymap
-source $USERAUTOLOAD/init/keymap.vim
+source $VIM_INIT/keymap.vim
+
+" File type
+source $VIM_INIT/filetype.vim
 
 " Status Line
-source $USERAUTOLOAD/init/statusline.vim
-
-" Appearcne
-source $USERAUTOLOAD/init/appearance.vim
-
-" Load all plugin settings
-runtime! plugins/*.vim
+source $VIM_INIT/statusline.vim
 
 " Local Settings
 if filereadable( $HOME . "/.vimrc_local" )
