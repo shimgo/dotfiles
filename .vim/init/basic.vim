@@ -10,6 +10,10 @@ else
                 \if has('gui_running') | source $MYGVIMRC
     autocmd MyAutoCmd BufWritePost $MYGVIMRC if has('gui_running') | source $MYGVIMRC
 endif
+
+" file type detection
+filetype on
+
 " Open quickfix window when execute grep
 autocmd QuickFixCmdPost *grep* cwindow
 
