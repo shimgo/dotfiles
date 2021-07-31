@@ -8,4 +8,3 @@
 .vim/tags/*
 !.vim/tags/.gitkeep
 .netrwhist
-.vim/pack/
