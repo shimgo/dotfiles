@@ -16,6 +16,3 @@
 [submodule ".vim/pack/all/start/vim-gitgutter"]
 	path = .vim/pack/all/start/vim-gitgutter
 	url = https://github.com/airblade/vim-gitgutter
-[submodule ".vim/pack/all/start/ale"]
-	path = .vim/pack/all/start/ale
-	url = https://github.com/dense-analysis/ale.git
