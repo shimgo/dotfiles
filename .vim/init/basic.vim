@@ -14,6 +14,9 @@ endif
 " file type detection
 filetype on
 
+" syntax highlight
+syntax enable
+
 " Open quickfix window when execute grep
 autocmd QuickFixCmdPost *grep* cwindow
 
