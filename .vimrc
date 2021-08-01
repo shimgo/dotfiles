@@ -19,6 +19,9 @@ source $VIM_INIT/filetype.vim
 " Status Line
 source $VIM_INIT/statusline.vim
 
+" Plugin settings
+source $VIM_INIT/plugin.vim
+
 " Local Settings
 if filereadable( $HOME . "/.vimrc_local" )
      source ~/.vimrc_local
