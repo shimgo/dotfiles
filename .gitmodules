@@ -16,3 +16,15 @@
 [submodule ".vim/pack/all/start/vim-gitgutter"]
 	path = .vim/pack/all/start/vim-gitgutter
 	url = https://github.com/airblade/vim-gitgutter
+[submodule ".vim/pack/all/start/vim-lsp"]
+	path = .vim/pack/all/start/vim-lsp
+	url = https://github.com/prabirshrestha/vim-lsp.git
+[submodule ".vim/pack/all/start/vim-lsp-settings"]
+	path = .vim/pack/all/start/vim-lsp-settings
+	url = https://github.com/mattn/vim-lsp-settings.git
+[submodule ".vim/pack/all/start/asyncomplete.vim"]
+	path = .vim/pack/all/start/asyncomplete.vim
+	url = https://github.com/prabirshrestha/asyncomplete.vim.git
+[submodule ".vim/pack/all/start/asyncomplete-lsp.vim"]
+	path = .vim/pack/all/start/asyncomplete-lsp.vim
+	url = https://github.com/prabirshrestha/asyncomplete-lsp.vim.git

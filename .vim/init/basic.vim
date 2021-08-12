@@ -33,6 +33,9 @@ if executable('ag')
     set grepprg=ag\ -a
 endif
 
+" completion behavior :h cot
+set completeopt=menuone,noinsert,noselect,preview
+
 " Display number of rows
 set number
 
@@ -148,7 +151,13 @@ set listchars=tab:>.,trail:_,extends:>,precedes:<,nbsp:%
 function! ZenkakuSpace()
     highlight ZenkakuSpace cterm=reverse ctermfg=DarkMagenta gui=reverse guifg=DarkMagenta
 endfunction
-   
+
+" ポップアップ内の色指定
+highlight Pmenu ctermbg=235 ctermfg=251
+highlight PmenuSel ctermbg=White ctermfg=Black
+highlight PmenuSbar ctermbg=DarkGray
+highlight PmenuThumb ctermbg=White
+
 if has('syntax')
     augroup ZenkakuSpace
         autocmd!
