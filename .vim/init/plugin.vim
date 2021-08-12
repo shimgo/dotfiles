@@ -36,3 +36,7 @@ inoremap <silent><expr> <TAB>
   \ asyncomplete#force_refresh()
 inoremap <expr> <S-Tab> pumvisible() ? "\<C-p>" : "\<S-Tab>"
 " }}}
+
+" vim-gitgutter {{{
+let g:gitgutter_map_keys = 0
+" }}}
