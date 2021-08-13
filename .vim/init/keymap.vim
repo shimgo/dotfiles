@@ -202,15 +202,6 @@ nnoremap [fugitive]r :<C-u>Gremove<Space>
 
 " }}}
 
-" vimfiler.vim {{{
-nnoremap [vimfiler] <Nop>
-nmap     <Leader>f [vimfiler]
-
-" Open VimFiler like IDE
-nnoremap <silent> [vimfiler]b :<C-u>VimFilerBufferDir -split -simple -winwidth=35 -no-quit<CR> 
-nnoremap <silent> [vimfiler]c :<C-u>VimFilerCurrentDir -split -simple -winwidth=35 -no-quit<CR> 
-" }}}
-
 " vim-easy-align.vim {{{
 vmap <Enter> <Plug>(EasyAlign)
 nmap ga <Plug>(EasyAlign)

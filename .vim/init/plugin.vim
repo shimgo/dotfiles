@@ -40,3 +40,13 @@ inoremap <expr> <S-Tab> pumvisible() ? "\<C-p>" : "\<S-Tab>"
 " vim-gitgutter {{{
 let g:gitgutter_map_keys = 0
 " }}}
+
+" NERDTree {{{
+nnoremap [nerdtree] <Nop>
+nmap     <Leader>f [nerdtree]
+nnoremap <silent> [nerdtree]b :<C-u>execute 'NERDTree' expand("%:p:h")<CR> 
+nnoremap <silent> [nerdtree]c :<C-u>execute 'NERDTree' getcwd()<CR> 
+nnoremap <silent> [nerdtree]j :<C-u>NERDTreeToggle<CR>
+" ターミナルで設定しているフォント名と合わせる
+set guifont=Hack\ Nerd\ Font\ Mono
+" }}}
