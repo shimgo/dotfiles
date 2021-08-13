@@ -1,3 +1,7 @@
+" debug
+" set verbose=9
+" set verbosefile=./vim.log
+
 " Set augroup.
 augroup MyAutoCmd
     autocmd!
