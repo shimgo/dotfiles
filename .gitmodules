@@ -40,3 +40,6 @@
 [submodule ".vim/pack/all/start/vim-nerdtree-syntax-highlight"]
 	path = .vim/pack/all/start/vim-nerdtree-syntax-highlight
 	url = https://github.com/tiagofumo/vim-nerdtree-syntax-highlight.git
+[submodule ".vim/pack/all/opt/vim-goimports"]
+	path = .vim/pack/all/opt/vim-goimports
+	url = https://github.com/mattn/vim-goimports.git

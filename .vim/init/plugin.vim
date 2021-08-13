@@ -50,3 +50,7 @@ nnoremap <silent> [nerdtree]j :<C-u>NERDTreeToggle<CR>
 " ターミナルで設定しているフォント名と合わせる
 set guifont=Hack\ Nerd\ Font\ Mono
 " }}}
+
+" vim-goimports {{{
+let g:goimports_simplify = 1
+" "}}}
