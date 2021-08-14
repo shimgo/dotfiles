@@ -43,10 +43,10 @@ let g:gitgutter_map_keys = 0
 
 " NERDTree {{{
 nnoremap [nerdtree] <Nop>
-nmap     <Leader>f [nerdtree]
-nnoremap <silent> [nerdtree]b :<C-u>execute 'NERDTree' expand("%:p:h")<CR> 
-nnoremap <silent> [nerdtree]c :<C-u>execute 'NERDTree' getcwd()<CR> 
-nnoremap <silent> [nerdtree]j :<C-u>NERDTreeToggle<CR>
+nnoremap <silent> <Leader>fb :<C-u>execute 'NERDTree' expand("%:p:h")<CR>
+nnoremap <silent> <Leader>fc :<C-u>execute 'NERDTree' getcwd()<CR>
+nnoremap <silent> <Leader>fj :<C-u>NERDTreeToggle<CR>
+nnoremap <silent> <Leader>fs :<C-u>NERDTreeToggle<CR>:<C-u>NERDTreeToggle<CR>
 " ターミナルで設定しているフォント名と合わせる
 set guifont=Hack\ Nerd\ Font\ Mono
 
@@ -95,8 +95,8 @@ let g:goimports_simplify = 1
 nnoremap  <Leader>ff :<C-u>Files<CR>
 nnoremap  <Leader>fl :<C-u>Buffers<CR>
 nnoremap  <Leader>fr :<C-u>History<CR>
-nnoremap  <Leader>fc :<C-u>History:<CR>
-nnoremap  <Leader>fs :<C-u>History/<CR>
+nnoremap  <Leader>f; :<C-u>History:<CR>
+nnoremap  <Leader>f/ :<C-u>History/<CR>
 nnoremap  <Leader>fg :<C-u>Ag<Space>
 nnoremap  <Leader><C-f> :<C-u>BLines<CR>
 nnoremap  <Leader>fk :<C-u>Maps<CR>
