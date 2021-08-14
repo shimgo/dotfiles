@@ -90,3 +90,14 @@ augroup end
 " vim-goimports {{{
 let g:goimports_simplify = 1
 " "}}}
+
+" fzf.vim {{{
+nnoremap  <Leader>ff :<C-u>Files<CR>
+nnoremap  <Leader>fl :<C-u>Buffers<CR>
+nnoremap  <Leader>fr :<C-u>History<CR>
+nnoremap  <Leader>fc :<C-u>History:<CR>
+nnoremap  <Leader>fs :<C-u>History/<CR>
+nnoremap  <Leader>fg :<C-u>Ag<Space>
+nnoremap  <Leader><C-f> :<C-u>BLines<CR>
+nnoremap  <Leader>fk :<C-u>Maps<CR>
+" }}}
