@@ -49,6 +49,42 @@ nnoremap <silent> [nerdtree]c :<C-u>execute 'NERDTree' getcwd()<CR>
 nnoremap <silent> [nerdtree]j :<C-u>NERDTreeToggle<CR>
 " ターミナルで設定しているフォント名と合わせる
 set guifont=Hack\ Nerd\ Font\ Mono
+
+" 複数ウィンドウを開いているときにどのウィンドウを開くかを指定する
+let s:NERDTreeSelectorKeys = ['a', 's', 'd', 'f', 'g', 'r', 'e', 'w', 'q']
+func! MyNERDTreeFileOpen() abort
+    let selected = g:NERDTreeFileNode.GetSelected()
+    let winKeyMap = {}
+    let s:idx = 0
+    let textWindowNrs = filter(range(1, winnr('$')), "getwinvar(v:val, '&filetype') !=# 'nerdtree'")
+
+    if len(textWindowNrs) == 1 || selected.path.isDirectory
+        call nerdtree#ui_glue#invokeKeyMap("o")
+        return
+    endif
+
+    for s:winnr in textWindowNrs
+        let w:winnr = s:winnr
+        let winKeyMap[s:NERDTreeSelectorKeys[s:idx]] = w:winnr
+        exe w:winnr . "wincmd w"
+        let w:idx = s:idx
+        set statusline=%{s:NERDTreeSelectorKeys[w:idx]}
+        let s:idx += 1
+    endfor
+
+    redrawstatus!
+
+    if selected != {}
+        let key = nr2char(getchar())
+        exe winKeyMap[key] . "wincmd w"
+        exec "e" selected.path.str()
+        set statusline=
+    endif
+endfunc
+
+augroup nerdtree_open | au!
+    au FileType nerdtree nnoremap <buffer> o :call MyNERDTreeFileOpen()<CR>
+augroup end
 " }}}
 
 " vim-goimports {{{
