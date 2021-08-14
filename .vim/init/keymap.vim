@@ -1,5 +1,11 @@
 let mapleader = "\<Space>"
 
+" swap : ;
+nnoremap ; :
+nnoremap : ;
+vnoremap : :
+vnoremap : ;
+
 " Invalidate compatible for vi
 set nocompatible
 
