@@ -5,10 +5,6 @@ set runtimepath&
 " Required. If you delete this line, runtime! command can't load correctly 
 set runtimepath+=~/.vim/userautoload/
 
-" Load all plugins now.
-" Plugins need to be added to runtimepath before helptags can be generated.
-packloadall
-
 let $VIM_INIT = expand('$HOME/.vim/init')
 
 " Basic Settings
@@ -30,6 +26,11 @@ source $VIM_INIT/plugin.vim
 if filereadable( $HOME . "/.vimrc_local" )
      source ~/.vimrc_local
 endif
+
+" Load all plugins now.
+" Plugins need to be added to runtimepath before helptags can be generated.
+" 最後にしないとNERDTree上のアイコンとgitステータスの表示が崩れる
+packloadall
 
 " Load all of the helptags now, after plugins have been loaded.
 " All messages and errors will be ignored.
