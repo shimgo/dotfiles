@@ -11,4 +11,12 @@ augroup MyAutoCmd
   endfunction
   autocmd FileType go call s:config_go()
   " }}}
+
+  " graphql {{{
+  autocmd BufRead,BufNewFile *.graphql,*.graphqls,*.gql set filetype=graphql
+  function! s:config_graphql()
+    packadd vim-graphql
+  endfunction
+  autocmd FileType graphql call s:config_graphql()
+  " }}}
 augroup END
