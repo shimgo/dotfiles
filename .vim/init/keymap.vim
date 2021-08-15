@@ -1,6 +1,10 @@
-" vim:set foldmethod=marker:
-
 let mapleader = "\<Space>"
+
+" swap : ;
+nnoremap ; :
+nnoremap : ;
+vnoremap : :
+vnoremap : ;
 
 " Invalidate compatible for vi
 set nocompatible
@@ -135,18 +139,18 @@ endfunction
 " Plugin key mapping {{{
 "==============================================================================
 
-" vim-submode.vim {{{
-if Has_plugin('vim-submode')
-    call submode#enter_with('bufmove', 'n', '', 's>', '<C-w>>')
-    call submode#enter_with('bufmove', 'n', '', 's<', '<C-w><')
-    call submode#enter_with('bufmove', 'n', '', 's+', '<C-w>+')
-    call submode#enter_with('bufmove', 'n', '', 's-', '<C-w>-')
-    call submode#map('bufmove', 'n', '', '>', '<C-w>>')
-    call submode#map('bufmove', 'n', '', '<', '<C-w><')
-    call submode#map('bufmove', 'n', '', '+', '<C-w>+')
-    call submode#map('bufmove', 'n', '', '-', '<C-w>-')
-endif
-" }}}
+" " vim-submode.vim {{{
+" if Has_plugin('vim-submode')
+"     call submode#enter_with('bufmove', 'n', '', 's>', '<C-w>>')
+"     call submode#enter_with('bufmove', 'n', '', 's<', '<C-w><')
+"     call submode#enter_with('bufmove', 'n', '', 's+', '<C-w>+')
+"     call submode#enter_with('bufmove', 'n', '', 's-', '<C-w>-')
+"     call submode#map('bufmove', 'n', '', '>', '<C-w>>')
+"     call submode#map('bufmove', 'n', '', '<', '<C-w><')
+"     call submode#map('bufmove', 'n', '', '+', '<C-w>+')
+"     call submode#map('bufmove', 'n', '', '-', '<C-w>-')
+" endif
+" " }}}
 
 " gtags.vim {{{
 nnoremap <C-g><C-g> :Gtags -g 
@@ -202,15 +206,6 @@ nnoremap [fugitive]d :<C-u>Gdiff<Space>
 " git-rm current buffer also you can specify file path
 nnoremap [fugitive]r :<C-u>Gremove<Space>
 
-" }}}
-
-" vimfiler.vim {{{
-nnoremap [vimfiler] <Nop>
-nmap     <Leader>f [vimfiler]
-
-" Open VimFiler like IDE
-nnoremap <silent> [vimfiler]b :<C-u>VimFilerBufferDir -split -simple -winwidth=35 -no-quit<CR> 
-nnoremap <silent> [vimfiler]c :<C-u>VimFilerCurrentDir -split -simple -winwidth=35 -no-quit<CR> 
 " }}}
 
 " vim-easy-align.vim {{{

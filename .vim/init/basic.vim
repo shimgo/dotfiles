@@ -1,3 +1,7 @@
+" debug
+" set verbose=9
+" set verbosefile=./vim.log
+
 " Set augroup.
 augroup MyAutoCmd
     autocmd!
@@ -10,13 +14,31 @@ else
                 \if has('gui_running') | source $MYGVIMRC
     autocmd MyAutoCmd BufWritePost $MYGVIMRC if has('gui_running') | source $MYGVIMRC
 endif
+
+" file type detection
+filetype on
+
+" syntax highlight
+syntax enable
+
 " Open quickfix window when execute grep
 autocmd QuickFixCmdPost *grep* cwindow
+
+" fold method
+" manual – 自分で範囲選択して折りたたみ
+" indent – インデント範囲
+" marker – {{{ と }}} で囲まれた範囲
+" expr – foldexpr による折りたたみレベル指定
+" syntax – 現在の syntax に応じた折りたたみ
+set foldmethod=marker
 
 " External grep program
 if executable('ag')
     set grepprg=ag\ -a
 endif
+
+" completion behavior :h cot
+set completeopt=menuone,noinsert,noselect,preview
 
 " Display number of rows
 set number
@@ -110,3 +132,42 @@ set tags+=./.git/ctags;
 "
 " fzf setting when intalled using HomeBrew
 set rtp+=/usr/local/opt/fzf
+
+" Encoding {{{
+" Make it normal in UTF-8 in Unix.
+set encoding=utf-8
+
+" Select newline character (either or both of CR and LF depending on system) automatically
+" Default fileformat.
+set fileformat=unix
+" Automatic recognition of a new line cord.
+set fileformats=unix,dos,mac
+
+set fileencodings=utf-8,iso-2022-jp,cp932,sjis,euc-jp
+"}}}
+
+" 全角スペース、タブ、空白のハイライト {{{
+"タブ、空白、改行の可視化
+set list
+set listchars=tab:>.,trail:_,extends:>,precedes:<,nbsp:%
+
+"全角スペースをハイライト表示
+function! ZenkakuSpace()
+    highlight ZenkakuSpace cterm=reverse ctermfg=DarkMagenta gui=reverse guifg=DarkMagenta
+endfunction
+
+" ポップアップ内の色指定
+highlight Pmenu ctermbg=235 ctermfg=251
+highlight PmenuSel ctermbg=White ctermfg=Black
+highlight PmenuSbar ctermbg=DarkGray
+highlight PmenuThumb ctermbg=White
+
+if has('syntax')
+    augroup ZenkakuSpace
+        autocmd!
+        autocmd ColorScheme       * call ZenkakuSpace()
+        autocmd VimEnter,WinEnter * match ZenkakuSpace /　/
+    augroup END
+    call ZenkakuSpace()
+endif
+" }}}

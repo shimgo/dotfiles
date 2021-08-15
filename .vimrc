@@ -5,38 +5,36 @@ set runtimepath&
 " Required. If you delete this line, runtime! command can't load correctly 
 set runtimepath+=~/.vim/userautoload/
 
-set runtimepath+=~/.vim/bundle/neobundle.vim/
-
-" userautoload root
-let $USERAUTOLOAD = expand('$HOME/.vim/userautoload')
-
-" Global functions
-source $USERAUTOLOAD/init/utils.vim
-
-" Encoding settings
-source $USERAUTOLOAD/init/encoding.vim
-
-"Load NeoBundle
-source $USERAUTOLOAD/init/neobundle.vim
+let $VIM_INIT = expand('$HOME/.vim/init')
 
 " Basic Settings
-source $USERAUTOLOAD/init/basic.vim
+source $VIM_INIT/basic.vim
 
 " Keymap
-source $USERAUTOLOAD/init/keymap.vim
+source $VIM_INIT/keymap.vim
+
+" File type
+source $VIM_INIT/filetype.vim
 
 " Status Line
-source $USERAUTOLOAD/init/statusline.vim
-
-" Appearcne
-source $USERAUTOLOAD/init/appearance.vim
-
-" Load all plugin settings
-runtime! plugins/*.vim
+source $VIM_INIT/statusline.vim
 
 " Local Settings
 if filereadable( $HOME . "/.vimrc_local" )
      source ~/.vimrc_local
 endif
+
+" Load all plugins now.
+" Plugins need to be added to runtimepath before helptags can be generated.
+" 最後にしないとNERDTree上のアイコンとgitステータスの表示が崩れる
+packloadall
+
+" Plugin settings
+" packloadallの後じゃないとプラグインの関数を使った設定ができない
+source $VIM_INIT/plugin.vim
+
+" Load all of the helptags now, after plugins have been loaded.
+" All messages and errors will be ignored.
+silent! helptags ALL
 
 set secure
