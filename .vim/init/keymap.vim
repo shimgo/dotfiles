@@ -3,7 +3,7 @@ let mapleader = "\<Space>"
 " swap : ;
 nnoremap ; :
 nnoremap : ;
-vnoremap : :
+vnoremap ; :
 vnoremap : ;
 
 " Invalidate compatible for vi

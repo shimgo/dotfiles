@@ -100,7 +100,7 @@ set showcmd
 set history=10000
 
 " Display long lines on the next line
-set wrap
+set nowrap
 
 " Use clipboard
 if has('clipboard')
