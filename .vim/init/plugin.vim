@@ -18,6 +18,16 @@ function! s:on_lsp_buffer_enabled() abort
   inoremap <buffer> <expr><c-f> lsp#scroll(+4)
   inoremap <buffer> <expr><c-b> lsp#scroll(-4)
   inoremap <expr> <cr> pumvisible() ? "\<c-y>\<cr>" : "\<cr>"
+  nmap <buffer> gl ;RestartGopls<CR>
+endfunction
+
+command! RestartGopls call s:restart_gopls()
+
+" goplsの再起動
+function! s:restart_gopls() abort
+  call lsp#stop_server('gopls')
+  sleep 1 " Language serverが止まる前にactivateを呼び出さないように
+  call lsp#activate()
 endfunction
 
 augroup lsp_install
