@@ -21,3 +21,10 @@ brew install --cask font-hack-nerd-font
 :LspInstallServer
 ```
 
+## vimにプラグインを追加する
+サブモジュールとして追加する。  
+.vim/pack/all/start/に追加すればvim起動時に必ずロードされる。  
+.vim/pack/all/opt/に追加すれば起動時にロードされないので、必要になったタイミングで`packadd xxxxx`で読み込む必要がある
+```
+git submodule add https://github.com/user/xxxxx.git .vim/pack/all/start/xxxxx
+```
