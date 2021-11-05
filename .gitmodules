@@ -49,3 +49,6 @@
 [submodule ".vim/pack/all/opt/vim-graphql"]
 	path = .vim/pack/all/opt/vim-graphql
 	url = https://github.com/jparise/vim-graphql.git
+[submodule ".vim/pack/all/start/ultisnips"]
+	path = .vim/pack/all/start/ultisnips
+	url = https://github.com/SirVer/ultisnips.git

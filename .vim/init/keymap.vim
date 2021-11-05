@@ -38,8 +38,6 @@ nnoremap <Leader>ev  :<C-u>edit $MYVIMRC<CR>
 nnoremap <Leader>eg  :<C-u>edit $MYGVIMRC<CR>
 nnoremap <Leader>eb  :<C-u>edit $USERAUTOLOAD/init/basic.vim<CR>
 nnoremap <Leader>ek  :<C-u>edit $USERAUTOLOAD/init/keymap.vim<CR>
-nnoremap <Leader>en  :<C-u>edit $USERAUTOLOAD/init/neobundle.vim<CR>
-nnoremap <Leader>es  :<C-u>edit $USERAUTOLOAD/init/statusline.vim<CR>
 noremap  <Leader>h ^
 nnoremap <Leader>vk  :<C-u>help index.txt@ja<CR>
 noremap  <Leader>l $
@@ -138,6 +136,10 @@ endfunction
 " }}}
 " Plugin key mapping {{{
 "==============================================================================
+
+" ultisnips {{{
+nnoremap <Leader>es :<C-u>UltiSnipsEdit<space>
+" }}}
 
 " " vim-submode.vim {{{
 " if Has_plugin('vim-submode')
