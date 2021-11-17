@@ -141,19 +141,6 @@ endfunction
 nnoremap <Leader>es :<C-u>UltiSnipsEdit<space>
 " }}}
 
-" " vim-submode.vim {{{
-" if Has_plugin('vim-submode')
-"     call submode#enter_with('bufmove', 'n', '', 's>', '<C-w>>')
-"     call submode#enter_with('bufmove', 'n', '', 's<', '<C-w><')
-"     call submode#enter_with('bufmove', 'n', '', 's+', '<C-w>+')
-"     call submode#enter_with('bufmove', 'n', '', 's-', '<C-w>-')
-"     call submode#map('bufmove', 'n', '', '>', '<C-w>>')
-"     call submode#map('bufmove', 'n', '', '<', '<C-w><')
-"     call submode#map('bufmove', 'n', '', '+', '<C-w>+')
-"     call submode#map('bufmove', 'n', '', '-', '<C-w>-')
-" endif
-" " }}}
-
 " gtags.vim {{{
 nnoremap <C-g><C-g> :Gtags -g 
 nnoremap <C-g><C-l> :Gtags -f %<CR>

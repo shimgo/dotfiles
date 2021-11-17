@@ -52,3 +52,6 @@
 [submodule ".vim/pack/all/start/ultisnips"]
 	path = .vim/pack/all/start/ultisnips
 	url = https://github.com/SirVer/ultisnips.git
+[submodule ".vim/pack/all/start/vim-submode"]
+	path = .vim/pack/all/start/vim-submode
+	url = https://github.com/kana/vim-submode.git
