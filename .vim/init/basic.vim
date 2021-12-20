@@ -30,11 +30,13 @@ autocmd QuickFixCmdPost *grep* cwindow
 " marker – {{{ と }}} で囲まれた範囲
 " expr – foldexpr による折りたたみレベル指定
 " syntax – 現在の syntax に応じた折りたたみ
-set foldmethod=marker
+set foldmethod=indent
+set foldlevel=1
+set foldenable!
 
 " External grep program
 if executable('ag')
-    set grepprg=ag\ -a
+    set grepprg=ag\ -a\ --hidden
 endif
 
 " completion behavior :h cot

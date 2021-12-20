@@ -1,0 +1,20 @@
+snippet stoi64 "stringからint64に変換" bwsm
+converted, err := strconv.ParseInt($1, 10, 64)
+endsnippet
+
+snippet stoi64 "stringからint64に変換" bwsm
+converted := strconv.FormatInt($1, 10)
+endsnippet
+
+snippet sw "switch" bwsm
+switch $1 {
+case $2:
+	return $3
+default:
+	panic(fmt.Printf("error %v", $1)
+}
+endsnippet
+
+snippet sl "sleep" bwsm
+time.Sleep(time.Second * 1)
+endsnippet
