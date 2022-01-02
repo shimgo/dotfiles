@@ -12,3 +12,5 @@
 	see = browse
 	st = status
 	ch = checkout
+[merge]
+	tool = vimdiff
