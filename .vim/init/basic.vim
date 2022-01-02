@@ -133,8 +133,8 @@ set tags+=./.git/ctags;
 " augroup END
 "
 " fzf setting when intalled using HomeBrew
+set rtp+=/opt/homebrew/opt/fzf
 set rtp+=/usr/local/opt/fzf
-
 " Encoding {{{
 " Make it normal in UTF-8 in Unix.
 set encoding=utf-8

@@ -1,4 +1,16 @@
-export PATH=/usr/local/bin:$PATH
+## アーキテクチャに応じてhomebrewのパス変更
+if [ `uname -m` = "arm64" ]; then
+    typeset -U path PATH
+    path=(
+        /opt/homebrew/bin(N-/)
+        /opt/homebrew/opt/go@1.16/bin(N-/)
+        /opt/homebrew/opt/python@3.9/libexec/bin(N-/)
+        /usr/local/bin(N-/)
+        $path
+    )
+else
+    export PATH=/usr/local/bin/brew:$PATH
+fi
 
 # Golang settings
 export GOPATH=$HOME/go
