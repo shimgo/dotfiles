@@ -3,8 +3,9 @@ if [ `uname -m` = "arm64" ]; then
     typeset -U path PATH
     path=(
         /opt/homebrew/bin(N-/)
-        /opt/homebrew/opt/go@1.16/bin(N-/)
+#        /opt/homebrew/opt/go@1.16/bin(N-/)
         /opt/homebrew/opt/python@3.9/libexec/bin(N-/)
+        /opt/homebrew/opt/make/libexec/gnubin(N-/)
         /usr/local/bin(N-/)
         $path
     )
@@ -17,11 +18,13 @@ export GOPATH=$HOME/go
 export PATH=$PATH:$GOPATH/bin
 
 # Java settings
-export JAVA_HOME=/Library/Java/JavaVirtualMachines/adoptopenjdk-16.jdk/Contents/Home
+export JAVA_HOME=/opt/homebrew/opt/openjdk
 export PATH=$PATH:$JAVA_HOME/bin
+export CPPFLAGS="-I/opt/homebrew/opt/openjdk/include"
 
 # make settings
 export PATH="/usr/local/opt/make/libexec/gnubin:$PATH"
+
 
 if [ -e "${HOME}/.zshrc_local" ]; then
     source "${HOME}/.zshrc_local"

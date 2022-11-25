@@ -2,7 +2,7 @@ snippet stoi64 "stringからint64に変換" bwsm
 converted, err := strconv.ParseInt($1, 10, 64)
 endsnippet
 
-snippet stoi64 "stringからint64に変換" bwsm
+snippet itos "intからstringに変換" bwsm
 converted := strconv.FormatInt($1, 10)
 endsnippet
 
@@ -11,7 +11,7 @@ switch $1 {
 case $2:
 	return $3
 default:
-	panic(fmt.Printf("error %v", $1)
+	panic(fmt.Sprintf("error %v", $1))
 }
 endsnippet
 

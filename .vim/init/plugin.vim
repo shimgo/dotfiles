@@ -107,6 +107,8 @@ augroup end
 
 " vim-goimports {{{
 let g:goimports_simplify = 1
+let g:goimports_cmd = 'gofumports'
+let g:goimports_simplify_cmd = 'gofumpt'
 " "}}}
 
 " fzf.vim {{{

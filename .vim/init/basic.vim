@@ -15,6 +15,9 @@ else
     autocmd MyAutoCmd BufWritePost $MYGVIMRC if has('gui_running') | source $MYGVIMRC
 endif
 
+" maxmempattern エラーが出ないようにする
+set mmp=5000
+
 " file type detection
 filetype on
 
