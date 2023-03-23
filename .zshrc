@@ -25,6 +25,8 @@ export CPPFLAGS="-I/opt/homebrew/opt/openjdk/include"
 # make settings
 export PATH="/usr/local/opt/make/libexec/gnubin:$PATH"
 
+# Ruby settings
+eval "$(rbenv init - zsh)"
 
 if [ -e "${HOME}/.zshrc_local" ]; then
     source "${HOME}/.zshrc_local"
