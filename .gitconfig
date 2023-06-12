@@ -6,8 +6,8 @@
 [pull]
 	rebase = false
 [ghq]
-    root = ~/ghq
     root = ~/go/src
+    root = ~/ghq
 [alias]
 	see = browse
 	st = status
