@@ -1,6 +1,7 @@
 ALL_DOTFILES := $(wildcard .*)
-EXCLUDES     := . .. .DS_Store .git .gitignore
-TARGETS      := $(filter-out $(EXCLUDES), $(ALL_DOTFILES))
+EXCLUDES     := . .. .DS_Store .git .gitignore .gitmodules .config
+ADDITIONAL   := .config/gh/config.yml
+TARGETS      := $(filter-out $(EXCLUDES), $(ALL_DOTFILES)) $(ADDITIONAL)
 
 list: ## Show dotfiles to be processed
 	@echo $(TARGETS)
