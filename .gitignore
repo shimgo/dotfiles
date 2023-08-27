@@ -8,3 +8,4 @@
 .vim/tags/*
 !.vim/tags/.gitkeep
 .netrwhist
+.vim/UltiSnips/*stack*
