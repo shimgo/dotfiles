@@ -58,3 +58,6 @@
 [submodule ".vim/pack/all/start/copilot.vim"]
 	path = .vim/pack/all/start/copilot.vim
 	url = https://github.com/github/copilot.vim.git
+[submodule ".vim/pack/all/start/winresizer"]
+	path = .vim/pack/all/start/winresizer
+	url = https://github.com/simeji/winresizer.git
