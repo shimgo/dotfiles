@@ -1,3 +1,5 @@
+require("plugins")
+
 -- 設定値 {{{
 
 -- クリップボード共有
@@ -55,6 +57,14 @@ vim.keymap.set('n', 's=', '<C-w>=')
 vim.keymap.set('n', 'sQ', ':<C-u>q<CR>')
 vim.keymap.set('n', 'sfQ', ':<C-u>q!<CR>')
 vim.keymap.set('n', 'sa', ':<C-u>qa<CR>')
+
+-- nvim-tree.lua {{{
+vim.g.loaded_netrw = 1
+vim.g.loaded_netrwPlugin = 1
+require("nvim-tree").setup()
+vim.keymap.set('n', '<leader>ft', ':NvimTreeToggle<CR>')
+vim.keymap.set('n', '<leader>fb', ':NvimTreeFindFile<CR>') -- 現在のバッファのファイルを指定した状態でファイラを開く
+-- }}}
 
 -- }}}
 
