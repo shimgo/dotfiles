@@ -6,5 +6,6 @@ Plug 'nvim-tree/nvim-tree.lua'
 Plug 'nvim-tree/nvim-web-devicons'
 Plug('nvim-treesitter/nvim-treesitter', {['do']= ':TSUpdate' })
 Plug 'nvim-treesitter/playground'
+Plug 'Mofiqul/vscode.nvim'
 
 vim.call('plug#end')

@@ -233,3 +233,17 @@ require'nvim-treesitter.configs'.setup {
 vim.keymap.set('n', '<leader>tt', ':TSPlaygroundToggle<CR>')
 vim.keymap.set('n', '<leader>tq', ':TSEditQueryUserAfter highlights')
 -- }}}
+
+-- vscode.nvim {{{
+require('vscode').setup({
+    -- Alternatively set style in setup
+    -- style = 'light'
+
+    -- Enable transparent background
+    transparent = true,
+
+    -- Enable italic comment
+    italic_comments = true,
+})
+require('vscode').load()
+-- }}}
