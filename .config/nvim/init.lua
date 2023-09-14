@@ -247,3 +247,22 @@ require('vscode').setup({
 })
 require('vscode').load()
 -- }}}
+
+-- mason.nvim, mason-lspconfig.nvim, lspconfig {{{
+-- It's important that you set up the plugins in the following order:
+-- 1. mason.nvim
+-- 2. mason-lspconfig.nvim
+-- 3. Setup servers via lspconfig
+require("mason").setup()
+require('mason-lspconfig').setup()
+-- :h mason-lspconfig.setup_handlers()
+require('mason-lspconfig').setup_handlers {
+  function(server_name)
+    require('lspconfig')[server_name].setup {}
+  end,
+}
+-- 上のハンドラでセットアップしてるのでいらない可能性あり
+-- After setting up mason-lspconfig you may set up servers via lspconfig
+-- require("lspconfig").lua_ls.setup {}
+-- ...
+-- }}}
