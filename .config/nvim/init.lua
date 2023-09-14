@@ -212,3 +212,24 @@ vim.keymap.set('n', '<leader>vr', '<cmd>lua ReloadConfig()<CR>')
 vim.keymap.set('n', '<Leader>ve', '<cmd>e ~/.config/nvim/init.lua<cr>')
 -- }}}
 -- }}}
+
+-- nvim-treesitter {{{
+require'nvim-treesitter.configs'.setup {
+  -- A list of parser names, or "all" (the five listed parsers should always be installed)
+  ensure_installed = "all",
+
+  -- Install parsers synchronously (only applied to `ensure_installed`)
+  sync_install = false,
+
+  -- Automatically install missing parsers when entering buffer
+  -- Recommendation: set to false if you don't have `tree-sitter` CLI installed locally
+  auto_install = true,
+
+  highlight = {
+    enable = true,
+  },
+}
+
+vim.keymap.set('n', '<leader>tt', ':TSPlaygroundToggle<CR>')
+vim.keymap.set('n', '<leader>tq', ':TSEditQueryUserAfter highlights')
+-- }}}
