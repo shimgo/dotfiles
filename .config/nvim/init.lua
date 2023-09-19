@@ -261,8 +261,64 @@ require('mason-lspconfig').setup_handlers {
     require('lspconfig')[server_name].setup {}
   end,
 }
--- 上のハンドラでセットアップしてるのでいらない可能性あり
+-- 上のハンドラ以外の個別設定
 -- After setting up mason-lspconfig you may set up servers via lspconfig
--- require("lspconfig").lua_ls.setup {}
+require("lspconfig").lua_ls.setup {
+  on_init = function(client)
+    local path = client.workspace_folders[1].name
+    if not vim.loop.fs_stat(path..'/.luarc.json') and not vim.loop.fs_stat(path..'/.luarc.jsonc') then
+      client.config.settings = vim.tbl_deep_extend('force', client.config.settings, {
+        Lua = {
+          diagnostics = {
+            globals = {'vim'}, -- "undefined global vim"の警告が出ないようにする
+          },
+        }
+      })
+
+      client.notify("workspace/didChangeConfiguration", { settings = client.config.settings })
+    end
+    return true
+  end
+}
 -- ...
+
+-- Global mappings.
+-- See `:help vim.diagnostic.*` for documentation on any of the below functions
+vim.keymap.set('n', '<leader>e', vim.diagnostic.open_float) -- エラー内容をfloating windowで表示。その状態で同じキーを押すとfloating windowにフォーカスが移る。qで離脱
+vim.keymap.set('n', 'gp', vim.diagnostic.goto_prev) -- 前のエラー箇所に移動
+vim.keymap.set('n', 'gn', vim.diagnostic.goto_next) -- 次のエラー箇所に移動
+vim.keymap.set('n', '<leader>q', vim.diagnostic.setloclist) -- quickfixにエラー箇所一覧を表示
+
+-- from: https://github.com/neovim/nvim-lspconfig/blob/master/README.md#suggested-configuration
+-- Use LspAttach autocommand to only map the following keys
+-- after the language server attaches to the current buffer
+vim.api.nvim_create_autocmd('LspAttach', {
+  group = vim.api.nvim_create_augroup('UserLspConfig', {}),
+  callback = function(ev)
+    -- Enable completion triggered by <c-x><c-o>
+    vim.bo[ev.buf].omnifunc = 'v:lua.vim.lsp.omnifunc'
+
+    -- Buffer local mappings.
+    -- See `:help vim.lsp.*` for documentation on any of the below functions
+    local opts = { buffer = ev.buf }
+    vim.keymap.set('n', 'gD', vim.lsp.buf.declaration, opts)
+    vim.keymap.set('n', 'gd', vim.lsp.buf.definition, opts)
+    vim.keymap.set('n', 'gh', vim.lsp.buf.hover, opts) -- floating windowを表示する。その状態で同じキーを押すとfloating windowにフォーカスが移る。qで離脱
+    vim.keymap.set('n', 'gi', vim.lsp.buf.implementation, opts)
+    vim.keymap.set({ 'n', 'i' }, '<C-k>', vim.lsp.buf.signature_help, opts)
+    vim.keymap.set('n', '<leader>wa', vim.lsp.buf.add_workspace_folder, opts)
+    vim.keymap.set('n', '<leader>wr', vim.lsp.buf.remove_workspace_folder, opts)
+    vim.keymap.set('n', '<leader>wl', function()
+      print(vim.inspect(vim.lsp.buf.list_workspace_folders()))
+    end, opts)
+    vim.keymap.set('n', 'gt', vim.lsp.buf.type_definition, opts)
+    vim.keymap.set('n', '<leader>rn', vim.lsp.buf.rename, opts)
+    vim.keymap.set({ 'n', 'v' }, '<leader>ca', vim.lsp.buf.code_action, opts)
+    vim.keymap.set('n', 'gr', vim.lsp.buf.references, opts)
+    vim.keymap.set('n', '<leader>f', function()
+      vim.lsp.buf.format { async = true }
+    end, opts)
+  end,
+})
+
 -- }}}
