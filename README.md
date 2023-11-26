@@ -36,6 +36,19 @@ brew install --cask font-hack-nerd-font
 :LspInfo
 ```
 
+## denops.vim関連の設定
+
+Denoのインストール
+```
+brew install deno
+```
+
+以下のコマンドでパスが出てくればOK
+```
+:echo exepath('deno')
+/opt/homebrew/bin/deno
+```
+
 
 # Vim
 

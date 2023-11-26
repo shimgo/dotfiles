@@ -322,3 +322,34 @@ vim.api.nvim_create_autocmd('LspAttach', {
 })
 
 -- }}}
+
+-- ddc.vim {{{
+vim.cmd [[
+call ddc#custom#patch_global('ui', 'pum')
+call ddc#custom#patch_global('sources', ['nvim-lsp', 'around', 'file'])
+call ddc#custom#patch_global('sourceOptions', {
+      \   'around': {'mark': 'A'},
+      \   '_': {
+      \     'matchers': ['matcher_head'],
+      \     'sorters': ['sorter_rank'],
+      \     'converters': ['converter_remove_overlap'],
+      \   },
+      \ })
+call ddc#custom#patch_global('sourceOptions', #{
+      \   nvim-lsp: #{
+      \     mark: 'lsp',
+      \     forceCompletionPattern: '\.\w*|:\w*|->\w*',
+      \   },
+      \ })
+call ddc#custom#patch_global('sourceParams', #{
+      \   nvim-lsp: #{
+      \     snippetEngine: denops#callback#register({
+      \           body -> vsnip#anonymous(body)
+      \     }),
+      \     enableResolveItem: v:true,
+      \     enableAdditionalTextEdit: v:true,
+      \   }
+      \ })
+call ddc#enable()
+]]
+-- }}}
