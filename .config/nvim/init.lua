@@ -329,6 +329,11 @@ call ddc#custom#patch_global('ui', 'pum')
 call ddc#custom#patch_global('sources', ['nvim-lsp', 'around', 'file'])
 call ddc#custom#patch_global('sourceOptions', {
       \   'around': {'mark': 'A'},
+      \   'file': {
+      \     'mark': 'F',
+      \     'isVolatile': v:true,
+      \     'forceCompletionPattern': '\S/\S*',
+      \   },
       \   '_': {
       \     'matchers': ['matcher_head'],
       \     'sorters': ['sorter_rank'],
