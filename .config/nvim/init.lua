@@ -335,12 +335,13 @@ call ddc#custom#patch_global('sourceOptions', {
       \     'forceCompletionPattern': '\S/\S*',
       \   },
       \   'nvim-lsp': {
-      \     'mark': 'lsp',
+      \     'mark': 'LSP',
       \     'forceCompletionPattern': '\.\w*|:\w*|->\w*',
       \   },
       \   '_': {
       \     'matchers': ['matcher_head'],
       \     'sorters': ['sorter_rank'],
+      \     'ignoreCase': v:true,
       \     'converters': ['converter_remove_overlap'],
       \   },
       \ })
@@ -354,5 +355,8 @@ call ddc#custom#patch_global('sourceParams', #{
       \   }
       \ })
 call ddc#enable()
+inoremap <C-n>   <Cmd>call pum#map#insert_relative(+1)<CR>
+inoremap <C-p>   <Cmd>call pum#map#insert_relative(-1)<CR>
 ]]
 -- }}}
+
