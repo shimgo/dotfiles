@@ -334,16 +334,14 @@ call ddc#custom#patch_global('sourceOptions', {
       \     'isVolatile': v:true,
       \     'forceCompletionPattern': '\S/\S*',
       \   },
+      \   'nvim-lsp': {
+      \     'mark': 'lsp',
+      \     'forceCompletionPattern': '\.\w*|:\w*|->\w*',
+      \   },
       \   '_': {
       \     'matchers': ['matcher_head'],
       \     'sorters': ['sorter_rank'],
       \     'converters': ['converter_remove_overlap'],
-      \   },
-      \ })
-call ddc#custom#patch_global('sourceOptions', #{
-      \   nvim-lsp: #{
-      \     mark: 'lsp',
-      \     forceCompletionPattern: '\.\w*|:\w*|->\w*',
       \   },
       \ })
 call ddc#custom#patch_global('sourceParams', #{
