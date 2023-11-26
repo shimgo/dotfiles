@@ -29,11 +29,9 @@ Plug 'Shougo/ddc-source-around'
 Plug 'LumaKernel/ddc-source-file'
 -- LSPのsource
 Plug 'Shougo/ddc-source-nvim-lsp'
--- 入力中の単語を補完の対象にするfilter
-Plug 'Shougo/ddc-filter-matcher_head'
--- 補完候補を適切にソートするfilter
-Plug 'Shougo/ddc-filter-sorter_rank'
 -- 補完時にすでに入力済みの文字を除いて補完するためのfilter
 Plug 'Shougo/ddc-filter-converter_remove_overlap'
+-- 曖昧検索のfilter
+Plug 'tani/ddc-fuzzy'
 
 vim.call('plug#end')

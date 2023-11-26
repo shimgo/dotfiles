@@ -339,10 +339,10 @@ call ddc#custom#patch_global('sourceOptions', {
       \     'forceCompletionPattern': '\.\w*|:\w*|->\w*',
       \   },
       \   '_': {
-      \     'matchers': ['matcher_head'],
-      \     'sorters': ['sorter_rank'],
+      \     'matchers': ['matcher_fuzzy'],
+      \     'sorters': ['sorter_fuzzy'],
       \     'ignoreCase': v:true,
-      \     'converters': ['converter_remove_overlap'],
+      \     'converters': ['converter_fuzzy', 'converter_remove_overlap'],
       \   },
       \ })
 call ddc#custom#patch_global('sourceParams', #{
@@ -357,6 +357,7 @@ call ddc#custom#patch_global('sourceParams', #{
 call ddc#enable()
 inoremap <C-n>   <Cmd>call pum#map#insert_relative(+1)<CR>
 inoremap <C-p>   <Cmd>call pum#map#insert_relative(-1)<CR>
+inoremap <TAB>   <Cmd>call pum#map#confirm()<CR>
 ]]
 -- }}}
 
