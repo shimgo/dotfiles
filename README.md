@@ -56,6 +56,11 @@ fdのインストール。これがないとファイル検索が動かなかっ
 brew install fd
 ```
 
+ripgrepのインストール。これがないとfzf-luaのgrepが動かなかった。Neovimのgrep設定をしてなかったからかも？
+```
+brew install ripgrep
+```
+
 # Vim
 
 ## セットアップ

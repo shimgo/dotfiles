@@ -37,7 +37,7 @@ Plug 'tani/ddc-fuzzy'
 -- ファイル検索
 -- fzf-lua
 -- grep、ファイル検索、gitの検索など
--- brew install fd が必要
+-- brew install fd ripgrep が必要
 Plug 'ibhagwan/fzf-lua'
 
 vim.call('plug#end')
