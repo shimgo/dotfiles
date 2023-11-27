@@ -49,6 +49,12 @@ brew install deno
 /opt/homebrew/bin/deno
 ```
 
+## fzf-lua
+
+fdのインストール。これがないとファイル検索が動かなかった。fzfのruntime pathの問題かも？
+```
+brew install fd
+```
 
 # Vim
 

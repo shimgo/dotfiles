@@ -144,7 +144,8 @@ require("nvim-tree").setup {
 }
 vim.keymap.set('n', '<leader>ft', ':NvimTreeToggle<CR>')
 vim.keymap.set('n', '<leader>fb', ':NvimTreeFindFile<CR>') -- 現在のバッファのファイルを指定した状態でファイラを開く
-vim.keymap.set('n', '<leader>ff', ':NvimTreeFocus<CR>') -- ファイラを開いてないなら開き、開いているならファイラにカーソルを移す
+vim.keymap.set('n', '<leader>fs', ':NvimTreeFocus<CR>') -- ファイラを開いてないなら開き、開いているならファイラにカーソルを移す
+vim.keymap.set('n', '<leader>fc', ':NvimTreeOpen pwd<CR>') -- カレントディレクトリを開く
 
 -- }}}
 
@@ -361,3 +362,7 @@ inoremap <TAB>   <Cmd>call pum#map#confirm()<CR>
 ]]
 -- }}}
 
+-- fzf-lua {{{
+vim.opt.rtp:append('/opt/homebrew/opt/fzf')
+vim.keymap.set("n", "<leader>ff", "<cmd>lua require('fzf-lua').files()<CR>", { silent = true })
+-- }}}
