@@ -23,6 +23,11 @@ vim.opt.tabstop = 4 -- タブ幅を4に設定する
 vim.opt.list = true
 vim.opt.listchars='tab:>.,trail:_,extends:>,precedes:<,nbsp:%'
 
+-- grepをrgに変更
+if vim.fn.executable('rg') == 1 then
+  vim.opt.grepprg='rg -S --vimgrep'
+end
+vim.api.nvim_create_autocmd({"QuickfixCmdPost"}, {pattern = {"make", "grep", "grepadd", "vimgrep"}, command = "copen"})
 -- }}}
 
 -- キー設定 {{{
@@ -35,6 +40,12 @@ vim.keymap.set('n', '<leader>h', '^')
 vim.keymap.set('v', '<leader>h', '^')
 vim.keymap.set('n', '<leader>l', '$')
 vim.keymap.set('v', '<leader>l', '$')
+vim.keymap.set('n', '<C-h>', ':<C-u>%s/') -- 置換
+
+-- Quickfix
+vim.keymap.set('n', 'sc', '<C-w><C-w><C-w>q') -- クイックフィックスを閉じる
+vim.keymap.set('n', '<C-n>', ':cn<CR>')
+vim.keymap.set('n', '<C-p>', ':cp<CR>')
 
 -- キー無効化 {{{
 vim.keymap.set('n', 's', '<Nop>') -- 使わない動作なので潰してウィンドウ操作のキーに使う
