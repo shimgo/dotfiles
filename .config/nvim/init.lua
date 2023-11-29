@@ -452,7 +452,15 @@ require'fzf-lua'.setup {
 
 -- vim-gitgutter {{{
 vim.opt.updatetime=100
+vim.g.gitgutter_map_keys=0 -- <leader>h*がvim-gitgutterでデフォルトで割り当てられていて邪魔なので無効化
 vim.keymap.set('n', '<leader>gn', ':GitGutterNextHunk<CR>')
 vim.keymap.set('n', '<leader>gp', ':GitGutterPrevHunk<CR>')
 vim.keymap.set('n', '<leader>gq', ':GitGutterQuickFix | copen<CR>')
+vim.keymap.set('n', '<leader>gs', ':GitGutterStageHunk<CR>')
+vim.keymap.set('n', '<leader>gu', ':GitGutterUndoHunk<CR>')
+-- }}}
+
+-- vim-fugitive {{{
+vim.keymap.set('n', '<leader>g<CR>', ':G<CR>')
+vim.keymap.set('n', '<leader>gd', ':Gdiffsplit<CR>')
 -- }}}

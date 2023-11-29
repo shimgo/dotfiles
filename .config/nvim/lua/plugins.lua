@@ -46,6 +46,8 @@ Plug 'ibhagwan/fzf-lua'
 -- Git {{{
 -- バッファに変更箇所を表示、変更箇所にカーソルを移動する
 Plug 'airblade/vim-gitgutter'
+-- Gitの操作
+Plug 'tpope/vim-fugitive'
 -- }}}
 
 vim.call('plug#end')
