@@ -364,6 +364,76 @@ inoremap <TAB>   <Cmd>call pum#map#confirm()<CR>
 
 -- fzf-lua {{{
 vim.opt.rtp:append('/opt/homebrew/opt/fzf')
-vim.keymap.set("n", "<leader>ff", "<cmd>lua require('fzf-lua').files()<CR>", { silent = true })
-vim.keymap.set("n", "<leader>fg", "<cmd>lua require('fzf-lua').grep()<CR>")
--- }}}
+vim.keymap.set("n", "<leader>ff", ":FzfLua files<CR>")
+vim.keymap.set("n", "<leader>fl", ":FzfLua buffers<CR>") -- 今開いているバッファをファイル名で検索
+vim.keymap.set("n", "<leader>fi", ":FzfLua blines<CR>") -- 今開いているバッファをgrep
+vim.keymap.set("n", "<leader>fq", ":FzfLua quickfix<CR>")
+vim.keymap.set("n", "<leader>fg", ":FzfLua grep<CR>")
+
+local actions = require "fzf-lua.actions"
+require'fzf-lua'.setup {
+  keymap = {
+    -- These override the default tables completely
+    -- no need to set to `false` to disable a bind
+    -- delete or modify is sufficient
+    builtin = {
+      -- neovim `:tmap` mappings for the fzf win
+      ["<F1>"]        = "toggle-help",
+      ["<F2>"]        = "toggle-fullscreen",
+      -- Only valid with the 'builtin' previewer
+      ["<F3>"]        = "toggle-preview-wrap",
+      ["<F4>"]        = "toggle-preview",
+      -- Rotate preview clockwise/counter-clockwise
+      ["<F5>"]        = "toggle-preview-ccw",
+      ["<F6>"]        = "toggle-preview-cw",
+      ["<S-down>"]    = "preview-page-down",
+      ["<S-up>"]      = "preview-page-up",
+      ["<S-left>"]    = "preview-page-reset",
+    },
+    fzf = {
+      -- fzf '--bind=' options
+      ["ctrl-z"]      = "abort",
+      ["ctrl-u"]      = "unix-line-discard",
+      ["ctrl-f"]      = "half-page-down",
+      ["ctrl-b"]      = "half-page-up",
+      ["ctrl-t"]      = "toggle-all",
+      ["ctrl-e"]      = "end-of-line",
+      ["ctrl-a"]      = "beginning-of-line",
+      -- Only valid with fzf previewers (bat/cat/git/etc)
+      ["f3"]          = "toggle-preview-wrap",
+      ["f4"]          = "toggle-preview",
+      ["shift-down"]  = "preview-page-down",
+      ["shift-up"]    = "preview-page-up",
+    },
+  },
+  actions = {
+    -- These override the default tables completely
+    -- no need to set to `false` to disable an action
+    -- delete or modify is sufficient
+    files = {
+      -- providers that inherit these actions:
+      --   files, git_files, git_status, grep, lsp
+      --   oldfiles, quickfix, loclist, tags, btags
+      --   args
+      -- default action opens a single selection
+      -- or sends multiple selection to quickfix
+      -- replace the default action with the below
+      -- to open all files whether single or multiple
+      -- ["default"]     = actions.file_edit,
+      ["default"]     = actions.file_edit_or_qf,
+      ["ctrl-s"]      = actions.file_split,
+      ["ctrl-v"]      = actions.file_vsplit,
+      ["alt-t"]      = actions.file_tabedit,
+      ["ctrl-q"]      = actions.file_sel_to_qf,
+      ["alt-l"]       = actions.file_sel_to_ll,
+    },
+    buffers = {
+      -- providers that inherit these actions:
+      --   buffers, tabs, lines, blines
+      ["default"]     = actions.buf_edit,
+      ["ctrl-s"]      = actions.buf_split,
+      ["ctrl-v"]      = actions.buf_vsplit,
+      ["ctrl-t"]      = actions.buf_tabedit,
+    }
+  },
+}
