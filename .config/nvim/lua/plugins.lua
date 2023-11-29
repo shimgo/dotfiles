@@ -8,12 +8,13 @@ Plug('nvim-treesitter/nvim-treesitter', {['do']= ':TSUpdate' })
 Plug 'nvim-treesitter/playground'
 Plug 'Mofiqul/vscode.nvim'
 
--- LSP
+-- LSP {{{
 Plug 'williamboman/mason.nvim'
 Plug 'williamboman/mason-lspconfig.nvim'
 Plug 'neovim/nvim-lspconfig'
+-- }}}
 
--- コード補完
+-- コード補完 {{{
 Plug 'vim-denops/denops.vim' -- ddc.vimに必要
 -- ddc.vim本体。単体では動かない。sourceとfilterをインストールする必要がある
 -- https://github.com/topics/ddc-source
@@ -33,11 +34,18 @@ Plug 'Shougo/ddc-source-nvim-lsp'
 Plug 'Shougo/ddc-filter-converter_remove_overlap'
 -- 曖昧検索のfilter
 Plug 'tani/ddc-fuzzy'
+-- }}}
 
--- ファイル検索
+-- ファイル検索 {{{
 -- fzf-lua
 -- grep、ファイル検索、gitの検索など
 -- brew install fd ripgrep が必要
 Plug 'ibhagwan/fzf-lua'
+-- }}}
+
+-- Git {{{
+-- バッファに変更箇所を表示、変更箇所にカーソルを移動する
+Plug 'airblade/vim-gitgutter'
+-- }}}
 
 vim.call('plug#end')

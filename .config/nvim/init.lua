@@ -377,7 +377,7 @@ inoremap <TAB>   <Cmd>call pum#map#confirm()<CR>
 vim.opt.rtp:append('/opt/homebrew/opt/fzf')
 vim.keymap.set("n", "<leader>ff", ":FzfLua files<CR>")
 vim.keymap.set("n", "<leader>fl", ":FzfLua buffers<CR>") -- 今開いているバッファをファイル名で検索
-vim.keymap.set("n", "<leader>fi", ":FzfLua blines<CR>") -- 今開いているバッファをgrep
+vim.keymap.set("n", "<leader>fi", ":FzfLua grep_curbuf<CR>") -- 今開いているバッファをgrep
 vim.keymap.set("n", "<leader>fq", ":FzfLua quickfix<CR>")
 vim.keymap.set("n", "<leader>fg", ":FzfLua grep<CR>")
 
@@ -407,7 +407,7 @@ require'fzf-lua'.setup {
       ["ctrl-u"]      = "unix-line-discard",
       ["ctrl-f"]      = "half-page-down",
       ["ctrl-b"]      = "half-page-up",
-      ["ctrl-t"]      = "toggle-all",
+      ["ctrl-l"]      = "toggle-all",
       ["ctrl-e"]      = "end-of-line",
       ["ctrl-a"]      = "beginning-of-line",
       -- Only valid with fzf previewers (bat/cat/git/etc)
@@ -448,3 +448,11 @@ require'fzf-lua'.setup {
     }
   },
 }
+-- }}}
+
+-- vim-gitgutter {{{
+vim.opt.updatetime=100
+vim.keymap.set('n', '<leader>gn', ':GitGutterNextHunk<CR>')
+vim.keymap.set('n', '<leader>gp', ':GitGutterPrevHunk<CR>')
+vim.keymap.set('n', '<leader>gq', ':GitGutterQuickFix | copen<CR>')
+-- }}}
