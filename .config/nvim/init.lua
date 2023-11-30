@@ -28,6 +28,23 @@ if vim.fn.executable('rg') == 1 then
   vim.opt.grepprg='rg -S --vimgrep'
 end
 vim.api.nvim_create_autocmd({"QuickfixCmdPost"}, {pattern = {"make", "grep", "grepadd", "vimgrep"}, command = "copen"})
+
+-- Smart ignore case
+-- 両方ONにしないとFooで検索したときにfooやFOOもヒットしてしまう。
+vim.opt.ignorecase = true
+vim.opt.smartcase = true
+
+-- 折りたたみ
+-- fold method
+-- manual – 自分で範囲選択して折りたたみ
+-- indent – インデント範囲
+-- marker – {{{ と }}} で囲まれた範囲
+-- expr – foldexpr による折りたたみレベル指定
+-- syntax – 現在の syntax に応じた折りたたみ
+vim.opt.foldmethod = 'indent'
+vim.opt.foldlevel = 1
+vim.opt.foldenable = true
+
 -- }}}
 
 -- キー設定 {{{
