@@ -50,4 +50,7 @@ Plug 'airblade/vim-gitgutter'
 Plug 'tpope/vim-fugitive'
 -- }}}
 
+-- Copilot
+Plug 'github/copilot.vim'
+
 vim.call('plug#end')
