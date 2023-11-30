@@ -43,7 +43,7 @@ vim.opt.smartcase = true
 -- syntax – 現在の syntax に応じた折りたたみ
 vim.opt.foldmethod = 'indent'
 vim.opt.foldlevel = 1
-vim.opt.foldenable = true
+vim.opt.foldenable = false
 
 -- }}}
 
