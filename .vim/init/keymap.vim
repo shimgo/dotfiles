@@ -174,7 +174,7 @@ nnoremap [fugitive]    <Nop>
 nmap     <Leader>g [fugitive]
 
 " Display git status [-unormal] on new window
-nnoremap <silent> [fugitive]s :<C-u>Gstatus<CR>
+nnoremap <silent> [fugitive]<CR> :<C-u>Gstatus<CR>
 
 " Display most recent commits of current buffer also you can specify revision
 nnoremap [fugitive]v :<C-u>Gread<Space>
