@@ -501,6 +501,9 @@ require'fzf-lua'.setup {
       ["ctrl-t"]      = actions.buf_tabedit,
     }
   },
+  grep = {
+    no_esc = true,
+  },
 }
 -- }}}
 
