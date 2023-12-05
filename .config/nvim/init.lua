@@ -312,6 +312,10 @@ require("lspconfig").lua_ls.setup {
   end
 }
 
+-- lsp-signature.nvim
+require("lsp_signature").setup({})
+vim.keymap.set('n', 'gk', function() require('lsp_signature').toggle_float_win() end) -- カーソル上の関数の引数のヒントを表示
+
 -- gopls
 require("lspconfig").gopls.setup({
   settings = {
@@ -523,4 +527,5 @@ vim.keymap.set('n', '<leader>gu', ':GitGutterUndoHunk<CR>')
 -- vim-fugitive {{{
 vim.keymap.set('n', '<leader>g<CR>', ':15split|0G<CR>') -- サイズを指定してfugitiveを開く0をつけると新しいバッファを開くのではなくそのバッファを開く。
 vim.keymap.set('n', '<leader>gd', ':Gdiffsplit<CR>')
+vim.keymap.set('n', '<leader>gb', ':G blame<CR>')
 -- }}}

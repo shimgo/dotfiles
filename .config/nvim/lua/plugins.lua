@@ -17,6 +17,7 @@ Plug 'neovim/nvim-lspconfig'
 -- コード補完 {{{
 Plug 'vim-denops/denops.vim' -- ddc.vimに必要
 -- ddc.vim本体。単体では動かない。sourceとfilterをインストールする必要がある
+-- ddcは補完機能のみを提供する。関数シグネチャの表示などは別途プラグインが必要。
 -- https://github.com/topics/ddc-source
 -- https://github.com/topics/ddc-filter
 Plug 'Shougo/ddc.vim'
@@ -34,6 +35,8 @@ Plug 'Shougo/ddc-source-nvim-lsp'
 Plug 'Shougo/ddc-filter-converter_remove_overlap'
 -- 曖昧検索のfilter
 Plug 'tani/ddc-fuzzy'
+-- 関数シグネチャの表示
+Plug 'ray-x/lsp_signature.nvim'
 -- }}}
 
 -- ファイル検索 {{{
