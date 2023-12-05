@@ -53,6 +53,8 @@ vim.keymap.set('i', 'jj', '<ESC>')
 vim.keymap.set('v', '<C-j><C-j>', '<ESC>')
 vim.keymap.set('n', ';', ':')
 vim.keymap.set('n', ':', ';')
+vim.keymap.set('v', ';', ':')
+vim.keymap.set('v', ':', ';')
 vim.keymap.set('n', '<leader>h', '^')
 vim.keymap.set('v', '<leader>h', '^')
 vim.keymap.set('n', '<leader>l', '$')
@@ -354,6 +356,7 @@ vim.keymap.set('n', '<leader>e', vim.diagnostic.open_float) -- エラー内容�
 vim.keymap.set('n', 'gp', vim.diagnostic.goto_prev) -- 前のエラー箇所に移動
 vim.keymap.set('n', 'gn', vim.diagnostic.goto_next) -- 次のエラー箇所に移動
 vim.keymap.set('n', '<leader>q', vim.diagnostic.setloclist) -- quickfixにエラー箇所一覧を表示
+vim.keymap.set('n', 'gl', ":LspRestart<CR>")
 
 -- from: https://github.com/neovim/nvim-lspconfig/blob/master/README.md#suggested-configuration
 -- Use LspAttach autocommand to only map the following keys
@@ -518,6 +521,6 @@ vim.keymap.set('n', '<leader>gu', ':GitGutterUndoHunk<CR>')
 -- }}}
 
 -- vim-fugitive {{{
-vim.keymap.set('n', '<leader>g<CR>', ':G<CR>')
+vim.keymap.set('n', '<leader>g<CR>', ':15split|0G<CR>') -- サイズを指定してfugitiveを開く0をつけると新しいバッファを開くのではなくそのバッファを開く。
 vim.keymap.set('n', '<leader>gd', ':Gdiffsplit<CR>')
 -- }}}
