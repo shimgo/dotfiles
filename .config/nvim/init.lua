@@ -529,3 +529,7 @@ vim.keymap.set('n', '<leader>g<CR>', ':15split|0G<CR>') -- サイズを指定し
 vim.keymap.set('n', '<leader>gd', ':Gdiffsplit<CR>')
 vim.keymap.set('n', '<leader>gb', ':G blame<CR>')
 -- }}}
+
+-- flatten.nvim {{{
+require("flatten").setup()
+-- }}}

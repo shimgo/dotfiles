@@ -56,4 +56,9 @@ Plug 'tpope/vim-fugitive'
 -- Copilot
 Plug 'github/copilot.vim'
 
+-- Terminal {{{
+-- Neovim内のターミナルでさらにNeovimを開いても、ネストしたNeovimセッションを開始せず、最初に開いたNeovim内のバッファとして開く
+Plug 'willothy/flatten.nvim'
+-- }}}
+
 vim.call('plug#end')
