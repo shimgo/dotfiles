@@ -51,6 +51,7 @@ vim.opt.foldenable = false
 vim.g.mapleader = ' '
 vim.keymap.set('i', 'jj', '<ESC>')
 vim.keymap.set('v', '<C-j><C-j>', '<ESC>')
+vim.keymap.set('t', 'jj', '<C-\\><C-n>')
 vim.keymap.set('n', ';', ':')
 vim.keymap.set('n', ':', ';')
 vim.keymap.set('v', ';', ':')
@@ -532,4 +533,18 @@ vim.keymap.set('n', '<leader>gb', ':G blame<CR>')
 
 -- flatten.nvim {{{
 require("flatten").setup()
+-- }}}
+
+-- term-edit.nvim {{{
+require("term-edit").setup({
+    -- Mandatory option:
+    -- Set this to a lua pattern that would match the end of your prompt.
+    -- Or a table of multiple lua patterns where at least one would match the
+    -- end of your prompt at any given time.
+    -- For most bash/zsh user this is '%$ '.
+    -- For most powershell/fish user this is '> '.
+    -- For most windows cmd user this is '>'.
+    prompt_end = '%$ ',
+    -- How to write lua patterns: https://www.lua.org/pil/20.2.html
+})
 -- }}}
