@@ -386,7 +386,7 @@ vim.api.nvim_create_autocmd('LspAttach', {
       print(vim.inspect(vim.lsp.buf.list_workspace_folders()))
     end, opts)
     vim.keymap.set('n', 'gt', vim.lsp.buf.type_definition, opts)
-    vim.keymap.set('n', '<leader>rn', vim.lsp.buf.rename, opts)
+    vim.keymap.set('n', 'ge', vim.lsp.buf.rename, opts)
     vim.keymap.set({ 'n', 'v' }, '<leader>ca', vim.lsp.buf.code_action, opts)
     vim.keymap.set('n', 'gr', vim.lsp.buf.references, opts)
     vim.keymap.set('n', '<leader>f', function()
@@ -547,4 +547,9 @@ require("term-edit").setup({
     prompt_end = '%$ ',
     -- How to write lua patterns: https://www.lua.org/pil/20.2.html
 })
+-- }}}
+
+-- toggleterm.nvim {{{
+require("toggleterm").setup()
+vim.keymap.set('n', '<leader>tt', '<cmd>ToggleTerm size=20 direction=horizontal name=hoge<CR>')
 -- }}}

@@ -61,6 +61,7 @@ Plug 'github/copilot.vim'
 Plug 'willothy/flatten.nvim'
 -- ターミナルモードでVimっぽく編集できる
 Plug 'chomosuke/term-edit.nvim'
+Plug 'akinsho/toggleterm.nvim'
 -- }}}
 
 vim.call('plug#end')
