@@ -64,4 +64,8 @@ Plug 'chomosuke/term-edit.nvim'
 Plug 'akinsho/toggleterm.nvim'
 -- }}}
 
+-- コメントアウト
+-- ノーマルモードでgccでコメントアウト
+Plug 'tpope/vim-commentary'
+
 vim.call('plug#end')
