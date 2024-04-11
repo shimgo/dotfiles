@@ -1,21 +1,20 @@
+# Golang settings
+export GOPATH=$HOME/go
+export PATH=$PATH:$GOPATH/bin
+
 ## アーキテクチャに応じてhomebrewのパス変更
 if [ `uname -m` = "arm64" ]; then
     typeset -U path PATH
     path=(
+        $path
         /opt/homebrew/bin(N-/)
-#        /opt/homebrew/opt/go@1.16/bin(N-/)
         /opt/homebrew/opt/python@3.9/libexec/bin(N-/)
         /opt/homebrew/opt/make/libexec/gnubin(N-/)
         /usr/local/bin(N-/)
-        $path
     )
 else
-    export PATH=/usr/local/bin/brew:$PATH
+    export PATH=$PATH:/usr/local/bin/brew
 fi
-
-# Golang settings
-export GOPATH=$HOME/go
-export PATH=$PATH:$GOPATH/bin
 
 # Java settings
 export JAVA_HOME=/opt/homebrew/opt/openjdk
