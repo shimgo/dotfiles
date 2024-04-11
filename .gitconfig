@@ -16,6 +16,8 @@
 	tool = vimdiff
 [diff]
 	tool = vimdiff
+[mergetool "vimdiff"]
+	path = nvim
 [difftool]
 	prompt = false
 [filter "lfs"]
