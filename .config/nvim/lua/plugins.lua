@@ -68,4 +68,7 @@ Plug 'akinsho/toggleterm.nvim'
 -- ノーマルモードでgccでコメントアウト
 Plug 'tpope/vim-commentary'
 
+-- ウィンドウサイズ変更
+Plug 'simeji/winresizer'
+
 vim.call('plug#end')
