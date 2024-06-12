@@ -71,4 +71,7 @@ Plug 'tpope/vim-commentary'
 -- ウィンドウサイズ変更
 Plug 'simeji/winresizer'
 
+-- 置換の高機能版
+Plug 'tpope/vim-abolish'
+
 vim.call('plug#end')

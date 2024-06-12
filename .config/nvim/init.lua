@@ -555,3 +555,7 @@ require("term-edit").setup({
 require("toggleterm").setup()
 vim.keymap.set('n', '<leader>tt', '<cmd>ToggleTerm size=20 direction=horizontal name=hoge<CR>')
 -- }}}
+
+-- vim-abolish {{{
+vim.keymap.set('n', '<C-g>', ':<C-u>%S/') -- 置換
+-- }}}
