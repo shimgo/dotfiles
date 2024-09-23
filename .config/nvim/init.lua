@@ -23,6 +23,32 @@ vim.opt.tabstop = 4 -- タブ幅を4に設定する
 vim.opt.list = true
 vim.opt.listchars='tab:>.,trail:_,extends:>,precedes:<,nbsp:%'
 
+-- ファイルごとの設定 {{{
+-- :echo &filetype で現在のバッファのファイルタイプを確認できる。バッファに出したいときは:put=&filetype
+-- sw=shiftwidth, sts=softtabstop, ts=tabstop, et=expandtabの略
+-- tabstop: タブ文字をスペース何も自分の表示にするか
+-- expandtab: TABキーを押したときにタブ文字の代わりにスペースを挿入するか
+-- softtabstop: TABキーを押したときにスペースを何個挿入するか
+local filetypes = {
+  typescriptreact = {sw = 2, sts = 2, ts = 2, et = true},
+  graphql = {sw = 4, sts = 4, ts = 4, et = true},
+  lua = {sw = 2, sts = 2, ts = 2, et = true},
+}
+-- autocmdの設定
+for ft, opts in pairs(filetypes) do
+  vim.api.nvim_create_autocmd("FileType", {
+    pattern = ft,
+    callback = function()
+      vim.bo.shiftwidth = opts.sw
+      vim.bo.softtabstop = opts.sts
+      vim.bo.tabstop = opts.ts
+      vim.bo.expandtab = opts.et
+    end
+  })
+end
+-- }}}
+
+
 -- grepをrgに変更
 if vim.fn.executable('rg') == 1 then
   vim.opt.grepprg='rg -S --vimgrep'
