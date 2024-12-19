@@ -16,6 +16,10 @@ else
     export PATH=$PATH:/usr/local/bin/brew
 fi
 
+# direnv
+export EDITOR=nvim
+eval "$(direnv hook zsh)"
+
 # Java settings
 export JAVA_HOME=/opt/homebrew/opt/openjdk
 export PATH=$PATH:$JAVA_HOME/bin
