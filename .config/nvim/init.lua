@@ -426,7 +426,7 @@ vim.api.nvim_create_autocmd('LspAttach', {
 -- ddc.vim {{{
 vim.cmd [[
 call ddc#custom#patch_global('ui', 'pum')
-call ddc#custom#patch_global('sources', ['nvim-lsp', 'around', 'file'])
+call ddc#custom#patch_global('sources', ['lsp', 'around', 'file'])
 call ddc#custom#patch_global('sourceOptions', {
       \   'around': {'mark': 'A'},
       \   'file': {
