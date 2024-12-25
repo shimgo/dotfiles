@@ -71,6 +71,9 @@ Plug 'tpope/vim-commentary'
 -- ウィンドウサイズ変更
 Plug 'simeji/winresizer'
 
+-- バッファを閉じるための便利コマンドを提供する
+Plug 'kazhala/close-buffers.nvim'
+
 -- 置換の高機能版
 Plug 'tpope/vim-abolish'
 
