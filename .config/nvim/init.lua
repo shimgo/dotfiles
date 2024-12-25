@@ -562,6 +562,7 @@ vim.keymap.set('n', '<leader>gb', ':G blame<CR>')
 -- gitlinker {{{
 require('gitlinker').setup({})
 vim.keymap.set('n', '<leader>go', ':GitLink!<CR>')
+vim.keymap.set('v', '<leader>go', ':GitLink!<CR>')
 -- }}}
 
 -- flatten.nvim {{{
