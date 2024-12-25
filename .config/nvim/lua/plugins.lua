@@ -51,6 +51,8 @@ Plug 'ibhagwan/fzf-lua'
 Plug 'airblade/vim-gitgutter'
 -- Gitの操作
 Plug 'tpope/vim-fugitive'
+-- GitHubのpermalink取得
+Plug 'linrongbin16/gitlinker.nvim'
 -- }}}
 
 -- Copilot

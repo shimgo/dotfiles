@@ -559,6 +559,11 @@ vim.keymap.set('n', '<leader>gd', ':Gdiffsplit<CR>')
 vim.keymap.set('n', '<leader>gb', ':G blame<CR>')
 -- }}}
 
+-- gitlinker {{{
+require('gitlinker').setup({})
+vim.keymap.set('n', '<leader>go', ':GitLink!<CR>')
+-- }}}
+
 -- flatten.nvim {{{
 require("flatten").setup()
 -- }}}
