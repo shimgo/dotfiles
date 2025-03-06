@@ -55,8 +55,11 @@ Plug 'tpope/vim-fugitive'
 Plug 'linrongbin16/gitlinker.nvim'
 -- }}}
 
--- Copilot
+-- Copilot {{{
 Plug 'github/copilot.vim'
+Plug 'nvim-lua/plenary.nvim'
+Plug 'CopilotC-Nvim/CopilotChat.nvim'
+-- }}}
 
 -- Terminal {{{
 -- Neovim内のターミナルでさらにNeovimを開いても、ネストしたNeovimセッションを開始せず、最初に開いたNeovim内のバッファとして開く
