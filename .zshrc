@@ -1,3 +1,5 @@
+# Add deno completions to search path
+if [[ ":$FPATH:" != *":/Users/shimgo/.zsh/completions:"* ]]; then export FPATH="/Users/shimgo/.zsh/completions:$FPATH"; fi
 # Golang settings
 export GOPATH=$HOME/go
 export PATH=$PATH:$GOPATH/bin
@@ -143,3 +145,5 @@ fbr() {
 ## git
 alias g="git"
 function git(){hub "$@"}
+
+. "/Users/shimgo/.deno/env"
