@@ -105,6 +105,10 @@ vim.keymap.set('n', 'sj', '<C-w>j')
 vim.keymap.set('n', 'sk', '<C-w>k')
 vim.keymap.set('n', 'sl', '<C-w>l')
 vim.keymap.set('n', 'sh', '<C-w>h')
+vim.keymap.set('v', 'sj', '<C-w>j')
+vim.keymap.set('v', 'sk', '<C-w>k')
+vim.keymap.set('v', 'sl', '<C-w>l')
+vim.keymap.set('v', 'sh', '<C-w>h')
 vim.keymap.set('n', 'sJ', '<C-w>J')
 vim.keymap.set('n', 'sK', '<C-w>K')
 vim.keymap.set('n', 'sL', '<C-w>L')
@@ -476,6 +480,7 @@ inoremap <TAB>   <Cmd>call pum#map#confirm()<CR>
 -- }}}
 
 -- fzf-lua {{{
+require('fzf-lua').register_ui_select() -- vim.ui.selectをfzf-luaのUIに置き換え
 vim.opt.rtp:append('/opt/homebrew/opt/fzf')
 vim.keymap.set("n", "<leader>ff", ":FzfLua files<CR>")
 vim.keymap.set("n", "<leader>fl", ":FzfLua buffers<CR>") -- 今開いているバッファをファイル名で検索
@@ -618,6 +623,9 @@ vim.keymap.set('n', 'sq', ':BDelete this<CR>')
 -- }}}
 
 -- copilot {{{
+vim.keymap.set('n', '<leader>cw', ':CopilotChatToggle<CR>')
+vim.keymap.set('n', '<leader>cl', ':CopilotChatReset<CR>')
+vim.keymap.set('n', '<leader>cm', ':CopilotChatModels<CR>')
 require("CopilotChat").setup {
   -- see config/prompts.lua for implementation
   prompts = {
@@ -632,22 +640,22 @@ require("CopilotChat").setup {
       description = "コードのレビューをお願いする",
     },
     Fix = {
-      prompt = "/COPILOT_FIX このコードには問題があります。バグを修正したコードを表示してください。説明は日本語でお願いします。",
+      prompt = "このコードには問題があります。バグを修正したコードを表示してください。説明は日本語でお願いします。",
       mapping = '<leader>cf',
       description = "コードの修正をお願いする",
     },
     Optimize = {
-      prompt = "/COPILOT_REFACTOR 選択したコードを最適化し、パフォーマンスと可読性を向上させてください。説明は日本語でお願いします。",
+      prompt = "コードを最適化し、パフォーマンスと可読性を向上させてください。説明は日本語でお願いします。",
       mapping = '<leader>co',
       description = "コードの最適化をお願いする",
     },
     Docs = {
-      prompt = "/COPILOT_GENERATE 選択したコードに関するドキュメントコメントを日本語のだ・である・体言止めを使った文体で書いてください。あなたの口調は丁寧語のままでいいです。",
+      prompt = "コードに関するドキュメントコメントを日本語のだ・である・体言止めを使った文体で書いてください。あなたの口調は丁寧語のままでいいです。",
       mapping = '<leader>cd',
       description = "コードのドキュメント作成をお願いする",
     },
     Tests = {
-      prompt = "/COPILOT_TESTS 選択したコードの詳細なユニットテストを書いてください。説明は日本語でお願いします。",
+      prompt = "選択したコードの詳細なユニットテストを書いてください。説明は日本語でお願いします。",
       mapping = '<leader>ct',
       description = "テストコード作成をお願いする",
     },
