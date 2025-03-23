@@ -632,54 +632,44 @@ require("CopilotChat").setup {
     Explain = {
       prompt = "/COPILOT_EXPLAIN コードを日本語で説明してください。",
       mapping = '<leader>ce',
-      description = "コードの説明をお願いする",
+      description = "コードの説明",
     },
     Review = {
       prompt = '/COPILOT_REVIEW コードを日本語でレビューしてください。',
       mapping = '<leader>cr',
-      description = "コードのレビューをお願いする",
+      description = "コードのレビュー",
     },
     Fix = {
       prompt = "このコードには問題があります。バグを修正したコードを表示してください。説明は日本語でお願いします。",
       mapping = '<leader>cf',
-      description = "コードの修正をお願いする",
+      description = "コードの修正",
     },
     Optimize = {
       prompt = "コードを最適化し、パフォーマンスと可読性を向上させてください。説明は日本語でお願いします。",
       mapping = '<leader>co',
-      description = "コードの最適化をお願いする",
+      description = "コードの最適化",
     },
     Docs = {
       prompt = "コードに関するドキュメントコメントを日本語のだ・である・体言止めを使った文体で書いてください。あなたの口調は丁寧語のままでいいです。",
       mapping = '<leader>cd',
-      description = "コードのドキュメント作成をお願いする",
+      description = "コードのドキュメント作成",
     },
     Tests = {
       prompt = "選択したコードの詳細なユニットテストを書いてください。説明は日本語でお願いします。",
       mapping = '<leader>ct',
-      description = "テストコード作成をお願いする",
+      description = "テストコード作成",
     },
     FixDiagnostic = {
       prompt = 'コードの診断結果に従って問題を修正してください。修正内容の説明は日本語でお願いします。',
       mapping = '<leader>cfd',
-      description = "コードの修正をお願いする",
+      description = "コードの診断結果から修正",
       selection = require('CopilotChat.select').diagnostics,
     },
-    Commit = {
-      prompt =
-      '実装差分に対するコミットメッセージを日本語で記述してください。',
+    CommitMessage = {
+      prompt = '変更に対するコミットメッセージを日本語でdiffとして記述してください。タイトルは50文字以内にし、メッセージは72文字で改行してください。また、gitcommit code blockの形式にしてください。',
       mapping = '<leader>cc',
-      description = "コミットメッセージの作成をお願いする",
-      selection = require('CopilotChat.select').gitdiff,
-    },
-    CommitStaged = {
-      prompt =
-      'ステージ済みの変更に対するコミットメッセージを日本語で記述してください。',
-      mapping = '<leader>cs',
-      description = "ステージ済みのコミットメッセージの作成をお願いする",
-      selection = function(source)
-          return require('CopilotChat.select').gitdiff(source, true)
-      end,
+      description = "コミットメッセージの作成",
+      context = 'git:staged',
     },
   },
 
