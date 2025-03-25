@@ -627,6 +627,7 @@ vim.keymap.set('n', '<leader>cw', ':CopilotChatToggle<CR>')
 vim.keymap.set('n', '<leader>cl', ':CopilotChatReset<CR>')
 vim.keymap.set('n', '<leader>cm', ':CopilotChatModels<CR>')
 require("CopilotChat").setup {
+  model = 'claude-3.7-sonnet',
   -- see config/prompts.lua for implementation
   prompts = {
     Explain = {
@@ -656,7 +657,7 @@ require("CopilotChat").setup {
     },
     Tests = {
       prompt = "選択したコードの詳細なユニットテストを書いてください。説明は日本語でお願いします。",
-      mapping = '<leader>ct',
+      mapping = '<leader>cu',
       description = "テストコード作成",
     },
     FixDiagnostic = {
@@ -690,41 +691,92 @@ require("CopilotChat").setup {
       insert = '<C-s>',
     },
     toggle_sticky = {
-      normal = 'grr',
+      normal = 'crr',
     },
     clear_stickies = {
-      normal = 'grx',
+      normal = 'crx',
     },
     accept_diff = {
       normal = '<C-y>',
       insert = '<C-y>',
     },
     jump_to_diff = {
-      normal = 'gj',
+      normal = 'cj',
     },
     quickfix_answers = {
-      normal = 'gqa',
+      normal = 'cqa',
     },
     quickfix_diffs = {
-      normal = 'gqd',
+      normal = 'cqd',
     },
     yank_diff = {
-      normal = 'gy',
+      normal = 'cy',
       register = '"', -- Default register to use for yanking
     },
     show_diff = {
-      normal = 'gd',
+      normal = 'cd',
       full_diff = false, -- Show full diff instead of unified diff when showing diff window
     },
     show_info = {
-      normal = 'gi',
+      normal = 'ci',
     },
     show_context = {
-      normal = 'gc',
+      normal = 'cc',
     },
     show_help = {
-      normal = 'gh',
+      normal = 'ch',
     },
   },
+  contexts = (function()
+    local context_dir = vim.fn.expand("~/copilot_context/")
+    local contexts = {}
+
+    -- ディレクトリ内の *.txt ファイルを取得
+    local txt_files = vim.fn.glob(context_dir .. "*.txt", true, true)
+    if not txt_files or #txt_files == 0 then
+      return contexts -- ファイルがない場合は空のテーブルを返す
+    end
+
+    -- 各 .txt ファイルを処理
+    for _, txt_filepath in ipairs(txt_files) do
+      -- コンテキスト名をファイル名から抽出（拡張子を除く）
+      local context_name = vim.fn.fnamemodify(txt_filepath, ":t:r") -- 例: "point.txt" -> "point"
+
+      contexts[context_name] = {
+        resolve = function()
+          -- .txt ファイルの内容を読み込む
+          local ok, lines = pcall(vim.fn.readfile, txt_filepath)
+          if not ok then
+            return { { content = "Error: Could not read " .. txt_filepath, filename = txt_filepath, filetype = "txt" } }
+          end
+
+          -- 記載されたファイルパスをコンテキストとして生成
+          local context_items = {}
+          for _, filepath in ipairs(lines) do
+            -- 空行やコメント行をスキップ（オプション）
+            if filepath:match("%S") and not filepath:match("^%s*#") then
+              local expanded_path = vim.fn.expand(filepath)
+              local content = ""
+              local ok, file_content = pcall(vim.fn.readfile, expanded_path)
+              if ok then
+                content = table.concat(file_content, "\n")
+              else
+                content = "Error: Could not read " .. expanded_path
+              end
+              table.insert(context_items, {
+                content = content,
+                filename = expanded_path,
+                filetype = vim.fn.fnamemodify(expanded_path, ":e") or "txt", -- 拡張子から動的に設定
+              })
+            end
+          end
+
+          return context_items
+        end,
+      }
+    end
+
+    return contexts
+  end)(),
 }
 -- }}}
