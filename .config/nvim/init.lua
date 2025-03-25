@@ -1,6 +1,7 @@
-require("plugins")
+-- vimというグローバルが認識されるようにする
+vim = vim or {}
 
--- 設定値 {{{
+require("plugins")
 
 -- クリップボード共有
 vim.opt.clipboard:append({ "unnamedplus" }) -- レジスタとクリップボードを共有
@@ -757,8 +758,8 @@ require("CopilotChat").setup {
             if filepath:match("%S") and not filepath:match("^%s*#") then
               local expanded_path = vim.fn.expand(filepath)
               local content = ""
-              local ok, file_content = pcall(vim.fn.readfile, expanded_path)
-              if ok then
+              local file_ok, file_content = pcall(vim.fn.readfile, expanded_path)
+              if file_ok then
                 content = table.concat(file_content, "\n")
               else
                 content = "Error: Could not read " .. expanded_path
