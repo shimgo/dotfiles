@@ -629,6 +629,7 @@ vim.keymap.set('n', '<leader>cl', ':CopilotChatReset<CR>')
 vim.keymap.set('n', '<leader>cm', ':CopilotChatModels<CR>')
 require("CopilotChat").setup {
   model = 'claude-3.7-sonnet',
+  system_prompt = '/COPILOT_INSTRUCTIONS 説明は日本語でしてください。',
   -- see config/prompts.lua for implementation
   prompts = {
     Explain = {
