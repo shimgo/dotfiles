@@ -730,16 +730,15 @@ require("CopilotChat").setup {
     },
   },
   contexts = (function()
-    -- 動的コンテキストを生成
-    local dynamic_contexts = {}
+    -- 動的に生成する、コンテキストでファイルをグルーピングしたコンテキストを生成
+    local dynamic_file_group_contexts = {}
     local context_dir = vim.fn.expand("~/copilot_context/")
-
     -- ディレクトリ内の *.txt ファイルを取得
     local txt_files = vim.fn.glob(context_dir .. "*.txt", true, true)
     if txt_files and #txt_files > 0 then
       for _, txt_filepath in ipairs(txt_files) do
         local context_name = vim.fn.fnamemodify(txt_filepath, ":t:r") -- 例: "point.txt" -> "point"
-        dynamic_contexts[context_name] = {
+        dynamic_file_group_contexts[context_name] = {
           resolve = function()
             local ok, lines = pcall(vim.fn.readfile, txt_filepath)
             if not ok then
@@ -825,8 +824,8 @@ require("CopilotChat").setup {
       },
     }
 
-    -- 動的コンテキストと静的コンテキストをマージ
-    return vim.tbl_extend("force", dynamic_contexts, gitdiff_context)
+    -- すべてのコンテキストをマージ
+    return vim.tbl_extend("force", dynamic_file_group_contexts, gitdiff_context)
   end)(),
 }
 -- }}}
