@@ -730,55 +730,103 @@ require("CopilotChat").setup {
     },
   },
   contexts = (function()
+    -- 動的コンテキストを生成
+    local dynamic_contexts = {}
     local context_dir = vim.fn.expand("~/copilot_context/")
-    local contexts = {}
 
     -- ディレクトリ内の *.txt ファイルを取得
     local txt_files = vim.fn.glob(context_dir .. "*.txt", true, true)
-    if not txt_files or #txt_files == 0 then
-      return contexts -- ファイルがない場合は空のテーブルを返す
-    end
-
-    -- 各 .txt ファイルを処理
-    for _, txt_filepath in ipairs(txt_files) do
-      -- コンテキスト名をファイル名から抽出（拡張子を除く）
-      local context_name = vim.fn.fnamemodify(txt_filepath, ":t:r") -- 例: "point.txt" -> "point"
-
-      contexts[context_name] = {
-        resolve = function()
-          -- .txt ファイルの内容を読み込む
-          local ok, lines = pcall(vim.fn.readfile, txt_filepath)
-          if not ok then
-            return { { content = "Error: Could not read " .. txt_filepath, filename = txt_filepath, filetype = "txt" } }
-          end
-
-          -- 記載されたファイルパスをコンテキストとして生成
-          local context_items = {}
-          for _, filepath in ipairs(lines) do
-            -- 空行やコメント行をスキップ（オプション）
-            if filepath:match("%S") and not filepath:match("^%s*#") then
-              local expanded_path = vim.fn.expand(filepath)
-              local content = ""
-              local file_ok, file_content = pcall(vim.fn.readfile, expanded_path)
-              if file_ok then
-                content = table.concat(file_content, "\n")
-              else
-                content = "Error: Could not read " .. expanded_path
-              end
-              table.insert(context_items, {
-                content = content,
-                filename = expanded_path,
-                filetype = vim.fn.fnamemodify(expanded_path, ":e") or "txt", -- 拡張子から動的に設定
-              })
+    if txt_files and #txt_files > 0 then
+      for _, txt_filepath in ipairs(txt_files) do
+        local context_name = vim.fn.fnamemodify(txt_filepath, ":t:r") -- 例: "point.txt" -> "point"
+        dynamic_contexts[context_name] = {
+          resolve = function()
+            local ok, lines = pcall(vim.fn.readfile, txt_filepath)
+            if not ok then
+              return { { content = "Error: Could not read " .. txt_filepath, filename = txt_filepath, filetype = "txt" } }
             end
-          end
 
-          return context_items
-        end,
-      }
+            local context_items = {}
+            for _, filepath in ipairs(lines) do
+              if filepath:match("%S") and not filepath:match("^%s*#") then
+                local expanded_path = vim.fn.expand(filepath)
+                local content = ""
+                local file_ok, file_content = pcall(vim.fn.readfile, expanded_path)
+                if file_ok then
+                  content = table.concat(file_content, "\n")
+                else
+                  content = "Error: Could not read " .. expanded_path
+                end
+                table.insert(context_items, {
+                  content = content,
+                  filename = expanded_path,
+                  filetype = vim.fn.fnamemodify(expanded_path, ":e") or "txt",
+                })
+              end
+            end
+            return context_items
+          end,
+        }
+      end
     end
 
-    return contexts
+    -- gitdiff コンテキスト
+    -- #gitdiff:main..feature-branch という形式で引数を渡すと、main と feature-branch の差分を表示する
+    local gitdiff_context = {
+      gitdiff = {
+        resolve = function(args)
+          -- argsが文字列でない、またはnilの場合のエラー処理
+          if not args or type(args) ~= "string" then
+            return {
+              {
+                content = "Please provide arguments in the format #gitdiff:xxx..yyy (e.g., #gitdiff:main..feature-branch)",
+                filename = "gitdiff_error.txt",
+                filetype = "txt",
+              },
+            }
+          end
+
+          -- argsを ".." で分割して xxx と yyy を取得
+          local xxx, yyy = args:match("^([^%.]+)%.%.([^%.]+)$")
+          if not xxx or not yyy then
+            return {
+              {
+                content = "Please provide two arguments separated by '..' (e.g., #gitdiff:main..feature-branch). Received: " .. args,
+                filename = "gitdiff_error.txt",
+                filetype = "txt",
+              },
+            }
+          end
+
+          -- git diff コマンドを実行
+          local diff_command = string.format("git diff %s %s", xxx, yyy)
+          local diff_output = vim.fn.system(diff_command)
+
+          -- コマンドの実行結果を確認
+          if vim.v.shell_error ~= 0 or diff_output == "" then
+            return {
+              {
+                content = "Error: Could not generate diff for " .. xxx .. " and " .. yyy .. "\n" .. diff_output,
+                filename = "gitdiff_error.txt",
+                filetype = "txt",
+              },
+            }
+          end
+
+          -- 差分をコンテキストとして返す
+          return {
+            {
+              content = diff_output,
+              filename = string.format("git_diff_%s_%s.diff", xxx, yyy),
+              filetype = "diff",
+            },
+          }
+        end,
+      },
+    }
+
+    -- 動的コンテキストと静的コンテキストをマージ
+    return vim.tbl_extend("force", dynamic_contexts, gitdiff_context)
   end)(),
 }
 -- }}}
