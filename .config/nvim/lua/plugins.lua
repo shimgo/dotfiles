@@ -55,6 +55,8 @@ Plug 'tpope/vim-fugitive'
 Plug 'linrongbin16/gitlinker.nvim'
 -- diffをGitHubっぽい表示にして見やすくする。ファイルの変更履歴をdiffで表示したりできる
 Plug 'sindrets/diffview.nvim'
+-- PRレビュー
+Plug 'pwntester/octo.nvim'
 -- }}}
 
 -- Copilot {{{

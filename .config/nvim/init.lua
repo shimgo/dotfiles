@@ -76,6 +76,7 @@ vim.opt.foldenable = false
 
 -- キー設定 {{{
 vim.g.mapleader = ' '
+vim.g.maplocalleader = ","
 vim.keymap.set('i', 'jj', '<ESC>')
 vim.keymap.set('v', '<C-j><C-j>', '<ESC>')
 vim.keymap.set('t', 'jj', '<C-\\><C-n>')
@@ -832,4 +833,93 @@ require("CopilotChat").setup {
 
 -- diffview.nvim {{{
 vim.keymap.set('n', '<leader>dc', ':DiffviewFileHistory %<CR>') -- 今開いているバッファの変更履歴を表示
+local diff_view_actions = require("diffview.actions")
+require("diffview").setup({
+  keymaps = {
+    disable_defaults = false, -- Disable the default keymaps
+    view = {
+      -- The `view` bindings are active in the diff buffers, only when the current
+      -- tabpage is a Diffview.
+      { "n", "<C-n>", diff_view_actions.select_next_entry, { desc = "Open the diff for the next file" } },
+      { "n", "<C-p>", diff_view_actions.select_prev_entry, { desc = "Open the diff for the previous file" } },
+    },
+    file_panel = {
+      { "n", "<C-n>", diff_view_actions.select_next_entry, { desc = "Open the diff for the next file" } },
+      { "n", "<C-p>", diff_view_actions.select_prev_entry, { desc = "Open the diff for the previous file" } },
+    },
+    file_history_panel = {
+      { "n", "<C-n>", diff_view_actions.select_next_entry, { desc = "Open the diff for the next file" } },
+      { "n", "<C-p>", diff_view_actions.select_prev_entry, { desc = "Open the diff for the previous file" } },
+    },
+  },
+})
+-- }}}
+
+-- octo.nvim {{{
+vim.keymap.set('n', '<leader>hl', ':Octo search is:pr is:open user-review-requested:@me<CR>') -- 自分にレビュー依頼されているPR一覧を表示
+vim.keymap.set('n', '<leader>ha', ':Octo pr list<CR>') -- PR一覧を表示
+vim.keymap.set('n', '<leader>hrs', ':Octo review start<CR>') -- 今開いているPRのレビューを開始する
+vim.keymap.set('n', '<leader>hrr', ':Octo review resume<CR>') -- 今開いているPRの途中のレビューを再開する
+require"octo".setup({
+  picker = "fzf-lua",
+  mappings = {
+    pull_request = {
+      checkout_pr = { lhs = "<localleader>po", desc = "checkout PR" },
+      merge_pr = { lhs = "<localleader>pm", desc = "merge commit PR" },
+      squash_and_merge_pr = { lhs = "<localleader>psm", desc = "squash and merge PR" },
+      rebase_and_merge_pr = { lhs = "<localleader>prm", desc = "rebase and merge PR" },
+      list_commits = { lhs = "<localleader>pc", desc = "list PR commits" },
+      list_changed_files = { lhs = "<localleader>pf", desc = "list PR changed files" },
+      show_pr_diff = { lhs = "<localleader>pd", desc = "show PR diff" },
+      add_reviewer = { lhs = "<localleader>va", desc = "add reviewer" },
+      remove_reviewer = { lhs = "<localleader>vd", desc = "remove reviewer request" },
+      close_issue = { lhs = "<localleader>ic", desc = "close PR" },
+      reopen_issue = { lhs = "<localleader>io", desc = "reopen PR" },
+      list_issues = { lhs = "<localleader>il", desc = "list open issues on same repo" },
+      reload = { lhs = "<C-r>", desc = "reload PR" },
+      open_in_browser = { lhs = "<C-b>", desc = "open PR in browser" },
+      copy_url = { lhs = "<C-y>", desc = "copy url to system clipboard" },
+      goto_file = { lhs = "gf", desc = "go to file" },
+      add_assignee = { lhs = "<localleader>aa", desc = "add assignee" },
+      remove_assignee = { lhs = "<localleader>ad", desc = "remove assignee" },
+      create_label = { lhs = "<localleader>lc", desc = "create label" },
+      add_label = { lhs = "<localleader>la", desc = "add label" },
+      remove_label = { lhs = "<localleader>ld", desc = "remove label" },
+      goto_issue = { lhs = "<localleader>gi", desc = "navigate to a local repo issue" },
+      add_comment = { lhs = "<localleader>ca", desc = "add comment" },
+      delete_comment = { lhs = "<localleader>cd", desc = "delete comment" },
+      next_comment = { lhs = "]c", desc = "go to next comment" },
+      prev_comment = { lhs = "[c", desc = "go to previous comment" },
+      react_hooray = { lhs = "<localleader>rp", desc = "add/remove 🎉 reaction" },
+      react_heart = { lhs = "<localleader>rh", desc = "add/remove ❤️ reaction" },
+      react_eyes = { lhs = "<localleader>re", desc = "add/remove 👀 reaction" },
+      react_thumbs_up = { lhs = "<localleader>r+", desc = "add/remove 👍 reaction" },
+      react_thumbs_down = { lhs = "<localleader>r-", desc = "add/remove 👎 reaction" },
+      react_rocket = { lhs = "<localleader>rr", desc = "add/remove 🚀 reaction" },
+      react_laugh = { lhs = "<localleader>rl", desc = "add/remove 😄 reaction" },
+      react_confused = { lhs = "<localleader>rc", desc = "add/remove 😕 reaction" },
+      review_start = { lhs = "<localleader>vs", desc = "start a review for the current PR" },
+      review_resume = { lhs = "<localleader>vr", desc = "resume a pending review for the current PR" },
+      resolve_thread = { lhs = "<localleader>rt", desc = "resolve PR thread" },
+      unresolve_thread = { lhs = "<localleader>rT", desc = "unresolve PR thread" },
+    },
+    review_diff = {
+      submit_review = { lhs = "<localleader>vs", desc = "submit review" },
+      discard_review = { lhs = "<localleader>vd", desc = "discard review" },
+      add_review_comment = { lhs = "<localleader>ca", desc = "add a new review comment", mode = { "n", "x" } },
+      add_review_suggestion = { lhs = "<localleader>sa", desc = "add a new review suggestion", mode = { "n", "x" } },
+      focus_files = { lhs = "<localleader>e", desc = "move focus to changed file panel" },
+      toggle_files = { lhs = "<localleader>b", desc = "hide/show changed files panel" },
+      next_thread = { lhs = "]t", desc = "move to next thread" },
+      prev_thread = { lhs = "[t", desc = "move to previous thread" },
+      select_next_entry = { lhs = "<C-n>", desc = "move to next changed file" }, -- デフォルトから変えた
+      select_prev_entry = { lhs = "<C-p>", desc = "move to previous changed file" }, -- デフォルトから変えた
+      select_first_entry = { lhs = "[Q", desc = "move to first changed file" },
+      select_last_entry = { lhs = "]Q", desc = "move to last changed file" },
+      close_review_tab = { lhs = "<C-c>", desc = "close review tab" },
+      toggle_viewed = { lhs = "<localleader><space>", desc = "toggle viewer viewed state" },
+      goto_file = { lhs = "gf", desc = "go to file" },
+    },
+  },
+})
 -- }}}
