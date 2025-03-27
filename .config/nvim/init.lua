@@ -829,3 +829,7 @@ require("CopilotChat").setup {
   end)(),
 }
 -- }}}
+
+-- diffview.nvim {{{
+vim.keymap.set('n', '<leader>dc', ':DiffviewFileHistory %<CR>') -- 今開いているバッファの変更履歴を表示
+-- }}}

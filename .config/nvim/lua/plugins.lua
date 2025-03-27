@@ -53,6 +53,8 @@ Plug 'airblade/vim-gitgutter'
 Plug 'tpope/vim-fugitive'
 -- GitHubのpermalink取得
 Plug 'linrongbin16/gitlinker.nvim'
+-- diffをGitHubっぽい表示にして見やすくする。ファイルの変更履歴をdiffで表示したりできる
+Plug 'sindrets/diffview.nvim'
 -- }}}
 
 -- Copilot {{{
