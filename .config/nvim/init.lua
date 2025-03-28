@@ -877,7 +877,7 @@ require"octo".setup({
       reopen_issue = { lhs = "<localleader>io", desc = "reopen PR" },
       list_issues = { lhs = "<localleader>il", desc = "list open issues on same repo" },
       reload = { lhs = "<C-r>", desc = "reload PR" },
-      open_in_browser = { lhs = "<C-b>", desc = "open PR in browser" },
+      open_in_browser = { lhs = "<localleader>go", desc = "open PR in browser" }, -- デフォルトから変えた
       copy_url = { lhs = "<C-y>", desc = "copy url to system clipboard" },
       goto_file = { lhs = "gf", desc = "go to file" },
       add_assignee = { lhs = "<localleader>aa", desc = "add assignee" },
