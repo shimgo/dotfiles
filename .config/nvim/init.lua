@@ -832,7 +832,7 @@ require("CopilotChat").setup {
 -- }}}
 
 -- diffview.nvim {{{
-vim.keymap.set('n', '<leader>dc', ':DiffviewFileHistory %<CR>') -- 今開いているバッファの変更履歴を表示
+vim.keymap.set('n', '<leader>db', ':DiffviewFileHistory %<CR>') -- 今開いているバッファの変更履歴を表示
 local diff_view_actions = require("diffview.actions")
 require("diffview").setup({
   keymaps = {
@@ -856,15 +856,14 @@ require("diffview").setup({
 -- }}}
 
 -- octo.nvim {{{
-vim.keymap.set('n', '<leader>hl', ':Octo search is:pr is:open user-review-requested:@me<CR>') -- 自分にレビュー依頼されているPR一覧を表示
-vim.keymap.set('n', '<leader>ha', ':Octo pr list<CR>') -- PR一覧を表示
-vim.keymap.set('n', '<leader>hrs', ':Octo review start<CR>') -- 今開いているPRのレビューを開始する
-vim.keymap.set('n', '<leader>hrr', ':Octo review resume<CR>') -- 今開いているPRの途中のレビューを再開する
+vim.keymap.set('n', '<leader>ol', ':Octo search is:pr is:open user-review-requested:@me<CR>a<Del>') -- 自分にレビュー依頼されているPR一覧を表示
+vim.keymap.set('n', '<leader>oa', ':Octo pr list<CR>') -- PR一覧を表示
+vim.keymap.set('n', '<leader>oc', ':Octo review comments<CR>') -- Pendingのレビューコメント一覧を表示
 require"octo".setup({
   picker = "fzf-lua",
   mappings = {
     pull_request = {
-      checkout_pr = { lhs = "<localleader>po", desc = "checkout PR" },
+      checkout_pr = { lhs = "<localleader>ch", desc = "checkout PR" }, -- デフォルトから変えた
       merge_pr = { lhs = "<localleader>pm", desc = "merge commit PR" },
       squash_and_merge_pr = { lhs = "<localleader>psm", desc = "squash and merge PR" },
       rebase_and_merge_pr = { lhs = "<localleader>prm", desc = "rebase and merge PR" },
@@ -888,8 +887,8 @@ require"octo".setup({
       goto_issue = { lhs = "<localleader>gi", desc = "navigate to a local repo issue" },
       add_comment = { lhs = "<localleader>ca", desc = "add comment" },
       delete_comment = { lhs = "<localleader>cd", desc = "delete comment" },
-      next_comment = { lhs = "]c", desc = "go to next comment" },
-      prev_comment = { lhs = "[c", desc = "go to previous comment" },
+      next_comment = { lhs = "<C-n>", desc = "go to next comment" }, -- デフォルトから変えた
+      prev_comment = { lhs = "<C-p>", desc = "go to previous comment" }, -- デフォルトから変えた
       react_hooray = { lhs = "<localleader>rp", desc = "add/remove 🎉 reaction" },
       react_heart = { lhs = "<localleader>rh", desc = "add/remove ❤️ reaction" },
       react_eyes = { lhs = "<localleader>re", desc = "add/remove 👀 reaction" },
