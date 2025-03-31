@@ -628,6 +628,23 @@ vim.keymap.set('n', 'sq', ':BDelete this<CR>')
 vim.keymap.set('n', '<leader>cw', ':CopilotChatToggle<CR>')
 vim.keymap.set('n', '<leader>cl', ':CopilotChatReset<CR>')
 vim.keymap.set('n', '<leader>cm', ':CopilotChatModels<CR>')
+-- diffから変更後ファイルパスを抽出し、Copilotのfileコンテキスト形式にしてクリップボードにコピーする関数
+local function copy_diff_files_to_clipboard()
+  -- バッファの全行を取得
+  local lines = vim.api.nvim_buf_get_lines(0, 0, -1, false)
+  local file_lines = {}  -- +++ で始まる行からファイルパスを抽出
+  for _, line in ipairs(lines) do
+    if line:match("^+++") then
+      -- "+++ "以降のパスを取得し、さらに "b/" を取り除く
+      local filepath = line:gsub("^+++ ", ""):gsub("^b/", "")
+      table.insert(file_lines, "#file:" .. filepath)
+    end
+  end
+  -- クリップボードにコピー（システムクリップボードを使用）
+  vim.fn.setreg('+', table.concat(file_lines, "\n"))
+  print("File paths copied to clipboard!")
+end
+vim.keymap.set('n', '<leader>dc', copy_diff_files_to_clipboard, { noremap = true, silent = false })
 require("CopilotChat").setup {
   model = 'claude-3.7-sonnet',
   system_prompt = '/COPILOT_INSTRUCTIONS 説明は日本語でしてください。',
