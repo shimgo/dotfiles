@@ -628,6 +628,7 @@ vim.keymap.set('n', 'sq', ':BDelete this<CR>')
 vim.keymap.set('n', '<leader>cw', ':CopilotChatToggle<CR>')
 vim.keymap.set('n', '<leader>cl', ':CopilotChatReset<CR>')
 vim.keymap.set('n', '<leader>cm', ':CopilotChatModels<CR>')
+vim.keymap.set('n', '<leader>cq', ':CopilotChatStop<CR>')
 -- diffから変更後ファイルパスを抽出し、Copilotのfileコンテキスト形式にしてクリップボードにコピーする関数
 local function copy_diff_files_to_clipboard()
   -- バッファの全行を取得
@@ -925,7 +926,7 @@ require"octo".setup({
       add_review_comment = { lhs = "<localleader>ca", desc = "add a new review comment", mode = { "n", "x" } },
       add_review_suggestion = { lhs = "<localleader>sa", desc = "add a new review suggestion", mode = { "n", "x" } },
       focus_files = { lhs = "<localleader>e", desc = "move focus to changed file panel" },
-      toggle_files = { lhs = "<localleader>b", desc = "hide/show changed files panel" },
+      toggle_files = { lhs = "<localleader>t", desc = "hide/show changed files panel" }, -- デフォルトから変えた
       next_thread = { lhs = "]t", desc = "move to next thread" },
       prev_thread = { lhs = "[t", desc = "move to previous thread" },
       select_next_entry = { lhs = "<C-n>", desc = "move to next changed file" }, -- デフォルトから変えた
