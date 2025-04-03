@@ -65,6 +65,11 @@ Plug 'nvim-lua/plenary.nvim'
 Plug 'CopilotC-Nvim/CopilotChat.nvim'
 -- }}}
 
+-- タブ・バッファ関連 {{{
+Plug 'lewis6991/gitsigns.nvim' -- barbar.nvimのGitのステータス表示に必要（optional）
+-- タブ表示
+Plug 'romgrk/barbar.nvim'
+-- }}}
 -- Terminal {{{
 -- Neovim内のターミナルでさらにNeovimを開いても、ネストしたNeovimセッションを開始せず、最初に開いたNeovim内のバッファとして開く
 Plug 'willothy/flatten.nvim'

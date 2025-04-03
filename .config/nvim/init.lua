@@ -91,7 +91,7 @@ vim.keymap.set('v', '<leader>l', '$')
 vim.keymap.set('n', '<C-h>', ':<C-u>%s/') -- 置換
 
 -- Quickfix
-vim.keymap.set('n', 'sc', '<C-w><C-w><C-w>q') -- クイックフィックスを閉じる
+vim.keymap.set('n', 'sqq', '<C-w><C-w><C-w>q') -- クイックフィックスを閉じる
 vim.keymap.set('n', '<C-n>', ':cn<CR>')
 vim.keymap.set('n', '<C-p>', ':cp<CR>')
 
@@ -215,8 +215,6 @@ vim.keymap.set('n', '<leader>fc', ':NvimTreeOpen pwd<CR>') -- カレントディ
 -- }}}
 
 -- バッファ関連 {{{
-vim.keymap.set('n', 'sn', ':<C-u>bn<CR>')
-vim.keymap.set('n', 'sp', ':<C-u>bp<CR>')
 vim.keymap.set('n', 'sfq', ':<C-u>bd!<CR>')
 vim.keymap.set('n', 'sb', ':<C-u>enew<CR>')
 
@@ -939,4 +937,15 @@ require"octo".setup({
     },
   },
 })
+-- }}}
+
+-- barbar.nvim {{{
+vim.keymap.set('n', 'sqb', ':BufferClose<CR>')
+vim.keymap.set('n', 'sqa', ':BufferCloseAllButCurrent<CR>')
+vim.keymap.set('n', 'sqr', ':BufferCloseBuffersRight<CR>')
+vim.keymap.set('n', 'sql', ':BufferCloseBuffersLeft<CR>')
+vim.keymap.set('n', 'sn', ':BufferNext<CR>')
+vim.keymap.set('n', 'sp', ':BufferPrevious<CR>')
+vim.keymap.set('n', 'sbr', ':BufferRestore<CR>')
+vim.keymap.set('n', 'sm', ':BufferPick<CR>') -- バッファを選択して開く
 -- }}}
