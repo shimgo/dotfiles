@@ -61,6 +61,8 @@ vim.api.nvim_create_autocmd({"QuickfixCmdPost"}, {pattern = {"make", "grep", "gr
 vim.opt.ignorecase = true
 vim.opt.smartcase = true
 
+vim.opt.cursorline = true -- カーソル行をハイライト
+
 -- 折りたたみ
 -- fold method
 -- manual – 自分で範囲選択して折りたたみ
