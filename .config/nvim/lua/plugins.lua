@@ -99,4 +99,7 @@ Plug 'nvim-treesitter/nvim-treesitter-context'
 -- スクロールのアニメーションをスムーズにし、スクロール時にカーソルを固定する
 Plug 'karb94/neoscroll.nvim'
 
+-- ステータスライン
+Plug 'nvim-lualine/lualine.nvim'
+
 vim.call('plug#end')
