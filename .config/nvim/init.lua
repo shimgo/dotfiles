@@ -482,7 +482,11 @@ inoremap <TAB>   <Cmd>call pum#map#confirm()<CR>
 -- }}}
 
 -- fzf-lua {{{
-require('fzf-lua').register_ui_select() -- vim.ui.selectをfzf-luaのUIに置き換え
+-- すでに登録されていない場合のみ登録
+if not _G.__fzf_lua_ui_select_registered then
+  require('fzf-lua').register_ui_select() -- vim.ui.selectをfzf-luaのUIに置き換え
+  _G.__fzf_lua_ui_select_registered = true
+end
 vim.opt.rtp:append('/opt/homebrew/opt/fzf')
 vim.keymap.set("n", "<leader>ff", ":FzfLua files<CR>")
 vim.keymap.set("n", "<leader>fl", ":FzfLua buffers<CR>") -- 今開いているバッファをファイル名で検索
@@ -581,7 +585,11 @@ vim.keymap.set('n', '<leader>gb', ':G blame<CR>')
 -- }}}
 
 -- gitlinker {{{
-require('gitlinker').setup({})
+-- すでに設定済みでない場合のみセットアップ
+if not _G.__gitlinker_setup_done then
+  require('gitlinker').setup({})
+  _G.__gitlinker_setup_done = true
+end
 vim.keymap.set('n', '<leader>go', ':GitLink!<CR>')
 vim.keymap.set('v', '<leader>go', ':GitLink!<CR>')
 -- }}}
