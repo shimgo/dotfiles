@@ -494,7 +494,7 @@ vim.keymap.set("n", "<leader>fq", ":FzfLua quickfix<CR>")
 vim.keymap.set("n", "<leader>fgg", ":lua require('fzf-lua').grep({ cmd = 'rg --ignore-file ~/.nvim_fzf_ignore -i --line-number --column --color=always' })<CR>") -- Git管理のファイルをcase-insensitiveでgrep
 vim.keymap.set("n", "<leader>fgi", ":lua require('fzf-lua').grep({ cmd = 'rg --ignore-file ~/.nvim_fzf_ignore --line-number --column --color=always' })<CR>") -- Git管理のファイルをcase-sensitiveでgrep
 vim.keymap.set("n", "<leader>fgb", ":FzfLua grep_curbuf<CR>") -- 今開いているバッファをgrep
-vim.keymap.set("n", "<leader>fgi", ":FzfLua grep<CR>") -- すべてのファイルをgrep
+vim.keymap.set("n", "<leader>fga", ":FzfLua grep<CR>") -- すべてのファイルをgrep
 
 local actions = require "fzf-lua.actions"
 require'fzf-lua'.setup {
@@ -1034,7 +1034,15 @@ require('lualine').setup {
     lualine_c = {'filename'},
     lualine_x = {'encoding', 'fileformat', 'filetype'},
     lualine_y = {'progress', 'selectioncount'},
-    lualine_z = {'location', 'tabs'}
+    lualine_z = {'location', 'tabs',
+      -- カレントワーキングディレクトリを表示する
+      {
+        function()
+          return vim.fn.getcwd()
+        end,
+        icon = '',
+      },
+    },
   },
   inactive_sections = {
     lualine_a = {},
