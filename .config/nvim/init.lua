@@ -958,6 +958,12 @@ vim.keymap.set('n', 'sn', ':BufferNext<CR>')
 vim.keymap.set('n', 'sp', ':BufferPrevious<CR>')
 vim.keymap.set('n', 'sbr', ':BufferRestore<CR>')
 vim.keymap.set('n', 'sm', ':BufferPick<CR>') -- バッファを選択して開く
+require'barbar'.setup {
+  -- サイドバー分のスペースを空ける
+  sidebar_filetypes = {
+    NvimTree = true,
+  },
+}
 -- }}}
 
 -- nvim-treesitter-context {{{
