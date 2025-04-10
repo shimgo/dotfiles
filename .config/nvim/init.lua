@@ -91,6 +91,8 @@ vim.keymap.set('v', '<leader>h', '^')
 vim.keymap.set('n', '<leader>l', '$')
 vim.keymap.set('v', '<leader>l', '$')
 vim.keymap.set('n', '<C-h>', ':<C-u>%s/') -- 置換
+vim.keymap.set('n', '<C-k>', '<C-y>') -- カーソルを固定して上にスクロール
+vim.keymap.set('n', '<C-j>', '<C-e>') -- カーソルを固定して下にスクロール
 
 -- Quickfix
 vim.keymap.set('n', 'sqq', '<C-w><C-w><C-w>q') -- クイックフィックスを閉じる
@@ -425,7 +427,7 @@ vim.api.nvim_create_autocmd('LspAttach', {
     vim.keymap.set('n', 'gd', vim.lsp.buf.definition, opts)
     vim.keymap.set('n', 'gh', vim.lsp.buf.hover, opts) -- floating windowを表示する。その状態で同じキーを押すとfloating windowにフォーカスが移る。qで離脱
     vim.keymap.set('n', 'gi', vim.lsp.buf.implementation, opts)
-    vim.keymap.set({ 'n', 'i' }, '<C-k>', vim.lsp.buf.signature_help, opts)
+    -- vim.keymap.set({ 'n', 'i' }, '<C-k>', vim.lsp.buf.signature_help, opts)
     vim.keymap.set('n', '<leader>wa', vim.lsp.buf.add_workspace_folder, opts)
     vim.keymap.set('n', '<leader>wr', vim.lsp.buf.remove_workspace_folder, opts)
     vim.keymap.set('n', '<leader>wl', function()
