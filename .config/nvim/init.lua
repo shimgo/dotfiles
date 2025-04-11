@@ -125,6 +125,11 @@ vim.keymap.set('n', 'sQ', ':<C-u>q<CR>')
 vim.keymap.set('n', 'sfQ', ':<C-u>q!<CR>')
 vim.keymap.set('n', 'sa', ':<C-u>qa<CR>')
 
+-- winresizer {{{
+-- winresizer の開始キー
+vim.g.winresizer_start_key = '<C-w>'
+-- }}}
+
 -- nvim-tree.lua {{{
 vim.g.loaded_netrw = 1
 vim.g.loaded_netrwPlugin = 1
