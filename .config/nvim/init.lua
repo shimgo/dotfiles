@@ -1026,7 +1026,7 @@ require('lualine').setup {
     ignore_focus = {},
     always_divide_middle = true,
     always_show_tabline = true,
-    globalstatus = false,
+    globalstatus = true, -- グローバルステータスラインを有効化
     refresh = {
       statusline = 100,
       tabline = 100,
