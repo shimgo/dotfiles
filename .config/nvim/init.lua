@@ -175,7 +175,7 @@ local function my_on_attach(bufnr)
   vim.keymap.set('n', 'I',     api.tree.toggle_gitignore_filter,      opts('Toggle Filter: Git Ignore'))
   vim.keymap.set('n', 'J',     api.node.navigate.sibling.last,        opts('Last Sibling'))
   vim.keymap.set('n', 'K',     api.node.navigate.sibling.first,       opts('First Sibling'))
-  vim.keymap.set('n', ' ',     api.marks.toggle,                      opts('Toggle Bookmark'))
+  vim.keymap.set('n', ',',     api.marks.toggle,                      opts('Toggle Bookmark')) -- デフォルトから変えた
   vim.keymap.set('n', 'o',     api.node.open.edit,                    opts('Open'))
   vim.keymap.set('n', 'O',     api.node.open.no_window_picker,        opts('Open: No Window Picker'))
   vim.keymap.set('n', 'p',     api.fs.paste,                          opts('Paste'))
@@ -198,6 +198,12 @@ end
 -- pass to setup along with your other options
 require("nvim-tree").setup {
   on_attach = my_on_attach,
+  view = {
+    width = 60,
+  },
+  live_filter = {
+    always_show_folders = false,
+  },
   actions = {
     open_file = {
       window_picker = {
@@ -659,8 +665,12 @@ local function copy_diff_files_to_clipboard()
   print("File paths copied to clipboard!")
 end
 vim.keymap.set('n', '<leader>dc', copy_diff_files_to_clipboard, { noremap = true, silent = false })
+local select = require("CopilotChat.select")
 require("CopilotChat").setup {
   model = 'claude-3.7-sonnet',
+  selection = function(source)
+    return select.visual(source) or select.buffer(source)
+  end,
   system_prompt = '/COPILOT_INSTRUCTIONS 説明は日本語でしてください。',
   -- see config/prompts.lua for implementation
   prompts = {
