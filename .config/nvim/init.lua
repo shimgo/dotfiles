@@ -495,8 +495,8 @@ vim.opt.rtp:append('/opt/homebrew/opt/fzf')
 vim.keymap.set("n", "<leader>ff", ":FzfLua files<CR>")
 vim.keymap.set("n", "<leader>fl", ":FzfLua buffers<CR>") -- 今開いているバッファをファイル名で検索
 vim.keymap.set("n", "<leader>fq", ":FzfLua quickfix<CR>")
-vim.keymap.set("n", "<leader>fgg", ":lua require('fzf-lua').grep({ cmd = 'rg --ignore-file ~/.nvim_fzf_ignore -i --line-number --column --color=always' })<CR>") -- Git管理のファイルをcase-insensitiveでgrep
-vim.keymap.set("n", "<leader>fgi", ":lua require('fzf-lua').grep({ cmd = 'rg --ignore-file ~/.nvim_fzf_ignore --line-number --column --color=always' })<CR>") -- Git管理のファイルをcase-sensitiveでgrep
+vim.keymap.set("n", "<leader>fgg", ":lua require('fzf-lua').grep({ cmd = 'rg --hidden --ignore-file ~/.nvim_fzf_ignore -i --line-number --column --color=always' })<CR>") -- Git管理のファイルをcase-insensitiveでgrep
+vim.keymap.set("n", "<leader>fgi", ":lua require('fzf-lua').grep({ cmd = 'rg --hidden --ignore-file ~/.nvim_fzf_ignore --line-number --column --color=always' })<CR>") -- Git管理のファイルをcase-sensitiveでgrep
 vim.keymap.set("n", "<leader>fgb", ":FzfLua grep_curbuf<CR>") -- 今開いているバッファをgrep
 vim.keymap.set("n", "<leader>fga", ":FzfLua grep<CR>") -- すべてのファイルをgrep
 
