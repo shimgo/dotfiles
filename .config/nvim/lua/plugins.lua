@@ -63,6 +63,7 @@ Plug 'pwntester/octo.nvim'
 Plug 'github/copilot.vim'
 Plug 'nvim-lua/plenary.nvim'
 Plug 'CopilotC-Nvim/CopilotChat.nvim'
+Plug 'olimorris/codecompanion.nvim'
 -- }}}
 
 -- タブ・バッファ関連 {{{

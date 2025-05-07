@@ -1149,3 +1149,7 @@ vim.keymap.set('n', 'zm', function()
   end
 end, { desc = "Increase fold level (fold more)" })
 -- }}}
+
+-- codecompanion.nvim {{{
+require("codecompanion").setup()
+-- }}}
