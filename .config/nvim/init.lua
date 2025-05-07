@@ -330,13 +330,6 @@ require('vscode').load()
 -- 3. Setup servers via lspconfig
 require("mason").setup()
 require('mason-lspconfig').setup()
--- :h mason-lspconfig.setup_handlers()
-require('mason-lspconfig').setup_handlers {
-  function(server_name)
-    require('lspconfig')[server_name].setup {}
-  end,
-}
--- 上のハンドラ以外の個別設定
 -- After setting up mason-lspconfig you may set up servers via lspconfig
 require("lspconfig").lua_ls.setup {
   on_init = function(client)
@@ -433,7 +426,7 @@ vim.api.nvim_create_autocmd('LspAttach', {
     -- See `:help vim.lsp.*` for documentation on any of the below functions
     local opts = { buffer = ev.buf }
     vim.keymap.set('n', 'gD', vim.lsp.buf.declaration, opts)
-    vim.keymap.set('n', 'gd', vim.lsp.buf.definition, opts)
+    -- vim.keymap.set('n', 'gd', vim.lsp.buf.definition, opts) -- これを定義していると定義ジャンプの動作が変わってしまった。
     vim.keymap.set('n', 'gh', vim.lsp.buf.hover, opts) -- floating windowを表示する。その状態で同じキーを押すとfloating windowにフォーカスが移る。qで離脱
     vim.keymap.set('n', 'gi', vim.lsp.buf.implementation, opts)
     -- vim.keymap.set({ 'n', 'i' }, '<C-k>', vim.lsp.buf.signature_help, opts)
@@ -671,6 +664,7 @@ require("CopilotChat").setup {
   selection = function(source)
     return select.visual(source) or select.buffer(source)
   end,
+  context = 'buffer',
   system_prompt = '/COPILOT_INSTRUCTIONS 説明は日本語でしてください。',
   -- see config/prompts.lua for implementation
   prompts = {
