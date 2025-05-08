@@ -329,8 +329,16 @@ require('vscode').load()
 -- 2. mason-lspconfig.nvim
 -- 3. Setup servers via lspconfig
 require("mason").setup()
-require('mason-lspconfig').setup()
--- After setting up mason-lspconfig you may set up servers via lspconfig
+require('mason-lspconfig').setup({
+  -- これをtrueにしてても、require('lspconfig').graphql.setup({})を呼び出さないと正しく動作しなかった。
+  -- また、trueにした状態で、setupを呼び出すとLSPを二重起動してしまうのでfalseにしておく。
+  automatic_enable = false
+})
+-- LSPごとのセットアップ
+-- https://github.com/neovim/nvim-lspconfig/blob/4bc481b6f0c0cf3671fc894debd0e00347089a4e/doc/configs.md
+-- masonでインストールしたLSPも個別にsetupを呼び出す必要がある（mason-lspconfigのautomatic_enableをfalseにしてるので）
+require('lspconfig').graphql.setup({})
+require('lspconfig').gopls.setup({})
 require("lspconfig").lua_ls.setup {
   on_init = function(client)
     local path = client.workspace_folders[1].name
@@ -348,24 +356,6 @@ require("lspconfig").lua_ls.setup {
     return true
   end
 }
-
--- lsp-signature.nvim
-require("lsp_signature").setup({})
-vim.keymap.set('n', 'gk', function() require('lsp_signature').toggle_float_win() end) -- カーソル上の関数の引数のヒントを表示
-
--- gopls
-require("lspconfig").gopls.setup({
-  settings = {
-    gopls = {
-      analyses = {
-        unusedparams = true,
-      },
-      staticcheck = true,
-      gofumpt = true,
-    },
-  },
-})
--- require'lspconfig'.biome.setup{}
 require('lspconfig').typos_lsp.setup({
     -- Logging level of the language server. Logs appear in :LspLog. Defaults to error.
     cmd_env = { RUST_LOG = "error" },
@@ -379,6 +369,11 @@ require('lspconfig').typos_lsp.setup({
         diagnosticSeverity = "Error"
     }
 })
+
+-- lsp-signature.nvim
+require("lsp_signature").setup({})
+vim.keymap.set('n', 'gk', function() require('lsp_signature').toggle_float_win() end) -- カーソル上の関数の引数のヒントを表示
+
 -- 保存時のフォーマット
 vim.api.nvim_create_augroup('MyAutoCmd', { clear = true })
 vim.api.nvim_create_autocmd({ 'BufWritePre' }, {
@@ -426,7 +421,7 @@ vim.api.nvim_create_autocmd('LspAttach', {
     -- See `:help vim.lsp.*` for documentation on any of the below functions
     local opts = { buffer = ev.buf }
     vim.keymap.set('n', 'gD', vim.lsp.buf.declaration, opts)
-    -- vim.keymap.set('n', 'gd', vim.lsp.buf.definition, opts) -- これを定義していると定義ジャンプの動作が変わってしまった。
+    vim.keymap.set('n', 'gd', vim.lsp.buf.definition, opts)
     vim.keymap.set('n', 'gh', vim.lsp.buf.hover, opts) -- floating windowを表示する。その状態で同じキーを押すとfloating windowにフォーカスが移る。qで離脱
     vim.keymap.set('n', 'gi', vim.lsp.buf.implementation, opts)
     -- vim.keymap.set({ 'n', 'i' }, '<C-k>', vim.lsp.buf.signature_help, opts)
