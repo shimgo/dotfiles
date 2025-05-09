@@ -442,42 +442,27 @@ vim.api.nvim_create_autocmd('LspAttach', {
 
 -- }}}
 
--- ddc.vim {{{
-vim.cmd [[
-call ddc#custom#patch_global('ui', 'pum')
-call ddc#custom#patch_global('sources', ['lsp', 'around', 'file'])
-call ddc#custom#patch_global('sourceOptions', {
-      \   'around': {'mark': 'A'},
-      \   'file': {
-      \     'mark': 'F',
-      \     'isVolatile': v:true,
-      \     'forceCompletionPattern': '\S/\S*',
-      \   },
-      \   'nvim-lsp': {
-      \     'mark': 'LSP',
-      \     'forceCompletionPattern': '\.\w*|:\w*|->\w*',
-      \   },
-      \   '_': {
-      \     'matchers': ['matcher_fuzzy'],
-      \     'sorters': ['sorter_fuzzy'],
-      \     'ignoreCase': v:true,
-      \     'converters': ['converter_fuzzy', 'converter_remove_overlap'],
-      \   },
-      \ })
-call ddc#custom#patch_global('sourceParams', #{
-      \   nvim-lsp: #{
-      \     snippetEngine: denops#callback#register({
-      \           body -> vsnip#anonymous(body)
-      \     }),
-      \     enableResolveItem: v:true,
-      \     enableAdditionalTextEdit: v:true,
-      \   }
-      \ })
-call ddc#enable()
-inoremap <C-n>   <Cmd>call pum#map#insert_relative(+1)<CR>
-inoremap <C-p>   <Cmd>call pum#map#insert_relative(-1)<CR>
-inoremap <TAB>   <Cmd>call pum#map#confirm()<CR>
-]]
+-- blink.cmp {{{
+require('blink.cmp').setup({
+  cmdline = { enabled = true },
+  -- keymapのデフォルト
+  -- keymap = {
+  --   -- set to 'none' to disable the 'default' preset
+  --   preset = 'default',
+  --   ['<C-space>'] = { 'show', 'show_documentation', 'hide_documentation' },
+  --   ['<C-e>'] = { 'hide' },
+  --   ['<C-y>'] = { 'select_and_accept' },
+  --   ['<Up>'] = { 'select_prev', 'fallback' },
+  --   ['<Down>'] = { 'select_next', 'fallback' },
+  --   ['<C-p>'] = { 'select_prev', 'fallback_to_mappings' },
+  --   ['<C-n>'] = { 'select_next', 'fallback_to_mappings' },
+  --   ['<C-b>'] = { 'scroll_documentation_up', 'fallback' },
+  --   ['<C-f>'] = { 'scroll_documentation_down', 'fallback' },
+  --   ['<Tab>'] = { 'snippet_forward', 'fallback' },
+  --   ['<S-Tab>'] = { 'snippet_backward', 'fallback' },
+  --   ['<C-k>'] = { 'show_signature', 'hide_signature', 'fallback' },
+  -- },
+})
 -- }}}
 
 -- fzf-lua {{{
