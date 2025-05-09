@@ -32,7 +32,7 @@ vim.opt.listchars='tab:>.,trail:_,extends:>,precedes:<,nbsp:%'
 -- softtabstop: TABキーを押したときにスペースを何個挿入するか
 local filetypes = {
   typescriptreact = {sw = 2, sts = 2, ts = 2, et = true},
-  graphql = {sw = 4, sts = 4, ts = 4, et = true},
+  graphql = {sw = 2, sts = 2, ts = 2, et = true},
   lua = {sw = 2, sts = 2, ts = 2, et = true},
 }
 -- autocmdの設定
