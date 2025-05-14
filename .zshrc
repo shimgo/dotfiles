@@ -144,6 +144,8 @@ fbr() {
 # alias
 ## git
 alias g="git"
+# ローカルのブランチを、main、develop、staging、releaseを除いた、mainへマージ済みのブランチを全て削除
+alias gbclean="git branch --merged main | grep -vE '^\*|main$|develop$|staging$|release$' | xargs -I % git branch -d %"
 function git(){hub "$@"}
 
 . "/Users/shimgo/.deno/env"
