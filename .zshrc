@@ -45,6 +45,20 @@ fi
 autoload -U promptinit; promptinit
 prompt pure
 
+# コマンド実行前に時刻を表示
+preexec() {
+    echo -e "\033[34mS: $(date '+%Y-%m-%d %H:%M:%S')\033[0m"  # 青
+    LAST_CMD="$1"
+}
+# コマンド実行後に色付き時刻を表示
+precmd() {
+    local exit_status=$?
+    if [[ -n "$LAST_CMD" ]]; then
+        echo -e "\033[32mE: $(date '+%Y-%m-%d %H:%M:%S')\033[0m"  # 緑
+        LAST_CMD=""
+    fi
+}
+
 # Title of terminal
 case "${TERM}" in
 kterm*|xterm)
