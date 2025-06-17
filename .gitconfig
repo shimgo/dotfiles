@@ -12,6 +12,7 @@
 	see = browse
 	st = status
 	ch = checkout
+	w = worktree
 [merge]
 	tool = vimdiff
 [diff]
