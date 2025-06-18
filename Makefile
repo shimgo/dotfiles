@@ -1,6 +1,6 @@
 ALL_DOTFILES := $(wildcard .*)
 EXCLUDES     := . .. .DS_Store .git .gitignore .gitmodules .config
-ADDITIONAL   := .config/gh/config.yml .config/nvim/init.lua .config/nvim/lua/plugins.lua
+ADDITIONAL   := .config/gh/config.yml .config/nvim/init.lua .config/nvim/lua/plugins.lua .claude/CLAUDE.md
 TARGETS      := $(filter-out $(EXCLUDES), $(ALL_DOTFILES)) $(ADDITIONAL)
 
 list: ## Show dotfiles to be processed
