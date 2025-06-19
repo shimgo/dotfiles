@@ -85,8 +85,4 @@ Plug 'karb94/neoscroll.nvim'
 -- ステータスライン
 Plug 'nvim-lualine/lualine.nvim'
 
--- 折りたたみ
-Plug 'kevinhwang91/nvim-ufo'
-Plug 'kevinhwang91/promise-async' -- nvim-ufoの依存関係
-
 vim.call('plug#end')
