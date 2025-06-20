@@ -154,6 +154,17 @@ fbr() {
   git checkout $(echo "$branch" | awk '{print $1}' | sed "s/.* //")
 }
 
+# git worktreeを追加する。gwa feature-aで、../feature-aにworktreeを追加し、cdする
+gwa() {
+    g w add "../$1" && cd "../$1"
+}
+
+# git worktreeを削除する。gwa feature-aで、../feature-aのworktreeを削除し、ブランチも削除する
+gwd() {
+    g w remove "../$1" && g branch -D "$1"
+}
+
+
 
 # alias
 ## git
