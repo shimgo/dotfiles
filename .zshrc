@@ -108,7 +108,8 @@ cf() {
 }
 
 frl() {
-  cd $(ghq list -p | fzf)
+  local selected=$(ghq list -p | fzf)
+  [ -n "$selected" ] && cd "$selected"
 }
 
 # fshow - git commit browser (enter for show, ctrl-d for diff)
@@ -156,14 +157,26 @@ fbr() {
 
 # git worktreeを追加する。gwa feature-aで、../feature-aにworktreeを追加し、cdする
 gwa() {
-    g w add "../$1" && cd "../$1"
+    git worktree add "../$1" && cd "../$1"
 }
 
-# git worktreeを削除する。gwa feature-aで、../feature-aのworktreeを削除し、ブランチも削除する
+# git worktreeを削除する。gwd feature-aで、../feature-aのworktreeを削除し、ブランチも削除する
 gwd() {
-    g w remove "../$1" && g branch -D "$1"
+    git worktree remove --force "../$1" && git branch -D "$1"
 }
 
+# tmux session selector with fzf
+ftmux() {
+  local session
+  session=$(tmux list-sessions -F "#{session_name}" 2>/dev/null | fzf --height 40% --reverse)
+  if [[ -n $session ]]; then
+    if [[ -n $TMUX ]]; then
+      tmux switch-client -t "$session"
+    else
+      tmux attach-session -t "$session"
+    fi
+  fi
+}
 
 
 # alias
