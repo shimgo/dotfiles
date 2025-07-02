@@ -371,7 +371,9 @@ require('lspconfig').typos_lsp.setup({
 })
 
 -- lsp-signature.nvim
-require("lsp_signature").setup({})
+require("lsp_signature").setup({
+  max_height = 20,
+})
 vim.keymap.set('n', 'gk', function() require('lsp_signature').toggle_float_win() end) -- カーソル上の関数の引数のヒントを表示
 
 -- 保存時のフォーマット
