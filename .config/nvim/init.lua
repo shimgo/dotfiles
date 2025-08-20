@@ -303,6 +303,55 @@ require'nvim-treesitter.configs'.setup {
   highlight = {
     enable = true,
   },
+
+  textobjects = {
+    select = {
+      enable = true,
+
+      -- Automatically jump forward to textobj, similar to targets.vim
+      lookahead = true,
+
+      keymaps = {
+        -- You can use the capture groups defined in textobjects.scm
+        ["af"] = "@function.outer",
+        ["if"] = "@function.inner",
+        ["ac"] = "@class.outer",
+        -- You can optionally set descriptions to the mappings (used in the desc parameter of
+        -- nvim_buf_set_keymap) which plugins like which-key display
+        ["ic"] = { query = "@class.inner", desc = "Select inner part of a class region" },
+        -- You can also use captures from other query groups like `locals.scm`
+        ["as"] = { query = "@local.scope", query_group = "locals", desc = "Select language scope" },
+      },
+    },
+    move = {
+      enable = true,
+      set_jumps = true,
+      goto_next_start = {
+        -- 次の関数の開始位置に移動
+        ["]m"] = "@function.outer",
+        -- 次のクラスの開始位置に移動
+        ["]c"] = "@class.outer",
+      },
+      goto_next_end = {
+        -- 次の関数の終了位置に移動
+        ["]M"] = "@function.outer",
+        -- 次のクラスの終了位置に移動
+        ["]C"] = "@class.outer",
+      },
+      goto_previous_start = {
+        -- 前の関数の開始位置に移動
+        ["[m"] = "@function.outer",
+        -- 前のクラスの開始位置に移動
+        ["[c"] = "@class.outer",
+      },
+      goto_previous_end = {
+        -- 前の関数の終了位置に移動
+        ["[M"] = "@function.outer",
+        -- 前のクラスの終了位置に移動
+        ["[C"] = "@class.outer",
+      },
+    },
+  },
 }
 
 vim.keymap.set('n', '<leader>tt', ':TSPlaygroundToggle<CR>')

@@ -79,6 +79,9 @@ Plug 'tpope/vim-surround'
 -- 画面に関数の実装が収まらなかった場合に、関数定義を画面の上部に表示する
 Plug 'nvim-treesitter/nvim-treesitter-context'
 
+-- テキストオブジェクトモジュール。関数へのジャンプや選択に使う
+Plug 'nvim-treesitter/nvim-treesitter-textobjects'
+
 -- スクロールのアニメーションをスムーズにし、スクロール時にカーソルを固定する
 Plug 'karb94/neoscroll.nvim'
 
