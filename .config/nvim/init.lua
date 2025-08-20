@@ -331,6 +331,7 @@ require'nvim-treesitter.configs'.setup {
         ["]m"] = "@function.outer",
         -- 次のクラスの開始位置に移動
         ["]c"] = "@class.outer",
+        ["]n"] = "^func.*",
       },
       goto_next_end = {
         -- 次の関数の終了位置に移動
@@ -354,6 +355,69 @@ require'nvim-treesitter.configs'.setup {
   },
 }
 
+-- 次のトップレベル関数に移動
+local function goto_next_top_level_function()
+  local ts_utils = require('nvim-treesitter.ts_utils')
+  local parsers = require('nvim-treesitter.parsers')
+
+  if not parsers.has_parser() then return end
+
+  local tree = parsers.get_parser():parse()[1]
+  local root = tree:root()
+  local cursor_row = vim.fn.line('.') - 1
+
+  local next_func = nil
+  local min_row = math.huge
+
+  -- source_fileの直下の子要素のみをチェック
+  for child in root:iter_children() do
+    if child:type() == "function_declaration" or 
+       child:type() == "method_declaration" then
+      local start_row = child:start()
+      if start_row > cursor_row and start_row < min_row then
+        min_row = start_row
+        next_func = child
+      end
+    end
+  end
+
+  if next_func then
+    ts_utils.goto_node(next_func)
+  end
+end
+
+-- 前のトップレベル関数に移動
+local function goto_prev_top_level_function()
+  local ts_utils = require('nvim-treesitter.ts_utils')
+  local parsers = require('nvim-treesitter.parsers')
+
+  if not parsers.has_parser() then return end
+
+  local tree = parsers.get_parser():parse()[1]
+  local root = tree:root()
+  local cursor_row = vim.fn.line('.') - 1
+
+  local prev_func = nil
+  local max_row = -1
+
+  for child in root:iter_children() do
+    if child:type() == "function_declaration" or 
+       child:type() == "method_declaration" then
+      local start_row = child:start()
+      if start_row < cursor_row and start_row > max_row then
+        max_row = start_row
+        prev_func = child
+      end
+    end
+  end
+
+  if prev_func then
+    ts_utils.goto_node(prev_func)
+  end
+end
+
+vim.keymap.set('n', ']f', goto_next_top_level_function, { desc = 'Go to next top-level function' })
+vim.keymap.set('n', '[f', goto_prev_top_level_function, { desc = 'Go to previous top-level function' })
 vim.keymap.set('n', '<leader>tt', ':TSPlaygroundToggle<CR>')
 vim.keymap.set('n', '<leader>tq', ':TSEditQueryUserAfter highlights')
 -- }}}
