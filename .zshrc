@@ -42,6 +42,7 @@ if [ -e "${HOME}/.linuxbrewrc" ]; then
 fi
 
 # pure prompt settings (https://github.com/sindresorhus/pure)
+fpath+=("$(brew --prefix)/share/zsh/site-functions")
 autoload -U promptinit; promptinit
 prompt pure
 
