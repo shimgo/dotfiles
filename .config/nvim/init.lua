@@ -418,6 +418,8 @@ end
 
 vim.keymap.set('n', ']f', goto_next_top_level_function, { desc = 'Go to next top-level function' })
 vim.keymap.set('n', '[f', goto_prev_top_level_function, { desc = 'Go to previous top-level function' })
+vim.keymap.set('v', ']f', goto_next_top_level_function, { desc = 'Go to next top-level function' })
+vim.keymap.set('v', '[f', goto_prev_top_level_function, { desc = 'Go to previous top-level function' })
 vim.keymap.set('n', '<leader>tt', ':TSPlaygroundToggle<CR>')
 vim.keymap.set('n', '<leader>tq', ':TSEditQueryUserAfter highlights')
 -- }}}
