@@ -88,4 +88,7 @@ Plug 'karb94/neoscroll.nvim'
 -- ステータスライン
 Plug 'nvim-lualine/lualine.nvim'
 
+-- quickfixの表示を改善
+Plug 'kevinhwang91/nvim-bqf'
+
 vim.call('plug#end')
