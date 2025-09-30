@@ -1169,6 +1169,7 @@ require('lualine').setup {
 require("codecompanion").setup()
 -- }}}
 
+-- bqf.nvim {{{
 require('bqf').setup({
   auto_enable = true,
   auto_resize_height = true,
@@ -1176,3 +1177,12 @@ require('bqf').setup({
     winblend = 0,
   },
 })
+-- }}}
+
+-- vim-interestingwords {{{
+vim.keymap.set('n', '<leader>k', ':call InterestingWords("n")<CR>', { silent = true })
+vim.keymap.set('v', '<leader>k', ':call InterestingWords("v")<CR>', { silent = true })
+vim.keymap.set('n', '<leader>K', ':call UncolorAllWords()<CR>', { silent = true })
+vim.keymap.set('n', 'n', ':call WordNavigation(1)<CR>', { silent = true })
+vim.keymap.set('n', 'N', ':call WordNavigation(0)<CR>', { silent = true })
+-- }}}

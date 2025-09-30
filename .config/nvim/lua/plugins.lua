@@ -91,4 +91,7 @@ Plug 'nvim-lualine/lualine.nvim'
 -- quickfixの表示を改善
 Plug 'kevinhwang91/nvim-bqf'
 
+-- 検索ハイライトを複数語に対応
+Plug 'lfv89/vim-interestingwords'
+
 vim.call('plug#end')
