@@ -1186,3 +1186,19 @@ vim.keymap.set('n', '<leader>K', ':call UncolorAllWords()<CR>', { silent = true 
 vim.keymap.set('n', 'n', ':call WordNavigation(1)<CR>', { silent = true })
 vim.keymap.set('n', 'N', ':call WordNavigation(0)<CR>', { silent = true })
 -- }}}
+
+-- leap.nvim {{{
+vim.keymap.set({'n', 'x', 'o'}, '<leader>s', '<Plug>(leap)')
+vim.keymap.set('n', '<leader>S', '<Plug>(leap-from-window)')
+-- Exclude whitespace and the middle of alphabetic words from preview:
+--   foobar[baaz] = quux
+--   ^----^^^--^^-^-^--^
+--   ^の部分にだけジャンプできるようにする
+require('leap').opts.preview_filter =
+  function (ch0, ch1, ch2)
+    return not (
+      ch1:match('%s') or
+      ch0:match('%a') and ch1:match('%a') and ch2:match('%a')
+    )
+  end
+-- }}}

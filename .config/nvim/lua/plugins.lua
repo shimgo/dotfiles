@@ -94,4 +94,7 @@ Plug 'kevinhwang91/nvim-bqf'
 -- 検索ハイライトを複数語に対応
 Plug 'lfv89/vim-interestingwords'
 
+-- バッファ内でジャンプ
+Plug 'ggandor/leap.nvim'
+
 vim.call('plug#end')
