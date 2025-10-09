@@ -97,4 +97,7 @@ Plug 'lfv89/vim-interestingwords'
 -- バッファ内でジャンプ
 Plug 'ggandor/leap.nvim'
 
+-- quickfixやロケーションリストのツリー表示
+Plug 'folke/trouble.nvim'
+
 vim.call('plug#end')

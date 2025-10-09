@@ -550,7 +550,7 @@ vim.api.nvim_create_autocmd('LspAttach', {
     vim.keymap.set('n', 'gt', vim.lsp.buf.type_definition, opts)
     vim.keymap.set('n', 'ge', vim.lsp.buf.rename, opts)
     vim.keymap.set({ 'n', 'v' }, '<leader>ca', vim.lsp.buf.code_action, opts)
-    vim.keymap.set('n', 'gr', vim.lsp.buf.references, opts)
+    -- vim.keymap.set('n', 'gr', vim.lsp.buf.references, opts)
     vim.keymap.set('n', '<leader>f', function()
       vim.lsp.buf.format { async = true }
     end, opts)
@@ -682,7 +682,7 @@ vim.keymap.set('n', '<leader>gu', ':GitGutterUndoHunk<CR>')
 -- vim-fugitive {{{
 vim.keymap.set('n', '<leader>g<CR>', ':15split|0G<CR>') -- サイズを指定してfugitiveを開く0をつけると新しいバッファを開くのではなくそのバッファを開く。
 vim.keymap.set('n', '<leader>gd', ':Gdiffsplit<CR>')
-vim.keymap.set('n', '<leader>gb', ':G blame<CR>')
+vim.keymap.set('n', '<leader>gh', ':G blame<CR>')
 -- }}}
 
 -- gitlinker {{{
@@ -693,6 +693,12 @@ if not _G.__gitlinker_setup_done then
 end
 vim.keymap.set('n', '<leader>go', ':GitLink!<CR>')
 vim.keymap.set('v', '<leader>go', ':GitLink!<CR>')
+-- }}}
+
+-- gitsigns.nvim {{{
+-- trouble.nvimがインストールされていると勝手にtrouble.nvimの設定で開く
+vim.keymap.set('n', '<leader>gqa', ':Gitsigns setqflist all<CR>', { desc = 'リポジトリ全体のhunkをquickfixに表示' })
+vim.keymap.set('n', '<leader>gqb', ':Gitsigns setqflist<CR>', { desc = 'Gitsigns setqflist buffer' })
 -- }}}
 
 -- flatten.nvim {{{
@@ -1201,4 +1207,90 @@ require('leap').opts.preview_filter =
       ch0:match('%a') and ch1:match('%a') and ch2:match('%a')
     )
   end
+-- }}}
+
+-- trouble.nvim {{{
+require('trouble').setup({
+  auto_refresh = false, -- auto refresh when open
+  focus = true, -- Focus the window when opened
+  modes = {
+    lsp_split_prev = {
+      mode = "lsp",
+      preview = {
+        type = "split",
+        relative = "win",
+        position = "right",
+        size = 0.4,
+      },
+    },
+  },
+  keys = {
+    ["?"] = "help",
+    r = "refresh",
+    R = "toggle_refresh",
+    q = "close",
+    o = "jump_close",
+    ["<esc>"] = "cancel",
+    ["<cr>"] = "jump",
+    ["<2-leftmouse>"] = "jump",
+    ["<c-s>"] = "jump_split",
+    ["<c-v>"] = "jump_vsplit",
+    -- go down to next item (accepts count)
+    -- j = "next",
+    ["}"] = "next",
+    ["<c-n>"] = "next", -- デフォルトから変えた
+    -- go up to prev item (accepts count)
+    -- k = "prev",
+    ["{"] = "prev",
+    ["<c-p>"] = "prev", -- デフォルトから変えた
+    dd = "delete",
+    d = { action = "delete", mode = "v" },
+    i = "inspect",
+    p = "preview",
+    P = "toggle_preview",
+    zo = "fold_open",
+    zO = "fold_open_recursive",
+    zc = "fold_close",
+    zC = "fold_close_recursive",
+    za = "fold_toggle",
+    zA = "fold_toggle_recursive",
+    zm = "fold_more",
+    zM = "fold_close_all",
+    zr = "fold_reduce",
+    zR = "fold_open_all",
+    zx = "fold_update",
+    zX = "fold_update_all",
+    zn = "fold_disable",
+    zN = "fold_enable",
+    zi = "fold_toggle_enable",
+    gb = { -- example of a custom action that toggles the active view filter
+      action = function(view)
+        view:filter({ buf = 0 }, { toggle = true })
+      end,
+      desc = "Toggle Current Buffer Filter",
+    },
+    s = false, -- デフォルトを無効化
+  },
+})
+-- require("fzf-lua.config").defaults.actions.files["ctrl-t"] = require("trouble.sources.fzf").actions.open
+vim.keymap.set("n", "<leader>gr", "<cmd>Trouble lsp toggle win.size=0.2<cr>", { desc = "Trouble LSP プレビュー分割なし" })
+vim.keymap.set("n", "<leader>gs", "<cmd>Trouble lsp_split_prev toggle  win.size=0.2<cr>", { desc = "Trouble LSP プレビューを分割表示" })
+vim.keymap.set("n", "<leader>gl", "<cmd>Trouble lsp toggle win.position=right win.size=0.3<cr>", { desc = "Trouble LSP ペインを右側に表示" })
+vim.keymap.set('n', '<leader>ge', '<cmd>Trouble diagnostics toggle<cr>', { desc = "Trouble Diagnostics プレビュー分割なし" })
+vim.keymap.set("n", "<leader>gb", "<cmd>Trouble diagnostics toggle filter.buf=0<cr>", { desc = "Trouble Diagnostics バッファ内 プレビュー分割なし" })
+vim.keymap.set("n", "<leader>gs", "<cmd>Trouble symbols toggle<cr>", { desc = "Trouble Symbols" })
+vim.keymap.set("n", "<leader>gl", "<cmd>Trouble loclist toggle<cr>", { desc = "ロケーションリストをTroubleで開く" })
+vim.keymap.set("n", "<leader>gq", "<cmd>Trouble qflist toggle<cr>", { desc = "Quickfix ListをTroubleで開く" })
+-- quickfixが開かれたら自動的にTroubleで開く
+vim.api.nvim_create_autocmd("BufRead", {
+  callback = function(ev)
+    if vim.bo[ev.buf].buftype == "quickfix" then
+      vim.schedule(function()
+        vim.cmd([[cclose]])
+        vim.cmd([[Trouble qflist open]])
+      end)
+    end
+  end,
+})
+
 -- }}}
