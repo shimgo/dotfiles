@@ -138,6 +138,24 @@ local function my_on_attach(bufnr)
     return { desc = "nvim-tree: " .. desc, buffer = bufnr, noremap = true, silent = true, nowait = true }
   end
 
+  -- カーソルで指定したディレクトリでターミナルを開く関数
+  local function open_terminal_in_dir()
+    local node = api.tree.get_node_under_cursor()
+
+    if not node then return end
+
+    -- ディレクトリかファイルかを判定
+    local path = node.absolute_path
+    local dir = node.type == "directory" and path or vim.fn.fnamemodify(path, ":h")
+
+    -- 水平分割でターミナルを開く場合
+    vim.cmd("split")
+    vim.cmd("terminal")
+
+    -- ディレクトリに移動
+    vim.fn.chansend(vim.b.terminal_job_id, "cd " .. vim.fn.shellescape(dir) .. "\n")
+  end
+
   -- BEGIN_DEFAULT_ON_ATTACH
   vim.keymap.set('n', '<C-]>', api.tree.change_root_to_node,          opts('CD'))
   vim.keymap.set('n', '<C-e>', api.node.open.replace_tree_buffer,     opts('Open: In Place'))
@@ -193,6 +211,7 @@ local function my_on_attach(bufnr)
   vim.keymap.set('n', '<2-LeftMouse>',  api.node.open.edit,           opts('Open'))
   vim.keymap.set('n', '<2-RightMouse>', api.tree.change_root_to_node, opts('CD'))
   -- END_DEFAULT_ON_ATTACH
+  vim.keymap.set("n", "t", open_terminal_in_dir, { buffer = bufnr, noremap = true, silent = true, desc = "Open terminal in directory" })
 end
 
 -- pass to setup along with your other options
