@@ -98,6 +98,8 @@ vim.keymap.set('c', '<C-e>', '<End>', { noremap = true, desc = "コマンドラ�
 vim.keymap.set('n', 'sqq', '<C-w><C-w><C-w>q') -- クイックフィックスを閉じる
 vim.keymap.set('n', '<C-n>', ':cn<CR>')
 vim.keymap.set('n', '<C-p>', ':cp<CR>')
+vim.keymap.set("n", "[q", "<cmd>colder<cr>", { desc = "前のquickfixリストを開く" })
+vim.keymap.set("n", "]q", "<cmd>cnewer<cr>", { desc = "次のquickfixリストを開く" })
 
 -- キー無効化 {{{
 vim.keymap.set('n', 's', '<Nop>') -- 使わない動作なので潰してウィンドウ操作のキーに使う
@@ -571,7 +573,7 @@ vim.api.nvim_create_autocmd('LspAttach', {
     vim.keymap.set('n', 'gt', vim.lsp.buf.type_definition, opts)
     vim.keymap.set('n', 'ge', vim.lsp.buf.rename, opts)
     vim.keymap.set({ 'n', 'v' }, '<leader>ca', vim.lsp.buf.code_action, opts)
-    -- vim.keymap.set('n', 'gr', vim.lsp.buf.references, opts)
+    vim.keymap.set('n', 'gr', vim.lsp.buf.references, opts)
     vim.keymap.set('n', '<leader>f', function()
       vim.lsp.buf.format { async = true }
     end, opts)
@@ -708,7 +710,7 @@ vim.keymap.set('n', '<leader>gu', ':GitGutterUndoHunk<CR>')
 -- vim-fugitive {{{
 vim.keymap.set('n', '<leader>g<CR>', ':15split|0G<CR>') -- サイズを指定してfugitiveを開く0をつけると新しいバッファを開くのではなくそのバッファを開く。
 vim.keymap.set('n', '<leader>gd', ':Gdiffsplit<CR>')
-vim.keymap.set('n', '<leader>gh', ':G blame<CR>')
+vim.keymap.set('n', '<leader>gb', ':G blame<CR>')
 -- }}}
 
 -- gitlinker {{{
@@ -1240,8 +1242,8 @@ require('trouble').setup({
   auto_refresh = false, -- auto refresh when open
   focus = true, -- Focus the window when opened
   modes = {
-    lsp_split_prev = {
-      mode = "lsp",
+    lsp_references_split_prev = {
+      mode = "lsp_references",
       preview = {
         type = "split",
         relative = "win",
@@ -1299,14 +1301,9 @@ require('trouble').setup({
   },
 })
 -- require("fzf-lua.config").defaults.actions.files["ctrl-t"] = require("trouble.sources.fzf").actions.open
-vim.keymap.set("n", "<leader>gr", "<cmd>Trouble lsp toggle win.size=0.2<cr>", { desc = "Trouble LSP プレビュー分割なし" })
-vim.keymap.set("n", "<leader>gs", "<cmd>Trouble lsp_split_prev toggle  win.size=0.2<cr>", { desc = "Trouble LSP プレビューを分割表示" })
-vim.keymap.set("n", "<leader>gl", "<cmd>Trouble lsp toggle win.position=right win.size=0.3<cr>", { desc = "Trouble LSP ペインを右側に表示" })
-vim.keymap.set('n', '<leader>ge', '<cmd>Trouble diagnostics toggle<cr>', { desc = "Trouble Diagnostics プレビュー分割なし" })
-vim.keymap.set("n", "<leader>gb", "<cmd>Trouble diagnostics toggle filter.buf=0<cr>", { desc = "Trouble Diagnostics バッファ内 プレビュー分割なし" })
-vim.keymap.set("n", "<leader>gs", "<cmd>Trouble symbols toggle<cr>", { desc = "Trouble Symbols" })
-vim.keymap.set("n", "<leader>gl", "<cmd>Trouble loclist toggle<cr>", { desc = "ロケーションリストをTroubleで開く" })
-vim.keymap.set("n", "<leader>gq", "<cmd>Trouble qflist toggle<cr>", { desc = "Quickfix ListをTroubleで開く" })
+vim.keymap.set("n", "<leader>dl", "<cmd>Trouble lsp toggle win.position=right win.size=0.3<cr>", { desc = "Trouble LSP ペインを右側に表示" })
+vim.keymap.set('n', '<leader>de', '<cmd>Trouble diagnostics toggle<cr>', { desc = "Trouble Diagnostics プレビュー分割なし" })
+vim.keymap.set("n", "<leader>ds", "<cmd>Trouble symbols toggle focus=true win.size=0.3<cr>", { desc = "Trouble Symbols" })
 -- quickfixが開かれたら自動的にTroubleで開く
 vim.api.nvim_create_autocmd("BufRead", {
   callback = function(ev)
