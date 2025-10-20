@@ -91,6 +91,8 @@ vim.keymap.set('v', '<leader>l', '$')
 vim.keymap.set('n', '<C-h>', ':<C-u>%s/') -- 置換
 vim.keymap.set('n', '<C-k>', '<C-y>') -- カーソルを固定して上にスクロール
 vim.keymap.set('n', '<C-j>', '<C-e>') -- カーソルを固定して下にスクロール
+vim.keymap.set('c', '<C-a>', '<Home>', { noremap = true, desc = "コマンドラインモードでカーソルを行頭へ移動" })
+vim.keymap.set('c', '<C-e>', '<End>', { noremap = true, desc = "コマンドラインモードでカーソルを行末へ移動" })
 
 -- Quickfix
 vim.keymap.set('n', 'sqq', '<C-w><C-w><C-w>q') -- クイックフィックスを閉じる
@@ -579,10 +581,15 @@ vim.api.nvim_create_autocmd('LspAttach', {
 -- }}}
 
 -- blink.cmp {{{
+-- C-spaceで補完メニューを表示する
 require('blink.cmp').setup({
-  cmdline = { enabled = true },
-  -- keymapのデフォルト
-  -- keymap = {
+  cmdline = {
+    enabled = true,
+    keymap = {
+      preset = 'inherit', -- これがないとC-eとかのキーマップを自分で設定できず上書きされてしまう
+    },
+    completion = { menu = { auto_show = false } },
+  },
   --   -- set to 'none' to disable the 'default' preset
   --   preset = 'default',
   --   ['<C-space>'] = { 'show', 'show_documentation', 'hide_documentation' },
