@@ -789,7 +789,7 @@ end
 vim.keymap.set('n', '<leader>dc', copy_diff_files_to_clipboard, { noremap = true, silent = false })
 local select = require("CopilotChat.select")
 require("CopilotChat").setup {
-  model = 'claude-3.7-sonnet',
+  model = 'gpt-5',
   selection = function(source)
     return select.visual(source) or select.buffer(source)
   end,
