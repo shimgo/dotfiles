@@ -998,7 +998,8 @@ require("CopilotChat").setup {
 -- }}}
 
 -- diffview.nvim {{{
-vim.keymap.set('n', '<leader>db', ':DiffviewFileHistory %<CR>') -- 今開いているバッファの変更履歴を表示
+vim.keymap.set('n', '<leader>db', ':DiffviewFileHistory --no-merges %<CR>',  { desc = "今開いているバッファの変更履歴を表示" })
+vim.keymap.set('n', '<leader>dc', ':DiffviewClose<CR>',  { desc = "今開いているDiffviewを閉じる" })
 local diff_view_actions = require("diffview.actions")
 require("diffview").setup({
   keymaps = {
