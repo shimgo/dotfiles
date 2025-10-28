@@ -94,6 +94,9 @@ vim.keymap.set('n', '<C-j>', '<C-e>') -- カーソルを固定して下にスク
 vim.keymap.set('c', '<C-a>', '<Home>', { noremap = true, desc = "コマンドラインモードでカーソルを行頭へ移動" })
 vim.keymap.set('c', '<C-e>', '<End>', { noremap = true, desc = "コマンドラインモードでカーソルを行末へ移動" })
 
+-- jq
+vim.keymap.set('n', '<leader>xjb', ':%! jq .<CR>', { desc = "jqでJSONをフォーマット" })
+
 -- Quickfix
 vim.keymap.set('n', 'sqq', '<C-w><C-w><C-w>q') -- クイックフィックスを閉じる
 vim.keymap.set('n', '<C-n>', ':cn<CR>')
@@ -1223,8 +1226,8 @@ vim.keymap.set('n', 'N', ':call WordNavigation(0)<CR>', { silent = true })
 -- }}}
 
 -- leap.nvim {{{
-vim.keymap.set({'n', 'x', 'o'}, '<leader>s', '<Plug>(leap)')
-vim.keymap.set('n', '<leader>S', '<Plug>(leap-from-window)')
+vim.keymap.set({'n', 'x', 'o'}, '<leader>s', '<Plug>(leap)', { desc = "フォーカスしているバッファを対象にleap.nvimを起動" })
+vim.keymap.set('n', '<leader>S', '<Plug>(leap-from-window)', { desc = "他のウィンドウを対象にleap.nvimを起動" })
 -- Exclude whitespace and the middle of alphabetic words from preview:
 --   foobar[baaz] = quux
 --   ^----^^^--^^-^-^--^
