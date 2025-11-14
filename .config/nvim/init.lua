@@ -1239,6 +1239,8 @@ require('leap').opts.preview_filter =
       ch0:match('%a') and ch1:match('%a') and ch2:match('%a')
     )
   end
+require('leap').opts.safe_labels = '' -- 最初の一致への自動ジャンプを無効化
+vim.api.nvim_set_hl(0, 'LeapBackdrop', { link = 'Comment' }) -- 検索時に全体をグレーアウトする（Commentと同色）
 -- }}}
 
 -- trouble.nvim {{{
