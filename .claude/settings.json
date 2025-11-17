@@ -21,7 +21,17 @@
       "Bash(wget:*)",
       "Bash(nc:*)",
       "Bash(npm uninstall:*)",
-      "Bash(npm remove:*)"
+      "Bash(npm remove:*)",
+      "Bash(gh repo delete:*)",
+      "Bash(gh repo archive:*)",
+      "Bash(gh secret delete:*)",
+      "Bash(gh pr close:*)",
+      "Bash(gh issue close:*)",
+      "Bash(gh release delete:*)",
+      "Bash(gh api --method DELETE:*)",
+      "Bash(gh api --method PATCH:*)",
+      "Bash(gh api -X DELETE:*)",
+      "Bash(gh api -X PATCH:*)"
     ]
   },
 }
