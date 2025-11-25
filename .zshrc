@@ -163,7 +163,10 @@ gwa() {
 
 # git worktreeを削除する。gwd feature-aで、../feature-aのworktreeを削除し、ブランチも削除する
 gwd() {
-    git worktree remove --force "../$1" && git branch -D "$1"
+    for branch in "$@"; do
+        echo "Removing worktree and branch: $branch"
+        git worktree remove --force "../$branch" && git branch -D "$branch"
+    done
 }
 
 # tmux session selector with fzf
