@@ -8,22 +8,35 @@
 
 まず、`gh` コマンドを使用して現在のブランチに関連するプルリクエストの未解決のレビューコメントをすべて取得してください。
 
+#### ステップ1: PR番号とリポジトリ情報を取得
+
 ```bash
 # 現在のブランチ名を取得
-current_branch=$(git branch --show-current)
+git branch --show-current
 
 # 現在のブランチのPRを取得
-pr_number=$(gh pr list --head "$current_branch" --json number --jq '.[0].number')
+gh pr list --head "$(git branch --show-current)" --json number,url --jq '.[0]'
 
+# リポジトリのowner/nameを取得
+gh repo view --json owner,name --jq '"\(.owner.login)/\(.name)"'
+```
+
+#### ステップ2: 総数を確認してから全件取得
+
+まず総数を確認し、次に全件を取得します。`first: 100` を使用し、100件を超える場合はページネーション（cursor）で追加取得してください。
+
+```bash
 # PRの未解決のレビュースレッドを取得（GraphQL APIを使用）
+# 注意: {owner}, {repo}, {pr_number} は実際の値に置き換えてください
 gh api graphql -f query='
 query {
   repository(owner: "{owner}", name: "{repo}") {
-    pullRequest(number: '$pr_number') {
-      reviewThreads(first: 50) {
+    pullRequest(number: {pr_number}) {
+      reviewThreads(first: 100) {
+        totalCount
         nodes {
           isResolved
-          comments(first: 10) {
+          comments(first: 20) {
             nodes {
               body
               author {
@@ -37,8 +50,24 @@ query {
       }
     }
   }
-}' --jq '.data.repository.pullRequest.reviewThreads.nodes[] | select(.isResolved == false)'
+}'
 ```
+
+#### ステップ3: 未解決コメントのフィルタリング
+
+取得結果から未解決のスレッドのみを抽出します：
+
+```bash
+# jqで未解決のみをフィルタリング
+... | jq '[.data.repository.pullRequest.reviewThreads.nodes[] | select(.isResolved == false)]'
+```
+
+#### 確認事項
+
+取得後、以下を必ずユーザーに報告してください：
+- **総レビュースレッド数**: `totalCount` の値
+- **未解決スレッド数**: フィルタリング後の件数
+- **取得漏れの有無**: `totalCount > 100` の場合はページネーションで追加取得が必要
 
 未解決のレビューコメントを抽出し、整理して表示してください。各コメントには以下の情報を含めてください:
 - コメントの原文
