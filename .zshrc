@@ -3,6 +3,7 @@ if [[ ":$FPATH:" != *":/Users/shimgo/.zsh/completions:"* ]]; then export FPATH="
 # Golang settings
 export GOPATH=$HOME/go
 export PATH=$PATH:$GOPATH/bin
+export PATH="$HOME/.local/bin:$PATH"
 
 ## アーキテクチャに応じてhomebrewのパス変更
 if [ `uname -m` = "arm64" ]; then
