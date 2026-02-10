@@ -315,7 +315,7 @@ vim.keymap.set('n', '<Leader>ve', '<cmd>e ~/.config/nvim/init.lua<cr>')
 -- }}}
 
 -- nvim-treesitter {{{
-require'nvim-treesitter.configs'.setup {
+require'nvim-treesitter.config'.setup {
   -- A list of parser names, or "all" (the five listed parsers should always be installed)
   ensure_installed = "all",
 
@@ -476,11 +476,11 @@ require('mason-lspconfig').setup({
   automatic_enable = false
 })
 -- LSPごとのセットアップ
--- https://github.com/neovim/nvim-lspconfig/blob/4bc481b6f0c0cf3671fc894debd0e00347089a4e/doc/configs.md
--- masonでインストールしたLSPも個別にsetupを呼び出す必要がある（mason-lspconfigのautomatic_enableをfalseにしてるので）
-require('lspconfig').graphql.setup({})
-require('lspconfig').gopls.setup({})
-require("lspconfig").lua_ls.setup {
+-- https://neovim.io/doc/user/lsp.html#vim.lsp.config()
+-- masonでインストールしたLSPも個別に設定・有効化する必要がある（mason-lspconfigのautomatic_enableをfalseにしてるので）
+vim.lsp.config('graphql', {})
+vim.lsp.config('gopls', {})
+vim.lsp.config('lua_ls', {
   on_init = function(client)
     local path = client.workspace_folders[1].name
     if not vim.loop.fs_stat(path..'/.luarc.json') and not vim.loop.fs_stat(path..'/.luarc.jsonc') then
@@ -496,8 +496,8 @@ require("lspconfig").lua_ls.setup {
     end
     return true
   end
-}
-require('lspconfig').typos_lsp.setup({
+})
+vim.lsp.config('typos_lsp', {
     -- Logging level of the language server. Logs appear in :LspLog. Defaults to error.
     cmd_env = { RUST_LOG = "error" },
     init_options = {
@@ -510,6 +510,7 @@ require('lspconfig').typos_lsp.setup({
         diagnosticSeverity = "Info"
     }
 })
+vim.lsp.enable({'graphql', 'gopls', 'lua_ls', 'typos_lsp'})
 
 -- lsp-signature.nvim
 require("lsp_signature").setup({
@@ -1103,10 +1104,31 @@ vim.keymap.set('n', 'sp', ':BufferPrevious<CR>')
 vim.keymap.set('n', 'sbr', ':BufferRestore<CR>')
 vim.keymap.set('n', 'sm', ':BufferPick<CR>') -- バッファを選択して開く
 require'barbar'.setup {
-  -- サイドバー分のスペースを空ける
-  sidebar_filetypes = {
-    NvimTree = true,
-  },
+  -- Enable/disable animations
+  animation = false,
+
+  -- Automatically hide the tabline when there are this many buffers left.
+  -- Set to any value >=0 to enable.
+  auto_hide = true,
+
+  -- Enable/disable current/total tabpages indicator (top right corner)
+  tabpages = true,
+
+  -- Enables/disable clickable tabs
+  --  - left-click: go to buffer
+  --  - middle-click: delete buffer
+  clickable = false,
+
+  -- If true, new buffers will be inserted at the start/end of the list.
+  -- Default is to insert after current buffer.
+  insert_at_end = false,
+  insert_at_start = true,
+
+  -- If set, the letters for each buffer in buffer-pick mode will be
+  -- assigned based on their name. Otherwise or in case all letters are
+  -- already assigned, the behavior is to assign letters in order of
+  -- usability (see order below)
+  semantic_letters = false,
 }
 -- }}}
 

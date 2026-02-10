@@ -5,7 +5,6 @@ vim.call('plug#begin', '~/.config/nvim/plugged')
 Plug 'nvim-tree/nvim-tree.lua'
 Plug 'nvim-tree/nvim-web-devicons'
 Plug('nvim-treesitter/nvim-treesitter', {['do']= ':TSUpdate' })
-Plug 'nvim-treesitter/playground'
 Plug 'Mofiqul/vscode.nvim'
 
 -- LSP {{{
@@ -95,7 +94,7 @@ Plug 'kevinhwang91/nvim-bqf'
 Plug 'lfv89/vim-interestingwords'
 
 -- バッファ内でジャンプ
-Plug 'ggandor/leap.nvim'
+Plug 'https://codeberg.org/andyg/leap.nvim'
 
 -- quickfixやロケーションリストのツリー表示
 Plug 'folke/trouble.nvim'
