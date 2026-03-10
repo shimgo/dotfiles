@@ -95,6 +95,9 @@ vim.keymap.set('n', '<C-j>', '<C-e>') -- カーソルを固定して下にスク
 vim.keymap.set('c', '<C-a>', '<Home>', { noremap = true, desc = "コマンドラインモードでカーソルを行頭へ移動" })
 vim.keymap.set('c', '<C-e>', '<End>', { noremap = true, desc = "コマンドラインモードでカーソルを行末へ移動" })
 
+vim.keymap.set('n', 'gf', 'gF', { noremap = true, desc = "カーソル下のファイルパスのファイルを開いてその行数にジャンプ" })
+vim.keymap.set('n', 'gF', 'gf', { noremap = true, desc = "カーソル下のファイルパスのファイルを開く" })
+
 -- jq
 vim.keymap.set('n', '<leader>xjb', ':%! jq .<CR>', { desc = "jqでJSONをフォーマット" })
 
