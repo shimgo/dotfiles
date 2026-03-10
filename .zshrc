@@ -61,6 +61,26 @@ precmd() {
     fi
 }
 
+preexec() {
+  _cmd_start=$SECONDS
+  _cmd_name="${1%% *}"  # コマンド名だけ取り出す（引数を除く）
+}
+
+precmd() {
+  if [[ -n $_cmd_start ]]; then
+    local elapsed=$(( SECONDS - _cmd_start ))
+
+    # 除外したいインタラクティブコマンド一覧
+    local excluded=(fzf vim nvim nano less more man htop top tig lazygit peco gh frl)
+
+    if (( elapsed >= 10 )) && [[ ! " ${excluded[@]} " =~ " ${_cmd_name} " ]]; then
+      afplay /System/Library/Sounds/Funk.aiff &
+    fi
+
+    unset _cmd_start _cmd_name
+  fi
+}
+
 # Title of terminal
 case "${TERM}" in
 kterm*|xterm)
