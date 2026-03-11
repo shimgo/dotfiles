@@ -1,22 +1,47 @@
 {
+  "$schema": "https://json.schemastore.org/claude-code-settings.json",
+  "hooks": {
+    "Stop": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "terminal-notifier -title \"Claude Code\" -message \"タスクが完了しました\" -sound \"Morse\""
+          }
+        ]
+      }
+    ]
+  },
+  "enabledPlugins": {
+    "example-skills@anthropic-agent-skills": true
+  },
+  "extraKnownMarketplaces": {
+    "anthropic-agent-skills": {
+      "source": {
+        "source": "github",
+        "repo": "anthropics/skills"
+      }
+    }
+  },
+  "autoUpdatesChannel": "latest",
+  "skipDangerousModePermissionPrompt": true,
+  "feedbackSurveyState": {
+    "lastShownTime": 1754265753674
+  },
+  "model": "sonnet",
   "permissions": {
     "allow": [
     ],
     "deny": [
       "Bash(sudo:*)",
       "Bash(rm:*)",
-      "Bash(rm -rf:*)",
+      "Bash(dd:*)",
+      "Bash(mkfs:*)",
       "Bash(git push:*)",
       "Bash(git commit:*)",
       "Bash(git reset:*)",
       "Bash(git rebase:*)",
-      "Read(.env.*)",
-      "Read(id_rsa)",
-      "Read(id_ed25519)",
-      "Read(**/*token*)",
-      "Read(**/*key*)",
-      "Write(.env*)",
-      "Write(**/secrets/**)",
       "Bash(curl:*)",
       "Bash(wget:*)",
       "Bash(nc:*)",
@@ -31,7 +56,18 @@
       "Bash(gh api --method DELETE:*)",
       "Bash(gh api --method PATCH:*)",
       "Bash(gh api -X DELETE:*)",
-      "Bash(gh api -X PATCH:*)"
+      "Bash(gh api -X PATCH:*)",
+      "Read(**/.env*)",
+      "Read(**/id_rsa)",
+      "Read(**/id_ed25519)",
+      "Read(**/id_ecdsa)",
+      "Read(**/id_dsa)",
+      "Read(**/*.pem)",
+      "Read(**/*.p12)",
+      "Read(**/*token*)",
+      "Read(**/*key*)",
+      "Write(**/.env*)",
+      "Write(**/secrets/**)"
     ]
   }
 }
