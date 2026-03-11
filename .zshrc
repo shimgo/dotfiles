@@ -71,7 +71,7 @@ precmd() {
     local elapsed=$(( SECONDS - _cmd_start ))
 
     # 除外したいインタラクティブコマンド一覧
-    local excluded=(fzf vim nvim nano less more man htop top tig lazygit peco gh frl)
+    local excluded=(fzf vim nvim nano less more man htop top tig lazygit peco gh frl claude)
 
     if (( elapsed >= 10 )) && [[ ! " ${excluded[@]} " =~ " ${_cmd_name} " ]]; then
       afplay /System/Library/Sounds/Funk.aiff &
