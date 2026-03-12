@@ -6,8 +6,6 @@ if [ "$EVENT" = "Notification" ]; then
   NTYPE=$(echo "$INPUT" | jq -r '.notification_type // ""')
   if [ "$NTYPE" = "permission_prompt" ]; then
     terminal-notifier -title "Claude Code" -message "実行許可の確認が必要です" -sound "Sosumi"
-  elif [ "$NTYPE" = "idle_prompt" ]; then
-    terminal-notifier -title "Claude Code" -message "このメッセージが表示されないなら消してOK" -sound "Sosumi"
   fi
 elif [ "$EVENT" = "Stop" ]; then
   MESSAGE=$(echo "$INPUT" | jq -r '.last_assistant_message // "タスクが完了しました"' \
