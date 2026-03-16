@@ -1321,7 +1321,7 @@ vim.api.nvim_create_autocmd("BufRead", {
 -- claudecode.nvim {{{
 require("claudecode").setup({
   log_level = "info",
-  terminal_cmd = "claude --enable-auto-mode",
+  terminal_cmd = "claude --dangerously-skip-permissions",
   track_selection = true,
   focus_after_send = false,
 
