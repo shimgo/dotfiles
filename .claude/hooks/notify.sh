@@ -17,20 +17,34 @@ fi
 if [ "$EVENT" = "Notification" ]; then
   NTYPE=$(echo "$INPUT" | jq -r '.notification_type // ""')
   if [ "$NTYPE" = "permission_prompt" ]; then
-    eval terminal-notifier \
-      -title "Claude Code" \
-      -message "実行許可の確認が必要です" \
-      -sound "Sosumi" \
-      $EXECUTE
+    if [[ -n "$SESSION_ID" ]]; then
+      terminal-notifier \
+        -title "Claude Code" \
+        -message "実行許可の確認が必要です" \
+        -sound "Sosumi" \
+        -execute "~/.claude/hooks/iterm2_notify_jump.sh '$SESSION_ID'"
+    else
+      terminal-notifier \
+        -title "Claude Code" \
+        -message "実行許可の確認が必要です" \
+        -sound "Sosumi"
+    fi
   fi
 elif [ "$EVENT" = "Stop" ]; then
   MESSAGE=$(echo "$INPUT" | jq -r '.last_assistant_message // "タスクが完了しました"' \
     | sed 's/\*\*//g; s/`//g; s/^- //g' \
     | tr '\n' ' ' \
     | cut -c1-80)
-  eval terminal-notifier \
-    -title "Claude Code" \
-    -message "$MESSAGE" \
-    -sound "Morse" \
-    $EXECUTE
+  if [[ -n "$SESSION_ID" ]]; then
+    terminal-notifier \
+      -title "Claude Code" \
+      -message "$MESSAGE" \
+      -sound "Morse" \
+      -execute "~/.claude/hooks/iterm2_notify_jump.sh '$SESSION_ID'"
+  else
+    terminal-notifier \
+      -title "Claude Code" \
+      -message "$MESSAGE" \
+      -sound "Morse"
+  fi
 fi
