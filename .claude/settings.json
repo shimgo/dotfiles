@@ -1,5 +1,44 @@
 {
   "$schema": "https://json.schemastore.org/claude-code-settings.json",
+  "permissions": {
+    "allow": [],
+    "deny": [
+      "Bash(sudo:*)",
+      "Bash(rm:*)",
+      "Bash(dd:*)",
+      "Bash(mkfs:*)",
+      "Bash(git push:*)",
+      "Bash(git commit:*)",
+      "Bash(git reset:*)",
+      "Bash(git rebase:*)",
+      "Bash(curl:*)",
+      "Bash(wget:*)",
+      "Bash(nc:*)",
+      "Bash(npm uninstall:*)",
+      "Bash(npm remove:*)",
+      "Bash(gh repo delete:*)",
+      "Bash(gh repo archive:*)",
+      "Bash(gh secret delete:*)",
+      "Bash(gh pr close:*)",
+      "Bash(gh issue close:*)",
+      "Bash(gh release delete:*)",
+      "Bash(gh api --method DELETE:*)",
+      "Bash(gh api --method PATCH:*)",
+      "Bash(gh api -X DELETE:*)",
+      "Bash(gh api -X PATCH:*)",
+      "Read(**/.env*)",
+      "Read(**/id_rsa)",
+      "Read(**/id_ed25519)",
+      "Read(**/id_ecdsa)",
+      "Read(**/id_dsa)",
+      "Read(**/*.pem)",
+      "Read(**/*.p12)",
+      "Read(**/*token*)",
+      "Read(**/*key*)",
+      "Write(**/.env*)",
+      "Write(**/secrets/**)"
+    ]
+  },
   "hooks": {
     "Stop": [
       {
@@ -39,46 +78,5 @@
   "skipDangerousModePermissionPrompt": true,
   "feedbackSurveyState": {
     "lastShownTime": 1754265753674
-  },
-  "model": "sonnet",
-  "permissions": {
-    "allow": [
-    ],
-    "deny": [
-      "Bash(sudo:*)",
-      "Bash(rm:*)",
-      "Bash(dd:*)",
-      "Bash(mkfs:*)",
-      "Bash(git push:*)",
-      "Bash(git commit:*)",
-      "Bash(git reset:*)",
-      "Bash(git rebase:*)",
-      "Bash(curl:*)",
-      "Bash(wget:*)",
-      "Bash(nc:*)",
-      "Bash(npm uninstall:*)",
-      "Bash(npm remove:*)",
-      "Bash(gh repo delete:*)",
-      "Bash(gh repo archive:*)",
-      "Bash(gh secret delete:*)",
-      "Bash(gh pr close:*)",
-      "Bash(gh issue close:*)",
-      "Bash(gh release delete:*)",
-      "Bash(gh api --method DELETE:*)",
-      "Bash(gh api --method PATCH:*)",
-      "Bash(gh api -X DELETE:*)",
-      "Bash(gh api -X PATCH:*)",
-      "Read(**/.env*)",
-      "Read(**/id_rsa)",
-      "Read(**/id_ed25519)",
-      "Read(**/id_ecdsa)",
-      "Read(**/id_dsa)",
-      "Read(**/*.pem)",
-      "Read(**/*.p12)",
-      "Read(**/*token*)",
-      "Read(**/*key*)",
-      "Write(**/.env*)",
-      "Write(**/secrets/**)"
-    ]
   }
 }
