@@ -1,5 +1,3 @@
-# Add deno completions to search path
-if [[ ":$FPATH:" != *":/Users/shimgo/.zsh/completions:"* ]]; then export FPATH="/Users/shimgo/.zsh/completions:$FPATH"; fi
 # Golang settings
 export GOPATH=$HOME/go
 export PATH=$PATH:$GOPATH/bin
@@ -107,24 +105,6 @@ fd() {
   cd "$dir"
 }
 
-# cf - fuzzy cd from anywhere
-# ex: cf word1 word2 ... (even part of a file name)
-# zsh autoload function
-cf() {
-  local file
-
-  file="$(locate -i -0 $@ | grep -Z -vE '~$' | fzf --read0 -0 -1)"
-
-  if [[ -n $file ]]
-  then
-     if [[ -d $file ]]
-     then
-        cd -- $file
-     else
-        cd -- ${file:h}
-     fi
-  fi
-}
 
 frl() {
   local selected=$(ghq list -p | fzf)
@@ -152,9 +132,6 @@ fgl() {
     fi
   done
 }
-
-# require 'git clone https://github.com/rupa/z.git ~/.zsh.d'
-source ~/.zsh.d/z.sh
 
 zs() {
     local res=$(z | sort -rn | cut -c 12- | fzf)
@@ -210,6 +187,7 @@ ftmux() {
 alias g="git"
 # ローカルのブランチを、main、develop、staging、releaseを除いた、mainへマージ済みのブランチを全て削除
 alias gbclean="git branch --merged main | grep -vE '^\*|main$|develop$|staging$|release$' | xargs -I % git branch -d %"
-function git(){hub "$@"}
 
+# Deno settings
 . "/Users/shimgo/.deno/env"
+if [[ ":$FPATH:" != *":/Users/shimgo/.zsh/completions:"* ]]; then export FPATH="/Users/shimgo/.zsh/completions:$FPATH"; fi
