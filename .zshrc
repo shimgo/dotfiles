@@ -179,7 +179,11 @@ fbr() {
 
 # git worktreeを追加する。gwa feature-aで、../feature-aにworktreeを追加し、cdする
 gwa() {
-    git worktree add "../$1" && cd "../$1"
+    if git ls-remote --exit-code --heads origin "$1" > /dev/null 2>&1; then
+        git worktree add --track -b "$1" "../$1" "origin/$1" && cd "../$1"
+    else
+        git worktree add "../$1" && cd "../$1"
+    fi
 }
 
 # git worktreeを削除する。gwd feature-aで、../feature-aのworktreeを削除し、ブランチも削除する
