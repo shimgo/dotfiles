@@ -47,48 +47,45 @@ fpath+=("$(brew --prefix)/share/zsh/site-functions")
 autoload -U promptinit; promptinit
 prompt pure
 
-# コマンド実行前に時刻を表示
+# コマンド実行前に時刻を表示し、計測開始
 preexec() {
     echo -e "\033[34mS: $(date '+%Y-%m-%d %H:%M:%S')\033[0m"  # 青
     LAST_CMD="$1"
+    _cmd_start=$SECONDS
+    _cmd_name="${1%% *}"  # コマンド名だけ取り出す（引数を除く）
 }
-# コマンド実行後に色付き時刻を表示
+
+# コマンド実行後に時刻表示、長時間コマンド通知、ターミナルタイトル設定
 precmd() {
     local exit_status=$?
+
+    # 終了時刻を表示
     if [[ -n "$LAST_CMD" ]]; then
         echo -e "\033[32mE: $(date '+%Y-%m-%d %H:%M:%S')\033[0m"  # 緑
         LAST_CMD=""
     fi
-}
 
-preexec() {
-  _cmd_start=$SECONDS
-  _cmd_name="${1%% *}"  # コマンド名だけ取り出す（引数を除く）
-}
+    # 長時間コマンドの完了通知
+    if [[ -n $_cmd_start ]]; then
+        local elapsed=$(( SECONDS - _cmd_start ))
 
-precmd() {
-  if [[ -n $_cmd_start ]]; then
-    local elapsed=$(( SECONDS - _cmd_start ))
+        # 除外したいインタラクティブコマンド一覧
+        local excluded=(fzf vim nvim nano less more man htop top tig lazygit peco gh frl claude)
 
-    # 除外したいインタラクティブコマンド一覧
-    local excluded=(fzf vim nvim nano less more man htop top tig lazygit peco gh frl claude)
+        if (( elapsed >= 10 )) && [[ ! " ${excluded[@]} " =~ " ${_cmd_name} " ]]; then
+            afplay /System/Library/Sounds/Funk.aiff &
+        fi
 
-    if (( elapsed >= 10 )) && [[ ! " ${excluded[@]} " =~ " ${_cmd_name} " ]]; then
-      afplay /System/Library/Sounds/Funk.aiff &
+        unset _cmd_start _cmd_name
     fi
 
-    unset _cmd_start _cmd_name
-  fi
-}
-
-# Title of terminal
-case "${TERM}" in
-kterm*|xterm)
-    precmd() {
+    # ターミナルタイトルの設定
+    case "${TERM}" in
+    kterm*|xterm)
         echo -ne "\033]0;${USER}@${HOST%%.*}:${PWD}\007"
-    }
-    ;;
-esac
+        ;;
+    esac
+}
 
 # You may need to manually set your language environment
 export LANG=ja_JP.UTF-8
