@@ -66,6 +66,10 @@
       "Write(**/secrets/**)"
     ]
   },
+  "statusLine": {
+    "type": "command",
+    "command": "~/.claude/statusline.py"
+  },
   "hooks": {
     "Stop": [
       {
