@@ -106,12 +106,13 @@ fd() {
 }
 
 
+# frl - ghqで管理しているリポジトリをfzfで選択してcdする
 frl() {
   local selected=$(ghq list -p | fzf)
   [ -n "$selected" ] && cd "$selected"
 }
 
-# fshow - git commit browser (enter for show, ctrl-d for diff)
+# fgl - gitログをfzfで閲覧する (enterでshow、ctrl-dでdiff)
 fgl() {
   local out shas sha q k
   while out=$(
@@ -133,17 +134,7 @@ fgl() {
   done
 }
 
-zs() {
-    local res=$(z | sort -rn | cut -c 12- | fzf)
-    if [ -n "$res" ]; then
-        BUFFER+="cd $res"
-        zle accept-line
-    else
-        return 1
-    fi
-}
-
-# fbr - checkout git branch
+# fbr - fzfでブランチを選択してcheckoutする
 fbr() {
   local branches branch
   branches=$(git branch -vv) &&
@@ -168,7 +159,7 @@ gwd() {
     done
 }
 
-# tmux session selector with fzf
+# ftmux - fzfでtmuxセッションを選択してアタッチ/切り替えする
 ftmux() {
   local session
   session=$(tmux list-sessions -F "#{session_name}" 2>/dev/null | fzf --height 40% --reverse)

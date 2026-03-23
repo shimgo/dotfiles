@@ -455,7 +455,7 @@ vim.lsp.config('gopls', {})
 vim.lsp.config('lua_ls', {
   on_init = function(client)
     local path = client.workspace_folders[1].name
-    if not vim.loop.fs_stat(path..'/.luarc.json') and not vim.loop.fs_stat(path..'/.luarc.jsonc') then
+    if not vim.uv.fs_stat(path..'/.luarc.json') and not vim.uv.fs_stat(path..'/.luarc.jsonc') then
       client.config.settings = vim.tbl_deep_extend('force', client.config.settings, {
         Lua = {
           diagnostics = {
@@ -473,10 +473,6 @@ vim.lsp.config('typos_lsp', {
     -- Logging level of the language server. Logs appear in :LspLog. Defaults to error.
     cmd_env = { RUST_LOG = "error" },
     init_options = {
-        -- Custom config. Used together with a config file found in the workspace or its parents,
-        -- taking precedence for settings declared in both.
-        -- Equivalent to the typos `--config` cli argument.
-        config = '~/code/typos-lsp/crates/typos-lsp/tests/typos.toml',
         -- How typos are rendered in the editor, can be one of an Error, Warning, Info or Hint.
         -- Defaults to error.
         diagnosticSeverity = "Info"
@@ -495,7 +491,10 @@ vim.api.nvim_create_augroup('MyAutoCmd', { clear = true })
 vim.api.nvim_create_autocmd({ 'BufWritePre' }, {
     pattern = "*.go",
     callback = function()
-      local params = vim.lsp.util.make_range_params()
+      local clients = vim.lsp.get_clients({ bufnr = 0, name = "gopls" })
+      if #clients == 0 then return end
+      local enc = clients[1].offset_encoding or "utf-16"
+      local params = vim.lsp.util.make_range_params(0, enc)
       params.context = {only = {"source.organizeImports"}}
       -- buf_request_sync defaults to a 1000ms timeout. Depending on your
       -- machine and codebase, you may want longer. Add an additional
@@ -506,8 +505,9 @@ vim.api.nvim_create_autocmd({ 'BufWritePre' }, {
       for cid, res in pairs(result or {}) do
         for _, r in pairs(res.result or {}) do
           if r.edit then
-            local enc = (vim.lsp.get_client_by_id(cid) or {}).offset_encoding or "utf-16"
-            vim.lsp.util.apply_workspace_edit(r.edit, enc)
+            local client = vim.lsp.get_clients({ id = cid })[1]
+            local client_enc = client and client.offset_encoding or "utf-16"
+            vim.lsp.util.apply_workspace_edit(r.edit, client_enc)
           end
         end
       end
