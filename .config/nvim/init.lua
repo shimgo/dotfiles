@@ -530,6 +530,15 @@ vim.keymap.set('n', 'gl', ":LspRestart<CR>")
 vim.api.nvim_create_autocmd('LspAttach', {
   group = vim.api.nvim_create_augroup('UserLspConfig', {}),
   callback = function(ev)
+    -- fugitiveバッファにはLSPをアタッチしない
+    local bufname = vim.api.nvim_buf_get_name(ev.buf)
+    if bufname:match('^fugitive://') then
+      vim.schedule(function()
+        vim.lsp.buf_detach_client(ev.buf, ev.data.client_id)
+      end)
+      return
+    end
+
     -- Enable completion triggered by <c-x><c-o>
     vim.bo[ev.buf].omnifunc = 'v:lua.vim.lsp.omnifunc'
 
