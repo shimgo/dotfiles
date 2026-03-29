@@ -71,6 +71,16 @@
     "command": "~/.claude/statusline.py"
   },
   "hooks": {
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "date +%s > /tmp/claude_task_start.txt"
+          }
+        ]
+      }
+    ],
     "Stop": [
       {
         "matcher": "",
@@ -78,6 +88,14 @@
           {
             "type": "command",
             "command": "~/.claude/hooks/notify.sh"
+          }
+        ]
+      },
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "start=$(cat /tmp/claude_task_start.txt 2>/dev/null); now=$(date +%s); if [ -n \"$start\" ]; then elapsed=$((now - start)); min=$((elapsed / 60)); sec=$((elapsed % 60)); echo \"{\\\"systemMessage\\\": \\\"$(date '+%Y-%m-%d %H:%M:%S') | 所要時間: ${min}分${sec}秒\\\"}\"; else echo \"{\\\"systemMessage\\\": \\\"$(date '+%Y-%m-%d %H:%M:%S')\\\"}\"; fi"
           }
         ]
       }
