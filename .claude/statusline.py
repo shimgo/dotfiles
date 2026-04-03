@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """Pattern 1: Minimal dots - colored circles with numbers only"""
 import json, sys
+from datetime import datetime, timezone
 if sys.platform == 'win32':
     sys.stdout.reconfigure(encoding='utf-8')
 
@@ -22,6 +23,14 @@ def dot(pct):
     p = round(pct)
     return f'{gradient(pct)}●{R} {BOLD}{p}%{R}'
 
+def reset_time(epoch, include_date=False):
+    if epoch is None:
+        return None
+    dt = datetime.fromtimestamp(epoch, tz=timezone.utc).astimezone()
+    if include_date:
+        return dt.strftime('%m/%d %H:%M')
+    return dt.strftime('%H:%M')
+
 model = data.get('model', {}).get('display_name', 'Claude')
 parts = [f'{BOLD}{model}{R}']
 
@@ -29,12 +38,22 @@ ctx = data.get('context_window', {}).get('used_percentage')
 if ctx is not None:
     parts.append(f'ctx {dot(ctx)}')
 
-five = data.get('rate_limits', {}).get('five_hour', {}).get('used_percentage')
+five_info = data.get('rate_limits', {}).get('five_hour', {})
+five = five_info.get('used_percentage')
 if five is not None:
-    parts.append(f'5h {dot(five)}')
+    reset = reset_time(five_info.get('resets_at'))
+    label = f'5h {dot(five)}'
+    if reset:
+        label += f' {DIM}→{reset}{R}'
+    parts.append(label)
 
-week = data.get('rate_limits', {}).get('seven_day', {}).get('used_percentage')
+week_info = data.get('rate_limits', {}).get('seven_day', {})
+week = week_info.get('used_percentage')
 if week is not None:
-    parts.append(f'7d {dot(week)}')
+    reset = reset_time(week_info.get('resets_at'), include_date=True)
+    label = f'7d {dot(week)}'
+    if reset:
+        label += f' {DIM}→{reset}{R}'
+    parts.append(label)
 
 print(f'  {DIM}·{R}  '.join(parts), end='')

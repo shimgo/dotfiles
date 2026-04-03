@@ -63,12 +63,18 @@
       "Read(**/*token*)",
       "Read(**/*key*)",
       "Write(**/.env*)",
-      "Write(**/secrets/**)"
-    ]
-  },
-  "statusLine": {
-    "type": "command",
-    "command": "~/.claude/statusline.py"
+      "Write(**/secrets/**)",
+      "READ(.env*)",
+      "Write(.env*)",
+      "Write(*_gen.go)",
+      "Bash(rm -rf:*)",
+      "Bash(git push --force:*)",
+      "Bash(git push -f:*)",
+      "Read(id_rsa)",
+      "Bash(go install *@*)",
+      "Bash(go install */*/*)"
+    ],
+    "defaultMode": "default"
   },
   "hooks": {
     "UserPromptSubmit": [
@@ -112,6 +118,10 @@
       }
     ]
   },
+  "statusLine": {
+    "type": "command",
+    "command": "~/.claude/statusline.py"
+  },
   "enabledPlugins": {
     "example-skills@anthropic-agent-skills": true
   },
@@ -123,6 +133,8 @@
       }
     }
   },
+  "language": "日本語",
+  "effortLevel": "medium",
   "autoUpdatesChannel": "latest",
   "skipDangerousModePermissionPrompt": true,
   "feedbackSurveyState": {
