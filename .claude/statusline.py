@@ -56,4 +56,9 @@ if week is not None:
         label += f' {DIM}→{reset}{R}'
     parts.append(label)
 
+# Stopフック用にコンテキスト使用率をファイルに書き出す
+if ctx is not None:
+    with open('/tmp/claude_ctx_pct.txt', 'w') as f:
+        f.write(str(round(ctx)))
+
 print(f'  {DIM}·{R}  '.join(parts), end='')

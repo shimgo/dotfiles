@@ -101,7 +101,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "start=$(cat /tmp/claude_task_start.txt 2>/dev/null); now=$(date +%s); if [ -n \"$start\" ]; then elapsed=$((now - start)); min=$((elapsed / 60)); sec=$((elapsed % 60)); echo \"{\\\"systemMessage\\\": \\\"$(date '+%Y-%m-%d %H:%M:%S') | 所要時間: ${min}分${sec}秒\\\"}\"; else echo \"{\\\"systemMessage\\\": \\\"$(date '+%Y-%m-%d %H:%M:%S')\\\"}\"; fi"
+            "command": "~/.claude/hooks/stop_message.sh"
           }
         ]
       }
@@ -139,5 +139,6 @@
   "skipDangerousModePermissionPrompt": true,
   "feedbackSurveyState": {
     "lastShownTime": 1754265753674
-  }
+  },
+  "model": "sonnet"
 }
