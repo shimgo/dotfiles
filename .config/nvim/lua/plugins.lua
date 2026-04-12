@@ -102,7 +102,4 @@ Plug 'folke/trouble.nvim'
 -- 便利プラグインの詰め合わせ。claudecode.nvimの依存
 Plug "folke/snacks.nvim"
 
--- Claude Code連携
-Plug 'coder/claudecode.nvim'
-
 vim.call('plug#end')

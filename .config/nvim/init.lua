@@ -133,6 +133,15 @@ vim.keymap.set('n', 's=', '<C-w>=')
 vim.keymap.set('n', 'sQ', ':<C-u>q<CR>')
 vim.keymap.set('n', 'sfQ', ':<C-u>q!<CR>')
 vim.keymap.set('n', 'sa', ':<C-u>qa<CR>')
+-- }}}
+
+-- ターミナル関連 {{{
+-- Claude Codeを新しいターミナルで開く
+vim.keymap.set('n', '<leader>ac', function()
+  vim.cmd('vsplit | wincmd l | terminal claude --dangerously-skip-permissions')
+  vim.cmd('startinsert')
+end, { desc = "Claude Code terminal" })
+-- }}}
 
 -- winresizer {{{
 -- winresizer の開始キー
@@ -1325,35 +1334,4 @@ vim.api.nvim_create_autocmd("BufRead", {
   end,
 })
 
--- }}}
-
--- claudecode.nvim {{{
-require("claudecode").setup({
-  log_level = "info",
-  terminal_cmd = "claude --dangerously-skip-permissions",
-  track_selection = true,
-  focus_after_send = false,
-
-  terminal = {
-    split_side = "right",
-    split_width_percentage = 0.4,
-    provider = "auto",
-    auto_close = true,
-    git_repo_cwd = true,
-  },
-
-  diff_opts = {
-    auto_close_on_accept = true,
-    vertical_split = true,
-    open_in_current_tab = true,
-  },
-})
-vim.keymap.set("n", "<leader>ac", "<cmd>ClaudeCode<cr>",            { desc = "Toggle Claude" })
-vim.keymap.set("n", "<leader>af", "<cmd>ClaudeCodeFocus<cr>",       { desc = "Focus Claude" })
-vim.keymap.set("n", "<leader>ar", "<cmd>ClaudeCode --resume<cr>",   { desc = "Resume session" })
-vim.keymap.set("n", "<leader>am", "<cmd>ClaudeCodeSelectModel<cr>", { desc = "Select model" })
-vim.keymap.set("n", "<leader>ab", "<cmd>ClaudeCodeAdd %<cr>",       { desc = "Add buffer" })
-vim.keymap.set("v", "<leader>as", "<cmd>ClaudeCodeSend<cr>",        { desc = "Send selection" })
-vim.keymap.set("n", "<leader>aa", "<cmd>ClaudeCodeDiffAccept<cr>",  { desc = "Accept diff" })
-vim.keymap.set("n", "<leader>ad", "<cmd>ClaudeCodeDiffDeny<cr>",    { desc = "Deny diff" })
 -- }}}
