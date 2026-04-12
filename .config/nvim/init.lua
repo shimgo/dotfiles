@@ -744,6 +744,15 @@ require("term-edit").setup({
 -- toggleterm.nvim {{{
 require("toggleterm").setup()
 vim.keymap.set('n', '<leader>tt', '<cmd>ToggleTerm size=20 direction=horizontal name=hoge<CR>')
+local claude_term = require('toggleterm.terminal').Terminal:new({
+  cmd = "claude --dangerously-skip-permissions",
+  direction = "vertical",
+  hidden = true,
+  on_open = function(term)
+    vim.api.nvim_win_set_width(term.window, math.floor(vim.o.columns * 0.5))
+  end,
+})
+vim.keymap.set('n', '<leader>tc', function() claude_term:toggle() end, { desc = "Claude Code terminal (toggleterm)" })
 -- }}}
 
 -- vim-abolish {{{
