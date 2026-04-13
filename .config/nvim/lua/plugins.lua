@@ -57,7 +57,6 @@ Plug 'romgrk/barbar.nvim'
 Plug 'willothy/flatten.nvim'
 -- ターミナルモードでVimっぽく編集できる
 Plug 'chomosuke/term-edit.nvim'
-Plug 'akinsho/toggleterm.nvim'
 -- }}}
 
 -- コメントアウト
@@ -99,7 +98,7 @@ Plug 'https://codeberg.org/andyg/leap.nvim'
 -- quickfixやロケーションリストのツリー表示
 Plug 'folke/trouble.nvim'
 
--- 便利プラグインの詰め合わせ。claudecode.nvimの依存
+-- 便利プラグインの詰め合わせ。
 Plug "folke/snacks.nvim"
 
 vim.call('plug#end')

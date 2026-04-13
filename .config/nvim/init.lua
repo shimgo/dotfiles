@@ -741,26 +741,36 @@ require("term-edit").setup({
 })
 -- }}}
 
--- toggleterm.nvim {{{
-require("toggleterm").setup({
-  open_mapping = '<C-q>', -- ノーマルモード・ターミナルモード両方でトグル可能
+-- snacks.nvim terminal {{{
+require("snacks").setup({
+  terminal = {
+    win = {
+      keys = {
+        ["<C-q>"] = { "hide", mode = { "n", "t" } },
+      },
+    },
+  },
 })
--- 汎用ターミナル（ID=1）
-vim.keymap.set('n', '<leader>tt', '<cmd>1ToggleTerm size=20 direction=horizontal name=hoge<CR>')
--- Claude Code専用ターミナル（ID=2）
-local claude_term = require('toggleterm.terminal').Terminal:new({
-  cmd = "zsh -i -c 'claude --dangerously-skip-permissions'",
-  direction = "vertical",
-  count = 2,
-  on_open = function(term)
-    vim.api.nvim_win_set_width(term.window, math.floor(vim.o.columns * 0.5))
-    -- open_mappingが設定するキーマップを上書きするためvim.scheduleで遅延させる
-    vim.schedule(function()
-      vim.keymap.set('t', '<C-q>', function() term:toggle() end, { buffer = term.bufnr })
-    end)
-  end,
-})
-vim.keymap.set('n', '<leader>tc', function() claude_term:toggle() end, { desc = "Claude Code terminal (toggleterm)" })
+-- 汎用ターミナル
+vim.keymap.set('n', '<leader>tt', function()
+  Snacks.terminal.toggle(nil, {
+    win = { position = "bottom", height = 20 },
+    count = 1,
+  })
+end)
+-- Claude Code専用ターミナル
+vim.keymap.set('n', '<leader>tc', function()
+  Snacks.terminal.toggle("zsh -i -c 'claude --dangerously-skip-permissions'", {
+    win = { position = "right", width = 0.5 },
+  })
+end, { desc = "Claude Code terminal" })
+-- <C-q>でターミナルをトグル（ノーマルモード、ターミナルバッファ外から）
+vim.keymap.set('n', '<C-q>', function()
+  Snacks.terminal.toggle(nil, {
+    win = { position = "bottom", height = 20 },
+    count = 1,
+  })
+end)
 -- }}}
 
 -- vim-abolish {{{
