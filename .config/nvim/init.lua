@@ -138,7 +138,7 @@ vim.keymap.set('n', 'sa', ':<C-u>qa<CR>')
 -- ターミナル関連 {{{
 -- Claude Codeを新しいターミナルで開く
 vim.keymap.set('n', '<leader>ac', function()
-  vim.cmd('vsplit | wincmd l | terminal claude --dangerously-skip-permissions')
+  vim.cmd("vsplit | wincmd l | terminal zsh -i -c 'claude --dangerously-skip-permissions'")
   vim.cmd('startinsert')
 end, { desc = "Claude Code terminal" })
 -- }}}
@@ -749,7 +749,7 @@ require("toggleterm").setup({
 vim.keymap.set('n', '<leader>tt', '<cmd>1ToggleTerm size=20 direction=horizontal name=hoge<CR>')
 -- Claude Code専用ターミナル（ID=2）
 local claude_term = require('toggleterm.terminal').Terminal:new({
-  cmd = "claude --dangerously-skip-permissions",
+  cmd = "zsh -i -c 'claude --dangerously-skip-permissions'",
   direction = "vertical",
   count = 2,
   on_open = function(term)
