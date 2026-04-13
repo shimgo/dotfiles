@@ -705,6 +705,14 @@ vim.keymap.set('n', '<leader>gu', ':GitGutterUndoHunk<CR>')
 vim.keymap.set('n', '<leader>g<CR>', ':15split|0G<CR>') -- サイズを指定してfugitiveを開く0をつけると新しいバッファを開くのではなくそのバッファを開く。
 vim.keymap.set('n', '<leader>gd', ':Gdiffsplit<CR>')
 vim.keymap.set('n', '<leader>gb', ':G blame<CR>')
+vim.api.nvim_create_autocmd("FileType", {
+  pattern = "fugitive",
+  callback = function(ev)
+    vim.keymap.set('n', 's', '<Nop>', { buffer = ev.buf })
+    vim.keymap.set('n', 'q', 'gq', { buffer = ev.buf, remap = true })
+    vim.wo.winfixheight = true
+  end,
+})
 -- }}}
 
 -- gitlinker {{{
@@ -742,6 +750,7 @@ require("term-edit").setup({
 -- }}}
 
 -- snacks.nvim terminal {{{
+package.loaded["snacks"] = nil
 require("snacks").setup({
   bigfile = { enabled = true },
   terminal = {
@@ -767,10 +776,14 @@ vim.keymap.set('n', '<leader>tc', function()
 end, { desc = "Claude Code terminal" })
 -- <C-q>でターミナルをトグル（ノーマルモード、ターミナルバッファ外から）
 vim.keymap.set('n', '<C-q>', function()
-  Snacks.terminal.toggle(nil, {
-    win = { position = "bottom", height = 20 },
-    count = 1,
-  })
+  if vim.bo.buftype == 'terminal' then
+    Snacks.terminal.toggle(nil, {
+      win = { position = "bottom", height = 20 },
+      count = 1,
+    })
+  else
+    vim.cmd('q')
+  end
 end)
 -- }}}
 
