@@ -743,6 +743,7 @@ require("term-edit").setup({
 
 -- snacks.nvim terminal {{{
 require("snacks").setup({
+  bigfile = { enabled = true },
   terminal = {
     win = {
       keys = {
