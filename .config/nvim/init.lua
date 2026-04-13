@@ -742,14 +742,22 @@ require("term-edit").setup({
 -- }}}
 
 -- toggleterm.nvim {{{
-require("toggleterm").setup()
-vim.keymap.set('n', '<leader>tt', '<cmd>ToggleTerm size=20 direction=horizontal name=hoge<CR>')
+require("toggleterm").setup({
+  open_mapping = '<C-q>', -- ノーマルモード・ターミナルモード両方でトグル可能
+})
+-- 汎用ターミナル（ID=1）
+vim.keymap.set('n', '<leader>tt', '<cmd>1ToggleTerm size=20 direction=horizontal name=hoge<CR>')
+-- Claude Code専用ターミナル（ID=2）
 local claude_term = require('toggleterm.terminal').Terminal:new({
   cmd = "claude --dangerously-skip-permissions",
   direction = "vertical",
-  hidden = true,
+  count = 2,
   on_open = function(term)
     vim.api.nvim_win_set_width(term.window, math.floor(vim.o.columns * 0.5))
+    -- open_mappingが設定するキーマップを上書きするためvim.scheduleで遅延させる
+    vim.schedule(function()
+      vim.keymap.set('t', '<C-q>', function() term:toggle() end, { buffer = term.bufnr })
+    end)
   end,
 })
 vim.keymap.set('n', '<leader>tc', function() claude_term:toggle() end, { desc = "Claude Code terminal (toggleterm)" })
