@@ -142,6 +142,27 @@ fbr() {
   git checkout $(echo "$branch" | awk '{print $1}' | sed "s/.* //")
 }
 
+# fst - fzfでstashを選択して表示する (enterでpop、ctrl-dでdrop)
+fst() {
+  local out k stash
+  while out=$(
+      git stash list --color=always |
+      fzf --ansi --no-sort --reverse \
+          --preview 'git stash show -p --color=always $(echo {} | cut -d: -f1)' \
+          --preview-window=right:60% \
+          --expect=ctrl-d); do
+    k=$(head -1 <<< "$out")
+    stash=$(tail -1 <<< "$out" | cut -d: -f1)
+    [ -z "$stash" ] && break
+    if [ "$k" = ctrl-d ]; then
+      git stash drop "$stash"
+    else
+      git stash pop "$stash"
+      break
+    fi
+  done
+}
+
 # git worktreeを追加する。gwa feature-aで、../feature-aにworktreeを追加し、cdする
 gwa() {
     if git ls-remote --exit-code --heads origin "$1" > /dev/null 2>&1; then
