@@ -11,10 +11,29 @@ vim.opt.fileencoding = "utf-8" -- エンコーディングをUTF-8に設定
 vim.opt.swapfile = false -- スワップファイルを作成しない
 vim.opt.helplang = "ja" -- ヘルプファイルの言語は日本語
 vim.opt.hidden = true -- バッファを切り替えるときにファイルを保存しなくてもOKに
+-- バッファ移動時・フォーカス喪失時に自動保存
+vim.api.nvim_create_autocmd({ "BufLeave", "FocusLost" }, {
+  callback = function()
+    if vim.bo.modified and vim.bo.buftype == "" and vim.fn.expand("%") ~= "" then
+      vim.cmd("silent! write")
+    end
+  end,
+})
 
 -- 表示
 vim.opt.number = true -- 行番号を表示
 vim.opt.wrap = false -- テキストの自動折り返しを無効に
+-- Markdownファイルではwrapをデフォルトで有効にする
+vim.api.nvim_create_autocmd("FileType", {
+  pattern = "markdown",
+  callback = function()
+    vim.wo.wrap = true
+  end,
+})
+-- wrap切り替え
+vim.keymap.set('n', '<leader>w', function()
+  vim.wo.wrap = not vim.wo.wrap
+end)
 vim.opt.termguicolors = true -- 24ビットカラーを有効化（vscode.nvim等のカラースキームに必要）
 
 -- インデント
