@@ -1391,17 +1391,81 @@ vim.api.nvim_create_autocmd("BufRead", {
     if vim.bo[ev.buf].buftype == "quickfix" then
       local title = vim.fn.getqflist({ title = 0 }).title or ""
       if title:match("Gclog") or title:match("Gllog") or title:match("^:?Git%s") then
-        -- fugitive由来のqflistで<CR>を押すと、該当ファイル@SHAと親コミット版を縦分割diff表示
-        vim.keymap.set("n", "<CR>", function()
+        local parent_win = nil
+
+        local function show_diff()
+          local qf_winid = vim.fn.getqflist({ winid = 0 }).winid
+          if qf_winid == 0 then return end
           local qf = vim.fn.getqflist()
-          local entry = qf[vim.fn.line(".")]
+          local lnum = vim.api.nvim_win_get_cursor(qf_winid)[1]
+          local entry = qf[lnum]
           if not entry then return end
           local fname = vim.api.nvim_buf_get_name(entry.bufnr)
           local sha = fname:match("fugitive://.-/%.git/+(%x+)/")
           if not sha then return end
-          vim.cmd(".cc")
+
+          -- qf + host窓1つだけ残して他は閉じる(常に3窓構成にするため)
+          local host = nil
+          for _, w in ipairs(vim.api.nvim_list_wins()) do
+            if w ~= qf_winid then
+              if not host then
+                host = w
+              else
+                pcall(vim.api.nvim_win_close, w, false)
+              end
+            end
+          end
+          if not host then
+            vim.fn.win_gotoid(qf_winid)
+            vim.cmd("aboveleft new")
+            host = vim.api.nvim_get_current_win()
+          end
+
+          -- hostにfile@SHAをロード、親SHA~を縦分割diff表示
+          vim.fn.win_gotoid(host)
+          vim.cmd("diffoff")
+          vim.cmd("edit " .. fname)
           vim.cmd("Gvdiffsplit " .. sha .. "~")
-        end, { buffer = ev.buf, desc = "fugitive qflist: side-by-side diff vs parent" })
+          parent_win = vim.api.nvim_get_current_win()
+          vim.fn.win_gotoid(qf_winid)
+        end
+
+        -- <C-n>/<C-p>: qf上でカーソル移動してdiff更新
+        vim.keymap.set("n", "<C-n>", function()
+          vim.cmd("normal! j")
+          show_diff()
+        end, { buffer = ev.buf, desc = "next commit diff" })
+        vim.keymap.set("n", "<C-p>", function()
+          vim.cmd("normal! k")
+          show_diff()
+        end, { buffer = ev.buf, desc = "prev commit diff" })
+
+        -- dd: カーソル行のコミットのdiffを表示(再表示用)
+        vim.keymap.set("n", "dd", show_diff, { buffer = ev.buf, desc = "show commit diff" })
+
+        -- <CR>: 親diff窓を閉じて、そのコミット時点のファイル全体のみ表示
+        vim.keymap.set("n", "<CR>", function()
+          if parent_win and vim.api.nvim_win_is_valid(parent_win) then
+            pcall(vim.api.nvim_win_close, parent_win, false)
+          end
+          parent_win = nil
+          vim.cmd(".cc")
+        end, { buffer = ev.buf, desc = "file at this commit" })
+
+        -- qfが閉じたら対の親diff窓も閉じる
+        vim.api.nvim_create_autocmd("BufWinLeave", {
+          buffer = ev.buf,
+          once = true,
+          callback = function()
+            if parent_win and vim.api.nvim_win_is_valid(parent_win) then
+              pcall(vim.api.nvim_win_close, parent_win, false)
+            end
+            parent_win = nil
+          end,
+        })
+
+        -- 初回: 最新コミット(1行目)のdiffを即時表示
+        vim.schedule(show_diff)
         return
       end
       vim.schedule(function()
