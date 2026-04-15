@@ -1390,7 +1390,14 @@ vim.api.nvim_create_autocmd("BufRead", {
   callback = function(ev)
     if vim.bo[ev.buf].buftype == "quickfix" then
       local title = vim.fn.getqflist({ title = 0 }).title or ""
-      if title:match("Gclog") or title:match("Gllog") or title:match("^:?Git%s") then
+      local qf_list = vim.fn.getqflist()
+      local first = qf_list[1]
+      local first_name = first and vim.fn.bufname(first.bufnr or 0) or ""
+      local is_fugitive_qf = first_name:match("^fugitive://")
+        or title:match("Gclog")
+        or title:match("Gllog")
+        or title:match("^:?Git%s")
+      if is_fugitive_qf then
         local parent_win = nil
 
         local function show_diff()
@@ -1400,9 +1407,15 @@ vim.api.nvim_create_autocmd("BufRead", {
           local lnum = vim.api.nvim_win_get_cursor(qf_winid)[1]
           local entry = qf[lnum]
           if not entry then return end
-          local fname = vim.api.nvim_buf_get_name(entry.bufnr)
-          local sha = fname:match("fugitive://.-/%.git/+(%x+)/")
+          local fname = vim.fn.bufname(entry.bufnr or 0)
+          local repo, sha, path = fname:match("fugitive://(.-)/%.git/+(%x+)/?(.*)$")
           if not sha then return end
+          -- :Gclogはコミット単位(パスなし)なのでコミット内の先頭変更ファイルを拾う
+          if path == "" then
+            local files = vim.fn.systemlist({ "git", "-C", repo, "diff-tree", "--no-commit-id", "--name-only", "-r", sha })
+            if vim.v.shell_error ~= 0 or #files == 0 or files[1] == "" then return end
+            fname = fname:gsub("/*$", "") .. "/" .. files[1]
+          end
 
           -- qf + host窓1つだけ残して他は閉じる(常に3窓構成にするため)
           local host = nil
