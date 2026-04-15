@@ -724,6 +724,8 @@ vim.keymap.set('n', '<leader>gu', ':GitGutterUndoHunk<CR>')
 vim.keymap.set('n', '<leader>g<CR>', ':15split|0G<CR>') -- サイズを指定してfugitiveを開く0をつけると新しいバッファを開くのではなくそのバッファを開く。
 vim.keymap.set('n', '<leader>gd', ':Gdiffsplit<CR>')
 vim.keymap.set('n', '<leader>gb', ':G blame<CR>')
+vim.keymap.set('n', '<leader>gl', ':0Gclog<CR>', { desc = 'このファイルのコミット履歴をqfに表示' })
+vim.keymap.set('n', '<leader>gL', ':Gclog<CR>', { desc = 'リポジトリ全体のコミット履歴をqfに表示' })
 vim.api.nvim_create_autocmd("FileType", {
   pattern = { "fugitive", "fugitiveblame" },
   callback = function(ev)
