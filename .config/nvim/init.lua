@@ -776,6 +776,7 @@ require("snacks").setup({
   bigfile = { enabled = true },
   terminal = {
     win = {
+      wo = {},
       keys = {
         ["<C-q>"] = { "hide", mode = { "n", "t" } },
       },
@@ -785,14 +786,14 @@ require("snacks").setup({
 -- 汎用ターミナル
 vim.keymap.set('n', '<leader>tt', function()
   Snacks.terminal.toggle(nil, {
-    win = { position = "bottom", height = 20 },
+    win = { position = "bottom", height = 20, wo = {} },
     count = 1,
   })
 end)
 -- Claude Code専用ターミナル
 vim.keymap.set('n', '<leader>tc', function()
   Snacks.terminal.toggle("zsh -i -c 'claude --dangerously-skip-permissions'", {
-    win = { position = "right", width = 0.5 },
+    win = { position = "right", width = 0.5, wo = {} },
   })
 end, { desc = "Claude Code terminal" })
 -- <C-q>でターミナルをトグル（ノーマルモード、ターミナルバッファ外から）
