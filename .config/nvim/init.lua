@@ -725,7 +725,7 @@ vim.keymap.set('n', '<leader>g<CR>', ':15split|0G<CR>') -- サイズを指定し
 vim.keymap.set('n', '<leader>gd', ':Gdiffsplit<CR>')
 vim.keymap.set('n', '<leader>gb', ':G blame<CR>')
 vim.api.nvim_create_autocmd("FileType", {
-  pattern = "fugitive",
+  pattern = { "fugitive", "fugitiveblame" },
   callback = function(ev)
     vim.keymap.set('n', 's', '<Nop>', { buffer = ev.buf })
     vim.keymap.set('n', 'q', 'gq', { buffer = ev.buf, remap = true })
@@ -1383,12 +1383,30 @@ vim.keymap.set("n", "<leader>dl", "<cmd>Trouble lsp toggle win.position=right wi
 vim.keymap.set('n', '<leader>de', '<cmd>Trouble diagnostics toggle<cr>', { desc = "Trouble Diagnostics プレビュー分割なし" })
 vim.keymap.set("n", "<leader>ds", "<cmd>Trouble symbols toggle focus=true win.size=0.3<cr>", { desc = "Trouble Symbols" })
 -- quickfixが開かれたら自動的にTroubleで開く
+-- ただしfugitive由来のqflist(Gclog/Git log等)はファイル名(fugitive://.../<SHA>/path)
+-- でグルーピングされてSHA辞書順になってしまうので、素のquickfixのままにする
 vim.api.nvim_create_autocmd("BufRead", {
+  group = vim.api.nvim_create_augroup("my_qf_to_trouble", { clear = true }),
   callback = function(ev)
     if vim.bo[ev.buf].buftype == "quickfix" then
+      local title = vim.fn.getqflist({ title = 0 }).title or ""
+      if title:match("Gclog") or title:match("Gllog") or title:match("^:?Git%s") then
+        -- fugitive由来のqflistで<CR>を押すと、該当ファイル@SHAと親コミット版を縦分割diff表示
+        vim.keymap.set("n", "<CR>", function()
+          local qf = vim.fn.getqflist()
+          local entry = qf[vim.fn.line(".")]
+          if not entry then return end
+          local fname = vim.api.nvim_buf_get_name(entry.bufnr)
+          local sha = fname:match("fugitive://.-/%.git/+(%x+)/")
+          if not sha then return end
+          vim.cmd(".cc")
+          vim.cmd("Gvdiffsplit " .. sha .. "~")
+        end, { buffer = ev.buf, desc = "fugitive qflist: side-by-side diff vs parent" })
+        return
+      end
       vim.schedule(function()
         vim.cmd([[cclose]])
-        vim.cmd([[Trouble qflist open]])
+        vim.cmd([[Trouble quickfix open]])
       end)
     end
   end,
