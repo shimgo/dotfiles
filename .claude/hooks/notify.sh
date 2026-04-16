@@ -3,9 +3,22 @@ INPUT=$(cat)
 EVENT=$(echo "$INPUT" | jq -r '.hook_event_name')
 
 # cmux環境ならcmux claude-hookで通知、それ以外はiTerm2 + terminal-notifierで通知
+# 通知対象はpermission_promptとStopのみ（iTerm2側と揃える）
 if [[ -n "$CMUX_BUNDLED_CLI_PATH" ]]; then
-  EVENT_LOWER=$(echo "$EVENT" | tr '[:upper:]' '[:lower:]')
-  echo "$INPUT" | "$CMUX_BUNDLED_CLI_PATH" claude-hook "$EVENT_LOWER"
+  SHOULD_NOTIFY=0
+  if [ "$EVENT" = "Notification" ]; then
+    NTYPE=$(echo "$INPUT" | jq -r '.notification_type // ""')
+    if [ "$NTYPE" = "permission_prompt" ]; then
+      SHOULD_NOTIFY=1
+    fi
+  elif [ "$EVENT" = "Stop" ]; then
+    SHOULD_NOTIFY=1
+  fi
+
+  if [ "$SHOULD_NOTIFY" = "1" ]; then
+    EVENT_LOWER=$(echo "$EVENT" | tr '[:upper:]' '[:lower:]')
+    echo "$INPUT" | "$CMUX_BUNDLED_CLI_PATH" claude-hook "$EVENT_LOWER"
+  fi
   exit 0
 fi
 
