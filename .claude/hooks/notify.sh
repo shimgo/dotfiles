@@ -2,17 +2,16 @@
 INPUT=$(cat)
 EVENT=$(echo "$INPUT" | jq -r '.hook_event_name')
 
-# 起動時のiTerm2セッションIDを取得（TERM_SESSION_IDはiTerm2が自動設定する環境変数）
-# w0t1p0:UUID 形式なのでUUID部分のみ抽出
-SESSION_ID="${TERM_SESSION_ID##*:}"
-
-# クリック時にジャンプするexecuteオプションを組み立て
-# iTerm2 → Settings → General → Magic → Enable Python API をオンにしておく必要がある
-if [[ -n "$SESSION_ID" ]]; then
-  EXECUTE="-execute \"~/.claude/hooks/iterm2_notify_jump.sh '$SESSION_ID'\""
-else
-  EXECUTE=""
+# cmux環境ならcmux claude-hookで通知、それ以外はiTerm2 + terminal-notifierで通知
+if [[ -n "$CMUX_BUNDLED_CLI_PATH" ]]; then
+  EVENT_LOWER=$(echo "$EVENT" | tr '[:upper:]' '[:lower:]')
+  echo "$INPUT" | "$CMUX_BUNDLED_CLI_PATH" claude-hook "$EVENT_LOWER"
+  exit 0
 fi
+
+# --- iTerm2 + terminal-notifier ---
+# TERM_SESSION_IDはiTerm2が自動設定する環境変数（w0t1p0:UUID 形式）
+SESSION_ID="${TERM_SESSION_ID##*:}"
 
 if [ "$EVENT" = "Notification" ]; then
   NTYPE=$(echo "$INPUT" | jq -r '.notification_type // ""')
