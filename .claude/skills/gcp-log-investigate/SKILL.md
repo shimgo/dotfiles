@@ -7,6 +7,7 @@ description: >
   「ログから〇〇のtraceを追って」といった依頼のときに使用する。
   GCPプロジェクトのログ調査・ログ検索・Cloud Logging調査の依頼があれば積極的に使うこと。
   使用するコマンドは gcloud logging read のみとし、それ以外のコマンドは使用しない。
+disable-model-invocation: true
 ---
 
 # GCP Log 調査スキル

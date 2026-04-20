@@ -74,7 +74,7 @@
       "Bash(go install *@*)",
       "Bash(go install */*/*)"
     ],
-    "defaultMode": "default"
+    "defaultMode": "auto"
   },
   "hooks": {
     "UserPromptSubmit": [
@@ -145,5 +145,7 @@
   "voiceEnabled": true,
   "feedbackSurveyState": {
     "lastShownTime": 1754265753674
-  }
+  },
+  "skipAutoPermissionPrompt": true,
+  "autoMemoryEnabled": false
 }

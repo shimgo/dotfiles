@@ -30,10 +30,6 @@ vim.api.nvim_create_autocmd("FileType", {
     vim.wo.wrap = true
   end,
 })
--- wrap切り替え
-vim.keymap.set('n', '<leader>w', function()
-  vim.wo.wrap = not vim.wo.wrap
-end)
 vim.opt.termguicolors = true -- 24ビットカラーを有効化（vscode.nvim等のカラースキームに必要）
 
 -- インデント
@@ -104,6 +100,10 @@ vim.keymap.set('n', ';', ':')
 vim.keymap.set('n', ':', ';')
 vim.keymap.set('v', ';', ':')
 vim.keymap.set('v', ':', ';')
+-- wrap切り替え
+vim.keymap.set('n', '<C-z>', function()
+  vim.wo.wrap = not vim.wo.wrap
+end)
 vim.keymap.set('n', '<leader>h', '^')
 vim.keymap.set('v', '<leader>h', '^')
 vim.keymap.set('n', '<leader>l', '$')
@@ -157,7 +157,7 @@ vim.keymap.set('n', 'sa', ':<C-u>qa<CR>')
 -- ターミナル関連 {{{
 -- Claude Codeを新しいターミナルで開く
 vim.keymap.set('n', '<leader>ac', function()
-  vim.cmd("vsplit | wincmd l | terminal zsh -i -c 'claude --dangerously-skip-permissions'")
+  vim.cmd("vsplit | wincmd l | terminal zsh -i -c 'claude'")
   vim.cmd('startinsert')
 end, { desc = "Claude Code terminal" })
 -- }}}
@@ -578,11 +578,6 @@ vim.api.nvim_create_autocmd('LspAttach', {
     vim.keymap.set('n', 'gh', vim.lsp.buf.hover, opts) -- floating windowを表示する。その状態で同じキーを押すとfloating windowにフォーカスが移る。qで離脱
     vim.keymap.set('n', 'gi', vim.lsp.buf.implementation, opts)
     -- vim.keymap.set({ 'n', 'i' }, '<C-k>', vim.lsp.buf.signature_help, opts)
-    vim.keymap.set('n', '<leader>wa', vim.lsp.buf.add_workspace_folder, opts)
-    vim.keymap.set('n', '<leader>wr', vim.lsp.buf.remove_workspace_folder, opts)
-    vim.keymap.set('n', '<leader>wl', function()
-      print(vim.inspect(vim.lsp.buf.list_workspace_folders()))
-    end, opts)
     vim.keymap.set('n', 'gt', vim.lsp.buf.type_definition, opts)
     vim.keymap.set('n', 'ge', vim.lsp.buf.rename, opts)
     vim.keymap.set({ 'n', 'v' }, '<leader>ca', vim.lsp.buf.code_action, opts)
@@ -792,7 +787,7 @@ vim.keymap.set('n', '<leader>tt', function()
 end)
 -- Claude Code専用ターミナル
 vim.keymap.set('n', '<leader>tc', function()
-  Snacks.terminal.toggle("zsh -i -c 'claude --dangerously-skip-permissions'", {
+  Snacks.terminal.toggle("zsh -i -c 'claude'", {
     win = { position = "right", width = 0.5, wo = {} },
   })
 end, { desc = "Claude Code terminal" })

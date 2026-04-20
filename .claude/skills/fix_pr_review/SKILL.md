@@ -14,7 +14,7 @@ description: >
 ## ワークフロー概要
 
 1. PR情報を取得する
-2. 未解決レビューコメントを取得・表示する
+2. レビューコメントを3種類すべて取得・表示する（Review thread / Review body / Issue comment）
 3. 修正方法をユーザーに確認する（一括 or 個別）
 4. 修正を実行する
 5. 完了サマリーを提示する
@@ -38,9 +38,19 @@ PRが見つからない場合は、ユーザーにPR番号を直接尋ねる。
 
 ---
 
-## Step 2: 未解決レビューコメントを取得する
+## Step 2: レビューコメントを取得する
 
-GraphQL APIで未解決スレッドを取得する。まず`totalCount`を確認し、100件を超える場合はページネーション（cursor）で全件取得する。
+GitHubのPRには3種類のコメントがある。**必ず3種類すべてを取得する**こと。1種類だけ見ると見逃しが発生する。
+
+| 種類 | フィールド | URL形式 | 解決状態の判定 |
+|------|-----------|---------|----------------|
+| Review thread (行コメント) | `reviewThreads.nodes` | `#discussion_rXXX` | `isResolved` で機械的に判定 |
+| Review body (総評コメント) | `reviews.nodes.body` | `#pullrequestreview-XXX` | 解決の概念なし。bodyが非空なら対応要確認 |
+| Issue comment (PR全体コメント) | `comments.nodes.body` | `#issuecomment-XXX` | 解決の概念なし。人のコメントは対応要確認 |
+
+### 1回のクエリで3種類をまとめて取得する
+
+`totalCount`が100を超える場合はページネーション（cursor）で全件取得する。
 
 ```bash
 gh api graphql -f query='
@@ -54,13 +64,31 @@ query {
           comments(first: 20) {
             nodes {
               body
-              author {
-                login
-              }
+              author { login }
               path
               line
+              url
             }
           }
+        }
+      }
+      reviews(first: 100) {
+        totalCount
+        nodes {
+          state
+          body
+          author { login }
+          createdAt
+          url
+        }
+      }
+      comments(first: 100) {
+        totalCount
+        nodes {
+          body
+          author { login }
+          createdAt
+          url
         }
       }
     }
@@ -68,25 +96,42 @@ query {
 }'
 ```
 
-取得後、`isResolved == false` のスレッドのみを抽出し、以下の情報をユーザーに報告する：
+### 取得後の処理
 
-- **総レビュースレッド数**（`totalCount`の値）
-- **未解決スレッド数**（フィルタリング後の件数）
-- **取得漏れの有無**（`totalCount > 100` の場合はページネーション必要）
+**1. Review thread (行コメント)**
+- `isResolved == false` のスレッドのみ抽出
+- 各スレッドの全コメントを時系列で表示（最後の発言者の意図を読み取るため）
+- 表示項目: コメント原文、コメント者、該当ファイル、該当行番号、URL
 
-各未解決コメントには以下を含めて表示する：
-- コメント原文
-- コメント者
-- 該当ファイル
-- 該当行番号
+**2. Review body (総評コメント)**
+- `body`が非空のものを抽出
+- PR著者自身のreviewは除外してよい
+- ボット（`login`が `[bot]` 終端、`gemini-code-assist`、`vercel`、`dependabot` など）は別枠で表示し、人のコメントと混ぜない
+- 解決済みかどうかGitHub側で判別できないため、**全件ユーザーに確認する**
+- 表示項目: 本文、author、state（APPROVED/COMMENTED/CHANGES_REQUESTED/DISMISSED）、URL
 
-未解決コメントが0件の場合は「未解決のレビューコメントはありません」と伝えてワークフローを終了する。
+**3. Issue comment (PR全体コメント)**
+- ボット（vercel、gemini-code-assist、CI通知など）は除外または別枠表示
+- 人のコメントで、PR著者以外のものを抽出
+- 表示項目: 本文、author、URL
+
+### 報告フォーマット
+
+取得後、**3種類を区別して**以下の件数を報告する：
+
+- 総Review thread数、未解決数、取得漏れの有無
+- 総Review数、対応要確認のbody数（人のみ）、ボット件数
+- 総Issue comment数、対応要確認数（人のみ）、ボット件数
+
+### 終了条件
+
+3種類のいずれにも対応要確認コメントが無い場合のみ「対応すべきコメントはありません」と伝えて終了する。**reviewThreadsだけを見て終了してはいけない**。
 
 ---
 
 ## Step 3: 修正方法をユーザーに確認する
 
-すべての未解決コメントを提示した後、`AskUserQuestionTool`を使って以下の選択肢を提示する：
+3種類すべての対応要確認コメントを提示した後、`AskUserQuestionTool`を使って以下の選択肢を提示する：
 
 ```
 修正方法を選択してください:
@@ -136,6 +181,7 @@ query {
 
 ## 注意事項
 
+- **3種類のコメント（reviewThreads / reviews.body / comments）をすべて取得すること**。`reviewThreads`だけを見ると、レビュー総評（`#pullrequestreview-XXX`）に書かれた設計提案などを見逃す。過去にここで見逃しが発生した。
 - レビューコメントの内容を正確に理解し、適切な修正を行う。不明確なコメントはユーザーに確認する。
 - 修正が他の部分に影響を与える可能性がある場合は、事前にユーザーに警告する。
 - プロジェクトのコーディング規約とコード品質を維持する。

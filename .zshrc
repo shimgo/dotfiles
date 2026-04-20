@@ -21,6 +21,9 @@ fi
 export EDITOR=nvim
 eval "$(direnv hook zsh)"
 
+# キーバインド: emacsモードを明示（main が .safe に落ちる環境への対策）
+bindkey -e
+
 # Java settings
 export JAVA_HOME=/opt/homebrew/opt/openjdk
 export PATH=$PATH:$JAVA_HOME/bin
