@@ -315,6 +315,7 @@ vim.keymap.set('n', 'sb', ':<C-u>enew<CR>')
 vim.keymap.set('n', 'sN', 'gt')
 vim.keymap.set('n', 'sP', 'gT')
 vim.keymap.set('n', 'so', '<C-w>_<C-w>|')
+vim.keymap.set('n', 'sz', function() Snacks.zen.zoom() end, { desc = "現在のウィンドウをzoomトグル" })
 vim.keymap.set('n', 'st', ':<C-u>tabnew<CR>')
 vim.keymap.set('n', 'sT', ':<C-u>Unite tab<CR>')
 -- }}}
