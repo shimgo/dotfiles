@@ -30,6 +30,31 @@ vim.api.nvim_create_autocmd("FileType", {
     vim.wo.wrap = true
   end,
 })
+
+-- 現在のバッファのマークダウンファイルをcmuxのマークダウンビューで開く
+vim.api.nvim_create_user_command("CmuxMarkdown", function()
+  if vim.bo.filetype ~= "markdown" then
+    vim.notify("マークダウンファイルではありません (filetype=" .. vim.bo.filetype .. ")", vim.log.levels.ERROR)
+    return
+  end
+  local path = vim.fn.expand("%:p")
+  if path == "" then
+    vim.notify("バッファに紐付くファイルがありません", vim.log.levels.ERROR)
+    return
+  end
+  if vim.bo.modified then
+    vim.cmd("silent! write")
+  end
+  vim.system({ "cmux", "markdown", "open", path }, { text = true }, function(obj)
+    if obj.code ~= 0 then
+      vim.schedule(function()
+        vim.notify("cmux markdown open に失敗しました: " .. (obj.stderr or ""), vim.log.levels.ERROR)
+      end)
+    end
+  end)
+end, { desc = "cmuxのマークダウンビューで現在のバッファを開く" })
+vim.keymap.set('n', '<leader>mv', ':CmuxMarkdown<CR>', { desc = "cmuxのマークダウンビューで現在のバッファを開く" })
+
 vim.opt.termguicolors = true -- 24ビットカラーを有効化（vscode.nvim等のカラースキームに必要）
 
 -- インデント
@@ -771,6 +796,7 @@ package.loaded["snacks"] = nil
 require("snacks").setup({
   bigfile = { enabled = true },
   terminal = {
+    auto_insert = false,
     win = {
       wo = {},
       keys = {
