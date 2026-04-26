@@ -53,7 +53,28 @@ vim.api.nvim_create_user_command("CmuxMarkdown", function()
     end
   end)
 end, { desc = "cmuxのマークダウンビューで現在のバッファを開く" })
-vim.keymap.set('n', '<leader>mv', ':CmuxMarkdown<CR>', { desc = "cmuxのマークダウンビューで現在のバッファを開く" })
+vim.keymap.set('n', '<leader>vm', ':CmuxMarkdown<CR>', { desc = "cmuxのマークダウンビューで現在のバッファを開く" })
+
+-- 現在のバッファをcmuxのブラウザでfile://として開く
+vim.api.nvim_create_user_command("CmuxBrowser", function()
+  local path = vim.fn.expand("%:p")
+  if path == "" then
+    vim.notify("バッファに紐付くファイルがありません", vim.log.levels.ERROR)
+    return
+  end
+  if vim.bo.modified then
+    vim.cmd("silent! write")
+  end
+  local url = "file://" .. path
+  vim.system({ "cmux", "browser", "open", url }, { text = true }, function(obj)
+    if obj.code ~= 0 then
+      vim.schedule(function()
+        vim.notify("cmux browser open に失敗しました: " .. (obj.stderr or ""), vim.log.levels.ERROR)
+      end)
+    end
+  end)
+end, { desc = "cmuxのブラウザで現在のバッファを開く" })
+vim.keymap.set('n', '<leader>vh', ':CmuxBrowser<CR>', { desc = "cmuxのブラウザで現在のバッファを開く" })
 
 vim.opt.termguicolors = true -- 24ビットカラーを有効化（vscode.nvim等のカラースキームに必要）
 
