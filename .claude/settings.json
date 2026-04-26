@@ -141,11 +141,13 @@
     "enabled": true,
     "mode": "hold"
   },
+  "autoMemoryEnabled": false,
   "skipDangerousModePermissionPrompt": true,
+  "skipAutoPermissionPrompt": true,
   "voiceEnabled": true,
   "feedbackSurveyState": {
     "lastShownTime": 1754265753674
   },
-  "skipAutoPermissionPrompt": true,
-  "autoMemoryEnabled": false
+  "preferredNotifChannel": "terminal_bell",
+  "remoteControlAtStartup": false
 }
