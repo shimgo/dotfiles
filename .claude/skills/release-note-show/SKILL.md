@@ -14,7 +14,7 @@ description: >
 
 # リリース内容表示スキル
 
-リポジトリのリリース内容を要約し、HTMLにレンダリングして **Claude Code を起動したディレクトリ直下の `./release.html`** に書き出す。書き出し後、`cmux browser open "file://$(pwd)/release.html"` を実行してブラウザペインで表示する。
+リポジトリのリリース内容を要約し、HTMLにレンダリングして **Claude Code を起動したディレクトリ直下の `./<リポジトリ名>-release-<リリースPR番号>.html`**（例: `./def-release-1234.html`。リポジトリが `abc/def` なら `def`）に書き出す。書き出し後、`cmux browser open "file://$(pwd)/<リポジトリ名>-release-<リリースPR番号>.html"` を実行してブラウザペインで表示する。
 
 HTMLテンプレートはスキル同梱の `release-template.md` を使う（プレースホルダー仕様はそのファイル内に記載）。
 
@@ -292,21 +292,21 @@ TZ='Asia/Tokyo' date -d '<utc-iso>' '+%Y-%m-%d %H:%M JST'
 
 ## O-Step 2: ファイルに書き出す
 
-レンダリング結果を **Claude Code を起動したディレクトリ直下の `./release.html`** に書き出す。既存ファイルは上書きする。
+ファイル名は `<REPO_NAME>-release-<RELEASE_PR_NUMBER>.html` とする。`<REPO_NAME>` は `gh repo view --json nameWithOwner --jq '.nameWithOwner | split("/")[1]'` で取得するリポジトリ名（owner/repo のスラッシュ以降）。レンダリング結果を **Claude Code を起動したディレクトリ直下** に書き出す。既存ファイルは上書きする。
 
 ## O-Step 3: ブラウザで表示する
 
 書き出し後、以下のコマンドでブラウザペインに表示する:
 
 ```bash
-cmux browser open "file://$(pwd)/release.html"
+cmux browser open "file://$(pwd)/<REPO_NAME>-release-<RELEASE_PR_NUMBER>.html"
 ```
 
 成功すると `OK surface=surface:N pane=pane:M placement=split` のような出力が返る。失敗時はエラー文をそのままユーザーに伝え、出力ファイルパスだけ案内する。
 
 ## O-Step 4: チャットへは1〜2行のサマリのみ
 
-出力ファイルを開いたあと、チャットには「`./release.html` に書き出してブラウザで開きました（リリースPR `#{番号}`、機能PR `{件数}` 件）」程度の短い報告だけを返す。HTMLの中身（PR一覧や概要）はチャットに再掲しない。
+出力ファイルを開いたあと、チャットには「`./<リポジトリ名>-release-<番号>.html` に書き出してブラウザで開きました（リリースPR `#<番号>`、機能PR `<件数>` 件）」程度の短い報告だけを返す。HTMLの中身（PR一覧や概要）はチャットに再掲しない。
 
 ## フォーマット遵守の注意
 
@@ -327,7 +327,7 @@ cmux browser open "file://$(pwd)/release.html"
 - progress モードで複数 Open PR があり1件に絞り込んだ場合 → 採用したPR番号と理由（`updatedAt` 最新）
 - last モードで release ブランチが複数候補あり絞り込んだ場合 → 採用したブランチ名
 - 機能PR一覧の取得方法（通常マージ／Squash merge）で分岐があった場合 → 採用したロジック
-- `cmux browser open` がエラーになった場合 → エラー内容と書き出した `release.html` のフルパスを案内
+- `cmux browser open` がエラーになった場合 → エラー内容と書き出した `<リポジトリ名>-release-<番号>.html` のフルパスを案内
 
 不要な前置きは省く。HTMLの中身をチャットに再掲しない。
 
@@ -339,6 +339,6 @@ cmux browser open "file://$(pwd)/release.html"
 - 出力フォーマットの改変（見出し追加・順序変更・JSTを別タイムゾーンに変える等）
 - 推測で「概要」を埋めること。PR本文・変更内容から読み取れない場合は「PR本文に記載なし」と書く。
 - HTML本体の中身（PR一覧・概要）をチャットに再掲すること。チャットへは O-Step 4 の短いサマリのみ。
-- `release.html` 以外への書き出し（ユーザーが明示的に別パスを指定した場合のみ従う）。
+- `<リポジトリ名>-release-<PR番号>.html` 以外への書き出し（ユーザーが明示的に別パスを指定した場合のみ従う）。
 - `git push` の使用、コミット履歴の改変
 - リポジトリ外のファイルへのアクセス
