@@ -124,7 +124,8 @@
   },
   "enabledPlugins": {
     "example-skills@anthropic-agent-skills": true,
-    "gopls-lsp@claude-plugins-official": true
+    "gopls-lsp@claude-plugins-official": true,
+    "session-report@claude-plugins-official": true
   },
   "extraKnownMarketplaces": {
     "anthropic-agent-skills": {
@@ -143,11 +144,11 @@
   },
   "autoMemoryEnabled": false,
   "skipDangerousModePermissionPrompt": true,
+  "preferredNotifChannel": "terminal_bell",
+  "remoteControlAtStartup": false,
   "skipAutoPermissionPrompt": true,
   "voiceEnabled": true,
   "feedbackSurveyState": {
     "lastShownTime": 1754265753674
-  },
-  "preferredNotifChannel": "terminal_bell",
-  "remoteControlAtStartup": false
+  }
 }
