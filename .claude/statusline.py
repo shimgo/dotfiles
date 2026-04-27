@@ -31,12 +31,36 @@ def reset_time(epoch, include_date=False):
         return dt.strftime('%m/%d %H:%M')
     return dt.strftime('%H:%M')
 
+groups = []
+
 model = data.get('model', {}).get('display_name', 'Claude')
-parts = [f'{BOLD}{model}{R}']
+effort = data.get('effort', {}).get('level')
+group_model = [f'{BOLD}{model}{R}']
+if effort:
+    group_model.append(f'{DIM}{effort}{R}')
+groups.append(' '.join(group_model))
+
+group_cost = []
+cost = data.get('cost', {}).get('total_cost_usd')
+if cost is not None:
+    group_cost.append(f'{BOLD}${cost:.2f}{R}')
+
+duration_ms = data.get('cost', {}).get('total_api_duration_ms')
+if duration_ms is not None:
+    s = duration_ms / 1000
+    if s < 60:
+        dur = f'{s:.1f}s'
+    elif s < 3600:
+        dur = f'{int(s // 60)}m{int(s % 60)}s'
+    else:
+        dur = f'{int(s // 3600)}h{int((s % 3600) // 60)}m'
+    group_cost.append(f'{DIM}{dur}{R}')
+if group_cost:
+    groups.append(' '.join(group_cost))
 
 ctx = data.get('context_window', {}).get('used_percentage')
 if ctx is not None:
-    parts.append(f'ctx {dot(ctx)}')
+    groups.append(f'ctx {dot(ctx)}')
 
 five_info = data.get('rate_limits', {}).get('five_hour', {})
 five = five_info.get('used_percentage')
@@ -45,7 +69,7 @@ if five is not None:
     label = f'5h {dot(five)}'
     if reset:
         label += f' {DIM}→{reset}{R}'
-    parts.append(label)
+    groups.append(label)
 
 week_info = data.get('rate_limits', {}).get('seven_day', {})
 week = week_info.get('used_percentage')
@@ -54,11 +78,14 @@ if week is not None:
     label = f'7d {dot(week)}'
     if reset:
         label += f' {DIM}→{reset}{R}'
-    parts.append(label)
+    groups.append(label)
 
-# Stopフック用にコンテキスト使用率をファイルに書き出す
+# Stopフック用にコンテキスト使用率と累計コストをファイルに書き出す
 if ctx is not None:
     with open('/tmp/claude_ctx_pct.txt', 'w') as f:
         f.write(str(round(ctx)))
+if cost is not None:
+    with open('/tmp/claude_cost.txt', 'w') as f:
+        f.write(f'{cost:.6f}')
 
-print(f'  {DIM}·{R}  '.join(parts), end='')
+print(f'  {DIM}|{R}  '.join(groups), end='')
