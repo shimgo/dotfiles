@@ -8,7 +8,7 @@ description: >
   「progress」「last」といった依頼のときに使用する。
   releaseブランチへのマージ済み最新リリース（last）と、releaseをbaseとするOpen PR（progress, 次のリリース予定）の
   2モードに対応する。デフォルトは last。指定されたPRの含まれる機能PR一覧と変更内容を抽出し、
-  機能・DBスキーマ・インフラに分類して規定フォーマットで要約する。
+  機能・GraphQLスキーマ・DBスキーマ・インフラに分類して規定フォーマットで要約する。
   リリース内容確認、リリースノート生成、直近リリース・次回リリース予定の要約依頼があれば積極的に使うこと。
 ---
 
@@ -196,9 +196,23 @@ gh pr diff <N> --name-only
 gh pr diff <N>
 ```
 
-## C-Step 2: 変更を3カテゴリに分類する
+## C-Step 2: 変更を4カテゴリに分類する
 
-各PRが「機能」「DBスキーマ」「インフラ」のどれに該当するかを変更ファイルのパスと内容から判定する。1つのPRが複数該当することもある。
+各PRが「機能」「GraphQLスキーマ」「DBスキーマ」「インフラ」のどれに該当するかを変更ファイルのパスと内容から判定する。1つのPRが複数該当することもある。
+
+### GraphQLスキーマに関する変更
+
+ファイルパスのヒューリスティック（マッチしたら候補）:
+
+- `**/*.graphql`, `**/*.graphqls`, `**/*.gql`
+- `**/schema.graphql`, `**/schema.graphqls`
+- `**/graphql/**` 配下のスキーマ定義ファイル
+- コード内のスキーマDSL（gqlgenの `schema.go`、graphql-ruby の type 定義、Apollo の `gql` テンプレートリテラル等）でスキーマ構造が変わるもの
+
+判定の基準:
+- `type` / `input` / `enum` / `interface` / `union` / `scalar` の追加・変更・削除があれば該当
+- フィールドの追加・削除・型変更、引数の変更、`@directive` の追加・変更も該当
+- リゾルバ実装のみの変更（スキーマSDL不変）は該当しない
 
 ### DBスキーマに関する変更
 
@@ -227,7 +241,7 @@ gh pr diff <N>
 
 ### 機能に関する変更
 
-上記2カテゴリに該当しない、アプリケーション挙動の変更すべて。
+上記3カテゴリに該当しない、アプリケーション挙動の変更すべて。
 
 ### 注意
 
@@ -275,7 +289,7 @@ TZ='Asia/Tokyo' date -d '<utc-iso>' '+%Y-%m-%d %H:%M JST'
   ```html
   <li><span class="num">{{PR_INDEX}}.</span><a href="#pr-{{PR_NUMBER}}">#{{PR_NUMBER}} {{PR_TITLE}}</a></li>
   ```
-- `{{SUMMARY_FEATURE}}` / `{{SUMMARY_SCHEMA}}` / `{{SUMMARY_INFRA}}`: 各カテゴリの要約を `<ul><li>...</li></ul>` で記述。該当なしは `<p>特になし</p>`。識別子は `<code>...</code>` で囲む。
+- `{{SUMMARY_FEATURE}}` / `{{SUMMARY_GRAPHQL}}` / `{{SUMMARY_SCHEMA}}` / `{{SUMMARY_INFRA}}`: 各カテゴリの要約を `<ul><li>...</li></ul>` で記述。該当なしは `<p>特になし</p>`。識別子は `<code>...</code>` で囲む。
 - `{{PR_ARTICLES}}`: 機能PRごとに以下を生成し連結
   ```html
   <article class="pr" id="pr-{{PR_NUMBER}}">
@@ -286,6 +300,7 @@ TZ='Asia/Tokyo' date -d '<utc-iso>' '+%Y-%m-%d %H:%M JST'
   ```
 - `{{PR_BADGES}}`: 該当カテゴリすべてを連結
   - 機能: `<span class="badge feature">機能</span>`
+  - GraphQLスキーマ: `<span class="badge graphql">GraphQLスキーマ</span>`
   - DBスキーマ: `<span class="badge schema">DBスキーマ</span>`
   - インフラ: `<span class="badge infra">インフラ</span>`
 - `{{PR_DESCRIPTION}}`: そのPRの変更内容の概要を2〜4文（背景・何を変えたか・影響範囲）。識別子は `<code>...</code>` で囲む。
@@ -313,7 +328,7 @@ cmux browser open "file://$(pwd)/<REPO_NAME>-release-<RELEASE_PR_NUMBER>.html"
 - HTMLテンプレートは `release-template.md` のものを **改変せず** 使う。CSSや見出し構造を勝手に変えない。
 - PR一覧と本文見出しの両方で、PR番号の後ろにPRタイトルを半角スペース区切りで併記する。タイトルは改変・要約せず GitHub の原文ママ（HTMLエスケープのみ）。
 - last モードのタイトル日時は JST に変換したうえで `YYYY-MM-DD HH:MM JST` 形式。秒は出さない。progress モードはタイトルに日時を含めない。
-- 「概要」3節（機能 / DBスキーマ / インフラ）は順序固定。該当なしでも節を省略しない。
+- 「概要」4節（機能 / GraphQLスキーマ / DBスキーマ / インフラ）は順序固定。該当なしでも節を省略しない。
 - HTMLエスケープ: PRタイトルや概要本文に `<` `>` `&` `"` `'` が含まれる場合はエスケープすること。
 - リリースPR自身の番号は機能PR一覧から除外する。
 

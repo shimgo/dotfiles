@@ -17,6 +17,7 @@
 | `{{PR_COUNT}}` | 機能PRの件数 | 例: `24` | 例: `24` |
 | `{{TOC_ITEMS}}` | 「PR一覧」のリストアイテム | 後述のループで生成 | 同左 |
 | `{{SUMMARY_FEATURE}}` | 機能ブロックの中身（`<ul><li>...</li></ul>` または `<p>特になし</p>`） | | |
+| `{{SUMMARY_GRAPHQL}}` | GraphQLスキーマブロックの中身 | | |
 | `{{SUMMARY_SCHEMA}}` | DBスキーマブロックの中身 | | |
 | `{{SUMMARY_INFRA}}` | インフラブロックの中身 | | |
 | `{{PR_ARTICLES}}` | PR詳細セクションの全 `<article>` を連結したHTML | | |
@@ -36,10 +37,11 @@
 
 ### バッジHTML
 
-PRが該当するカテゴリ（機能 / DBスキーマ / インフラ）すべてを含める。複数該当する場合は連結する。
+PRが該当するカテゴリ（機能 / GraphQLスキーマ / DBスキーマ / インフラ）すべてを含める。複数該当する場合は連結する。
 
 ```html
 <span class="badge feature">機能</span>
+<span class="badge graphql">GraphQLスキーマ</span>
 <span class="badge schema">DBスキーマ</span>
 <span class="badge infra">インフラ</span>
 ```
@@ -101,9 +103,11 @@ PRタイトルや概要本文に `<` `>` `&` `"` `'` が含まれる場合は HT
     --border: #d0d7de;
     --code-bg: #f6f8fa;
     --feature: #1a7f37;
+    --graphql: #b41e8b;
     --schema: #9a6700;
     --infra: #8250df;
     --feature-bg: #dafbe1;
+    --graphql-bg: #fde0f3;
     --schema-bg: #fff8c5;
     --infra-bg: #fbefff;
   }
@@ -117,9 +121,11 @@ PRタイトルや概要本文に `<` `>` `&` `"` `'` が含まれる場合は HT
       --border: #30363d;
       --code-bg: #161b22;
       --feature: #56d364;
+      --graphql: #ff7eb8;
       --schema: #e3b341;
       --infra: #d2a8ff;
       --feature-bg: #0f2417;
+      --graphql-bg: #2d1029;
       --schema-bg: #271d08;
       --infra-bg: #21163a;
     }
@@ -209,6 +215,7 @@ PRタイトルや概要本文に `<` `>` `&` `"` `'` が含まれる場合は HT
     border-radius: 0 6px 6px 0;
   }
   .summary-block.feature { border-color: var(--feature); background: var(--feature-bg); }
+  .summary-block.graphql { border-color: var(--graphql); background: var(--graphql-bg); }
   .summary-block.schema { border-color: var(--schema); background: var(--schema-bg); }
   .summary-block.infra { border-color: var(--infra); background: var(--infra-bg); }
   .summary-block h3 {
@@ -216,6 +223,7 @@ PRタイトルや概要本文に `<` `>` `&` `"` `'` が含まれる場合は HT
     font-size: 16px;
   }
   .summary-block.feature h3 { color: var(--feature); }
+  .summary-block.graphql h3 { color: var(--graphql); }
   .summary-block.schema h3 { color: var(--schema); }
   .summary-block.infra h3 { color: var(--infra); }
   .summary-block ul {
@@ -283,6 +291,7 @@ PRタイトルや概要本文に `<` `>` `&` `"` `'` が含まれる場合は HT
     line-height: 1.6;
   }
   .badge.feature { color: var(--feature); background: var(--feature-bg); }
+  .badge.graphql { color: var(--graphql); background: var(--graphql-bg); }
   .badge.schema { color: var(--schema); background: var(--schema-bg); }
   .badge.infra { color: var(--infra); background: var(--infra-bg); }
   article.pr p {
@@ -329,6 +338,11 @@ PRタイトルや概要本文に `<` `>` `&` `"` `'` が含まれる場合は HT
   <div class="summary-block feature">
     <h3>機能に関する変更</h3>
     {{SUMMARY_FEATURE}}
+  </div>
+
+  <div class="summary-block graphql">
+    <h3>GraphQLスキーマに関する変更</h3>
+    {{SUMMARY_GRAPHQL}}
   </div>
 
   <div class="summary-block schema">
