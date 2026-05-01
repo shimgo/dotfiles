@@ -1298,9 +1298,10 @@ require('lualine').setup {
     lualine_y = {'progress', 'selectioncount'},
     lualine_z = {'location', 'tabs',
       -- カレントワーキングディレクトリを表示する
+      -- 末尾のスペースは、ターミナルのスクロールバーに隠れないように入れている
       {
         function()
-          return vim.fn.getcwd()
+          return vim.fn.getcwd() .. '  '
         end,
         icon = '',
       },
