@@ -196,6 +196,8 @@ gh pr diff <N> --name-only
 gh pr diff <N>
 ```
 
+GraphQLスキーマ または DBスキーマ に該当するPRについては、`gh pr diff <N>` の出力から該当ファイルの diff ブロック（`diff --git a/<path> b/<path>` から次の `diff --git` 直前まで）を切り出して保持する。これは O-Step 1 で `{{SUMMARY_GRAPHQL}}` / `{{SUMMARY_SCHEMA}}` の中に埋め込むのに使う。`gh pr diff` 自体は pathspec フィルタを持たないので、出力をパースして対象パスのブロックを抽出する。
+
 ## C-Step 2: 変更を4カテゴリに分類する
 
 各PRが「機能」「GraphQLスキーマ」「DBスキーマ」「インフラ」のどれに該当するかを変更ファイルのパスと内容から判定する。1つのPRが複数該当することもある。
@@ -289,7 +291,11 @@ TZ='Asia/Tokyo' date -d '<utc-iso>' '+%Y-%m-%d %H:%M JST'
   ```html
   <li><span class="num">{{PR_INDEX}}.</span><a href="#pr-{{PR_NUMBER}}">#{{PR_NUMBER}} {{PR_TITLE}}</a></li>
   ```
-- `{{SUMMARY_FEATURE}}` / `{{SUMMARY_GRAPHQL}}` / `{{SUMMARY_SCHEMA}}` / `{{SUMMARY_INFRA}}`: 各カテゴリの要約を `<ul><li>...</li></ul>` で記述。該当なしは `<p>特になし</p>`。識別子は `<code>...</code>` で囲む。
+- `{{SUMMARY_FEATURE}}` / `{{SUMMARY_GRAPHQL}}` / `{{SUMMARY_SCHEMA}}` / `{{SUMMARY_INFRA}}`: 各カテゴリの要約を `<ul><li>...</li></ul>` で記述。該当なしは `<p>特になし</p>`。識別子は `<code>...</code>` で囲む。本文中に `#1234` のようなPR番号表記を含める場合は、必ず `<a class="pr-ref" href="https://github.com/{owner}/{repo}/pull/{N}" target="_blank" rel="noopener">#{N}</a>` の形式でリンク化する（同じ番号が複数回出ても全箇所リンク化する）。
+  - `{{SUMMARY_GRAPHQL}}` と `{{SUMMARY_SCHEMA}}` は、**変更内容ごとに対応する diff を直後に並べる**。各 `<li>`（変更内容1件）の中に「要約テキスト + 紐づく `<details class="schema-diff">`」を入れ、変更内容1→そのdiff、変更内容2→そのdiff、…の順で配置する。要約とdiffを別の節に分けない。HTML仕様は `release-template.md` の「スキーマ diff の埋め込み」セクション参照。
+  - `{{SUMMARY_GRAPHQL}}` は GraphQL スキーマ系ファイル、`{{SUMMARY_SCHEMA}}` は DB スキーマ系ファイルのみを対象にし、混ぜない。`{{SUMMARY_FEATURE}}` と `{{SUMMARY_INFRA}}` には diff を埋め込まない。
+  - 1つの変更内容に複数ファイルのdiffが紐づく場合は同じ `<li>` 内に `<details>` を複数並べる。1つのPRが独立した複数の変更内容を持つ場合はPRを複数 `<li>` に分割する。
+  - diff 行は HTML エスケープしてから `<span class="line file|hunk|add|del|context">…</span>` でラップする。1ファイルが200行を超える場合は先頭100行 + 中略 + 末尾30行に切り詰め、`<summary>` に `（一部省略）` と書き添える。
 - `{{PR_ARTICLES}}`: 機能PRごとに以下を生成し連結
   ```html
   <article class="pr" id="pr-{{PR_NUMBER}}">
@@ -303,7 +309,7 @@ TZ='Asia/Tokyo' date -d '<utc-iso>' '+%Y-%m-%d %H:%M JST'
   - GraphQLスキーマ: `<span class="badge graphql">GraphQLスキーマ</span>`
   - DBスキーマ: `<span class="badge schema">DBスキーマ</span>`
   - インフラ: `<span class="badge infra">インフラ</span>`
-- `{{PR_DESCRIPTION}}`: そのPRの変更内容の概要を2〜4文（背景・何を変えたか・影響範囲）。識別子は `<code>...</code>` で囲む。
+- `{{PR_DESCRIPTION}}`: そのPRの変更内容の概要を2〜4文（背景・何を変えたか・影響範囲）。識別子は `<code>...</code>` で囲む。本文中に `#1234` のようなPR番号表記を含める場合は、必ず `<a class="pr-ref" href="https://github.com/{owner}/{repo}/pull/{N}" target="_blank" rel="noopener">#{N}</a>` の形式でリンク化する（同じ番号が複数回出ても全箇所リンク化する）。
 
 ## O-Step 2: ファイルに書き出す
 
@@ -331,6 +337,8 @@ cmux browser open "file://$(pwd)/<REPO_NAME>-release-<RELEASE_PR_NUMBER>.html"
 - 「概要」4節（機能 / GraphQLスキーマ / DBスキーマ / インフラ）は順序固定。該当なしでも節を省略しない。
 - HTMLエスケープ: PRタイトルや概要本文に `<` `>` `&` `"` `'` が含まれる場合はエスケープすること。
 - リリースPR自身の番号は機能PR一覧から除外する。
+- 概要・PR詳細本文中の `#NNNN` 表記は **すべて** GitHub PR へのリンクにする（`<a class="pr-ref" href="https://github.com/{owner}/{repo}/pull/{N}" target="_blank" rel="noopener">#{N}</a>`）。プレーンテキストの `#NNNN` を残さない。TOC とPR Article の `<h3>` 内のリンクはテンプレート既定のままでよい。
+- GraphQLスキーマ／DBスキーマ概要は、変更内容ごとにdiffを直後に並べる構造（`<li>` 内に要約 + 該当 `<details class="schema-diff">`）にする。要約だけまとめて出してdiffを末尾にまとめる構造にしない。HTML仕様は `release-template.md` の「スキーマ diff の埋め込み」セクション参照。diffは要約・改変せず原文ママを行クラス分けして出す。
 
 ---
 
@@ -353,6 +361,7 @@ cmux browser open "file://$(pwd)/<REPO_NAME>-release-<RELEASE_PR_NUMBER>.html"
 - HTMLテンプレート（`release-template.md`）の改変・要約。CSS や見出し構造を変更しない。
 - 出力フォーマットの改変（見出し追加・順序変更・JSTを別タイムゾーンに変える等）
 - 推測で「概要」を埋めること。PR本文・変更内容から読み取れない場合は「PR本文に記載なし」と書く。
+- スキーマ diff の要約・改変。`gh pr diff` で得られた diff は行クラス分けと HTML エスケープ・上限超過時の中略以外の編集を加えない。
 - HTML本体の中身（PR一覧・概要）をチャットに再掲すること。チャットへは O-Step 4 の短いサマリのみ。
 - `<リポジトリ名>-release-<PR番号>.html` 以外への書き出し（ユーザーが明示的に別パスを指定した場合のみ従う）。
 - `git push` の使用、コミット履歴の改変

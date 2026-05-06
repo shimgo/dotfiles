@@ -81,6 +81,61 @@ PRが該当するカテゴリ（機能 / GraphQLスキーマ / DBスキーマ / 
 
 PRタイトルや概要本文に `<` `>` `&` `"` `'` が含まれる場合は HTML エスケープすること。バッククォート `` ` `` で囲まれた識別子は `<code>` タグに変換するとよい。
 
+## PR番号のリンク化
+
+`{{SUMMARY_FEATURE}}` / `{{SUMMARY_GRAPHQL}}` / `{{SUMMARY_SCHEMA}}` / `{{SUMMARY_INFRA}}` および `{{PR_DESCRIPTION}}` の本文中に `#1234` のような PR 番号表記を出す場合、**必ず** GitHub の PR ページへのリンクにする。リンクは以下の形式:
+
+```html
+<a class="pr-ref" href="https://github.com/{owner}/{repo}/pull/{N}" target="_blank" rel="noopener">#{N}</a>
+```
+
+- `{owner}/{repo}` は `gh repo view --json nameWithOwner --jq .nameWithOwner` で取得した値
+- `{N}` は PR 番号（数値のみ）
+- 同じ PR 番号が複数回出てきても、すべての出現箇所をリンク化する
+- TOC の `<a href="#pr-{{PR_NUMBER}}">` および PR Article の `<a href="{{PR_URL}}">` は従来通り（ページ内アンカー／既にリンク化済み）。追加の修飾は不要
+
+## スキーマ diff の埋め込み（`{{SUMMARY_GRAPHQL}}` / `{{SUMMARY_SCHEMA}}` 専用）
+
+`{{SUMMARY_GRAPHQL}}` と `{{SUMMARY_SCHEMA}}` は、**変更内容ごとに対応する diff を直後に配置する**。各 `<li>`（変更内容1件）の中に、要約テキストとそれに紐づく `<details class="schema-diff">` を入れ、変更内容1→そのdiff、変更内容2→そのdiff、…の順で並べる。要約と diff を分離した節にしない。
+
+```html
+<ul>
+  <li>
+    <a class="pr-ref" href="{{PR_URL}}" target="_blank" rel="noopener">#{{PR_NUMBER}}</a> {{要約テキスト1}}
+    <details class="schema-diff">
+      <summary><code>{{FILE_PATH}}</code></summary>
+      <pre class="diff"><span class="line file">{{HEADER_LINE}}</span><span class="line hunk">{{HUNK_LINE}}</span><span class="line context">{{CONTEXT_LINE}}</span><span class="line add">{{ADD_LINE}}</span><span class="line del">{{DEL_LINE}}</span></pre>
+    </details>
+  </li>
+  <li>
+    <a class="pr-ref" href="{{PR_URL}}" target="_blank" rel="noopener">#{{PR_NUMBER}}</a> {{要約テキスト2}}
+    <details class="schema-diff">
+      <summary><code>{{FILE_PATH}}</code></summary>
+      <pre class="diff">…</pre>
+    </details>
+  </li>
+</ul>
+```
+
+**重要**: `<pre class="diff">` の中では、各 `<span class="line ...">` を **改行や空白なしで連続連結する**。`</span>` の直後にすぐ次の `<span>` を続け、テキスト改行（`\n`）を入れない。改行は `.line { display: block }` が生み出すため、span 間にテキスト改行を入れると `<pre>` がそれを保持して **空行** が挟まる。
+
+各行のクラス分け:
+- `line file`: `diff --git`, `index `, `new file mode`, `deleted file mode`, `rename from`, `rename to`, `--- `, `+++ ` で始まる行
+- `line hunk`: `@@ ` で始まる行
+- `line add`: `+` で始まる行（ただし `+++ ` は file 扱い）
+- `line del`: `-` で始まる行（ただし `--- ` は file 扱い）
+- `line context`: 上記いずれにも該当しない行（先頭が空白）
+
+注意:
+- 1つの変更内容に複数ファイルの diff が紐づく場合、同じ `<li>` の中に `<details>` を複数並べる（順序はファイルパスのアルファベット順）。
+- 1つのPRが独立した複数の変更内容を持つ場合は、PRを複数の `<li>` に分割し、各 `<li>` の冒頭に PR 番号リンクを置く。
+- diff を伴わない（該当ファイルが切り出せない・要約のみの）変更内容は `<details>` を省略し、テキスト要約のみの `<li>` とする。
+- `<summary>` は対象ファイルパス（`<code>`）のみを置く。PR 番号リンクは外側 `<li>` 冒頭に既にあるので二重に出さない。
+- 行内容は **HTML エスケープしてから** `<span>` にラップする（diff 内に `<` `>` `&` が現れることがある）。
+- `<span class="line ...">` は **改行・空白なしで連続連結する**（テキスト改行を入れない）。改行は `.line { display: block }` が作るので、span 間に `\n` を入れると空行が挟まる。`<br>` も使わない。
+- 1ファイルのdiffが200行を超える場合は、先頭100行 + `<span class="line context">… (中略 N行) …</span>` + 末尾30行 程度に切り詰める。中略した旨を `<summary>` 末尾に `（一部省略）` と書き添える。
+- `{{SUMMARY_GRAPHQL}}` には GraphQL スキーマ系ファイルのdiffのみ、`{{SUMMARY_SCHEMA}}` にはDBスキーマ系ファイルのdiffのみを入れる。混ぜない。
+
 ---
 
 ## テンプレート本体
@@ -110,12 +165,14 @@ PRタイトルや概要本文に `<` `>` `&` `"` `'` が含まれる場合は HT
     --graphql-bg: #fde0f3;
     --schema-bg: #fff8c5;
     --infra-bg: #fbefff;
+    --diff-del: #cf222e;
+    --diff-del-bg: #ffebe9;
   }
   @media (prefers-color-scheme: dark) {
     :root {
       --bg: #0d1117;
-      --fg: #e6edf3;
-      --muted: #8b949e;
+      --fg: #c9d1d9;
+      --muted: #7d8590;
       --accent: #58a6ff;
       --accent-bg: #0d2a4a;
       --border: #30363d;
@@ -128,6 +185,8 @@ PRタイトルや概要本文に `<` `>` `&` `"` `'` が含まれる場合は HT
       --graphql-bg: #2d1029;
       --schema-bg: #271d08;
       --infra-bg: #21163a;
+      --diff-del: #ff7b72;
+      --diff-del-bg: #3c0d11;
     }
   }
   * { box-sizing: border-box; }
@@ -298,6 +357,53 @@ PRタイトルや概要本文に `<` `>` `&` `"` `'` が含まれる場合は HT
     margin: 8px 0 0 0;
     color: var(--fg);
   }
+
+  a.pr-ref {
+    color: var(--accent);
+    text-decoration: none;
+    font-family: ui-monospace, SFMono-Regular, "SF Mono", Consolas, monospace;
+    font-weight: 600;
+    white-space: nowrap;
+  }
+  a.pr-ref:hover { text-decoration: underline; }
+
+  details.schema-diff {
+    margin: 6px 0 8px 0;
+  }
+  details.schema-diff > summary {
+    cursor: pointer;
+    font-size: 13px;
+    color: var(--muted);
+    padding: 4px 0;
+    list-style: revert;
+  }
+  details.schema-diff > summary:hover { color: var(--fg); }
+  details.schema-diff > summary code {
+    background: transparent;
+    border: none;
+    padding: 0;
+    font-size: inherit;
+  }
+  pre.diff {
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 8px 0;
+    overflow-x: auto;
+    font-family: ui-monospace, SFMono-Regular, "SF Mono", Consolas, monospace;
+    font-size: 12px;
+    line-height: 1.5;
+    margin: 8px 0 0 0;
+  }
+  pre.diff .line {
+    display: block;
+    padding: 0 12px;
+    white-space: pre;
+  }
+  pre.diff .line.add { color: var(--feature); background: var(--feature-bg); }
+  pre.diff .line.del { color: var(--diff-del); background: var(--diff-del-bg); }
+  pre.diff .line.hunk { color: var(--accent); }
+  pre.diff .line.file { color: var(--muted); font-weight: 600; }
 
   code {
     font-family: ui-monospace, SFMono-Regular, "SF Mono", Consolas, monospace;
