@@ -1336,12 +1336,18 @@ require('bqf').setup({
 })
 -- }}}
 
--- vim-interestingwords {{{
-vim.keymap.set('n', '<leader>k', ':call InterestingWords("n")<CR>', { silent = true })
-vim.keymap.set('v', '<leader>k', ':call InterestingWords("v")<CR>', { silent = true })
-vim.keymap.set('n', '<leader>K', ':call UncolorAllWords()<CR>', { silent = true })
-vim.keymap.set('n', 'n', ':call WordNavigation(1)<CR>', { silent = true })
-vim.keymap.set('n', 'N', ':call WordNavigation(0)<CR>', { silent = true })
+-- vim-quickhl {{{
+-- キーワードに色を付けてハイライトする。複数ウィンドウ間でも同じ色でハイライトされる。
+-- ビジュアルモードはVim組み込みのヤンク機構を使うためマルチバイト(日本語)も正しく扱える。
+--   <leader>k (n/v): カーソル下/選択範囲のキーワードを色付け(再実行で解除)
+--   <leader>K     : 全ハイライトを解除
+--   n / N         : ハイライト中のキーワード間を前後に移動
+vim.g.quickhl_manual_enable_at_startup = 1
+vim.keymap.set('n', '<leader>k', '<Plug>(quickhl-manual-this)', { silent = true })
+vim.keymap.set('x', '<leader>k', '<Plug>(quickhl-manual-this)', { silent = true })
+vim.keymap.set('n', '<leader>K', '<Plug>(quickhl-manual-reset)', { silent = true })
+vim.keymap.set('n', 'n', '<Plug>(quickhl-manual-go-to-next)', { silent = true })
+vim.keymap.set('n', 'N', '<Plug>(quickhl-manual-go-to-prev)', { silent = true })
 -- }}}
 
 -- leap.nvim {{{

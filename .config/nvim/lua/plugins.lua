@@ -90,7 +90,7 @@ Plug 'nvim-lualine/lualine.nvim'
 Plug 'kevinhwang91/nvim-bqf'
 
 -- 検索ハイライトを複数語に対応
-Plug 'lfv89/vim-interestingwords'
+Plug 't9md/vim-quickhl'
 
 -- バッファ内でジャンプ
 Plug 'https://codeberg.org/andyg/leap.nvim'
