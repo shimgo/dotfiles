@@ -1,6 +1,10 @@
 -- vimというグローバルが認識されるようにする
 vim = vim or {}
 
+-- leaderはキーマップ定義より前、かつプラグイン読み込み前に設定する必要がある
+vim.g.mapleader = ' '
+vim.g.maplocalleader = ","
+
 require("plugins")
 
 -- クリップボード共有
@@ -137,8 +141,6 @@ vim.o.foldenable = false
 -- }}}
 
 -- キー設定 {{{
-vim.g.mapleader = ' '
-vim.g.maplocalleader = ","
 vim.keymap.set('i', 'jj', '<ESC>')
 vim.keymap.set('v', '<C-j><C-j>', '<ESC>')
 vim.keymap.set('t', 'jj', '<C-\\><C-n>')
