@@ -1,6 +1,6 @@
 # リリースノート HTML テンプレート
 
-`release-note-show` スキルでHTML出力（例: `release.html`）を求められた場合に使用するテンプレート。
+`release-note-generate` スキルでHTML出力（例: `release.html`）を求められた場合に使用するテンプレート。
 本ファイルの「テンプレート本体」セクションに記載されたHTMLをコピーし、プレースホルダーを実値に置換して出力する。
 
 ---

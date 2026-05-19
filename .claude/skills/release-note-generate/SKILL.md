@@ -1,9 +1,9 @@
 ---
-name: release-note-show
+name: release-note-generate
 description: >
-  リポジトリのリリース内容を要約して表示するスキル。
+  リポジトリのリリース内容を要約してHTMLに書き出すスキル。
   「最新リリースの内容を教えて」「リリースノートを出して」「直近のリリースに何が入った？」
-  「release-note-show」「リリース内容を要約して」「最近何がリリースされた？」
+  「release-note-generate」「リリース内容を要約して」「最近何がリリースされた？」
   「次のリリースに何が入る？」「今進んでるリリースは？」「リリース予定の内容を教えて」
   「progress」「last」といった依頼のときに使用する。
   releaseブランチへのマージ済み最新リリース（last）と、releaseをbaseとするOpen PR（progress, 次のリリース予定）の
@@ -12,16 +12,24 @@ description: >
   リリース内容確認、リリースノート生成、直近リリース・次回リリース予定の要約依頼があれば積極的に使うこと。
 ---
 
-# リリース内容表示スキル
+# リリースノート生成スキル
 
-リポジトリのリリース内容を要約し、HTMLにレンダリングして **Claude Code を起動したディレクトリ直下** に書き出す。ファイル名はモードによって異なる:
+リポジトリのリリース内容を要約し、HTMLにレンダリングして **Claude Code を起動したディレクトリ直下の `./releases/` ディレクトリ** に書き出す。ファイル名はモードによって異なる:
 
-- `last` モード: `./<リポジトリ名>-release-<リリースPR番号>-<YYYYMMDD-hhmm形式のマージ日時(JST)>.html`（例: `./def-release-1234-20240426-1030.html`。リポジトリが `abc/def` なら `def`）
-- `progress` モード: `./<リポジトリ名>-release-<リリースPR番号>.html`（例: `./def-release-1234.html`。マージ前のため日時は付けない）
+- `last` モード: `./releases/<リポジトリ名>-release-<リリースPR番号>-<YYYYMMDD-hhmm形式のマージ日時(JST)>.html`（例: `./releases/def-release-1234-20240426-1030.html`。リポジトリが `abc/def` なら `def`）
+- `progress` モード: `./releases/<リポジトリ名>-release-<リリースPR番号>.html`（例: `./releases/def-release-1234.html`。マージ前のため日時は付けない）
 
-書き出し後、`cmux browser open "file://$(pwd)/<書き出したファイル名>"` を実行してブラウザペインで表示する。
+加えて、リポジトリルート直下に **リリース一覧のインデックスHTML** を書き出す:
 
-HTMLテンプレートはスキル同梱の `release-template.md` を使う（プレースホルダー仕様はそのファイル内に記載）。
+- `./<リポジトリ名>-release-index.html`（例: `./def-release-index.html`）
+- `releases/` 配下に存在する全リリースHTMLへのリンクを、リリース日時の降順で一覧化する（進行中のリリースは先頭にまとめる）
+
+書き出し後にブラウザで自動表示はしない。ユーザーが必要に応じて出力ファイルを開く。
+
+HTMLテンプレートはスキル同梱の以下を使う（プレースホルダー仕様は各ファイル内に記載）:
+
+- 個別リリースHTML: `release-template.md`
+- インデックスHTML: `release-index-template.md`
 
 ## 2つのモード
 
@@ -318,15 +326,23 @@ TZ='Asia/Tokyo' date -d '<utc-iso>' '+%Y-%m-%d %H:%M JST'
 
 ## O-Step 2: ファイルに書き出す
 
+書き出し先ディレクトリは **Claude Code を起動したディレクトリ直下の `./releases/`**。ディレクトリが無ければ作成する:
+
+```bash
+mkdir -p releases
+```
+
 ファイル名はモードによって異なる:
 
-- `last` モード: `<REPO_NAME>-release-<RELEASE_PR_NUMBER>-<MERGED_AT_COMPACT>.html`
+- `last` モード: `releases/<REPO_NAME>-release-<RELEASE_PR_NUMBER>-<MERGED_AT_COMPACT>.html`
   - `<MERGED_AT_COMPACT>` は `<MERGED_AT>` (UTC ISO 8601) を JST に変換したうえで `YYYYMMDD-HHMM` 形式（区切りなしの日付 + ハイフン + ゼロ埋め時分）にしたもの。例: `2024-04-26T01:30:00Z` → `20240426-1030`
-  - 例: `def-release-1234-20240426-1030.html`
-- `progress` モード: `<REPO_NAME>-release-<PROGRESS_PR_NUMBER>.html`（マージ前のため日時を付けない）
-  - 例: `def-release-1234.html`
+  - 例: `releases/def-release-1234-20240426-1030.html`
+- `progress` モード: `releases/<REPO_NAME>-release-<PROGRESS_PR_NUMBER>.html`（マージ前のため日時を付けない）
+  - 例: `releases/def-release-1234.html`
 
-`<REPO_NAME>` は `gh repo view --json nameWithOwner --jq '.nameWithOwner | split("/")[1]'` で取得するリポジトリ名（owner/repo のスラッシュ以降）。レンダリング結果を **Claude Code を起動したディレクトリ直下** に書き出す。既存ファイルは上書きする。
+`<REPO_NAME>` は `gh repo view --json nameWithOwner --jq '.nameWithOwner | split("/")[1]'` で取得するリポジトリ名（owner/repo のスラッシュ以降）。レンダリング結果を上記パスに書き出す。既存ファイルは上書きする。
+
+以降の手順では、書き出した個別リリースHTMLの相対パスを `<OUTPUT_RELPATH>`（例: `releases/def-release-1234-20240426-1030.html`）として参照する。
 
 `<MERGED_AT_COMPACT>` の生成例（macOS / BSD date）:
 
@@ -342,7 +358,7 @@ TZ='Asia/Tokyo' date -d '<MERGED_AT>' '+%Y%m%d-%H%M'
 
 ## O-Step 3: PR番号リンク化の自己チェック（必須）
 
-ブラウザで開く前に、書き出したHTMLファイルに「プレーンテキストの `#NNNN` が残っていないか」を必ず確認する。
+書き出したHTMLファイルに「プレーンテキストの `#NNNN` が残っていないか」を必ず確認する。
 
 概要4節（機能 / GraphQLスキーマ / DBスキーマ / インフラ）と各PRの `{{PR_DESCRIPTION}}` の中に出てくる `#NNNN` 表記は、例外なく全てGitHub PRへのリンクにすること。同じ番号が複数回出てきても、機能PR一覧に含まれない過去PR・関連PRであっても、`#NNNN` 形式で書かれていれば全てリンク化対象。唯一の例外は TOC の `<a href="#pr-NNNN">` および PR Article の `<h3>` 内のPR番号リンク（テンプレート既定で既にリンク化済み）。
 
@@ -353,13 +369,13 @@ TZ='Asia/Tokyo' date -d '<MERGED_AT>' '+%Y%m%d-%H%M'
 
 ### チェック方法
 
-書き出したファイルに対して以下を実行する。`<OUTPUT_FILENAME>` は O-Step 2 で書き出したファイル名:
+書き出したファイルに対して以下を実行する。`<OUTPUT_RELPATH>` は O-Step 2 で書き出した個別リリースHTMLの相対パス（`releases/...`）:
 
 ```bash
 # 既にリンク化されている <a class="pr-ref" ...>#NNNN</a> を伏せ字に置換し、
 # 残った #NNNN（プレーンテキスト）を抽出する。
 # テンプレート由来の偽陽性（id="pr-NNNN"、href="#pr-NNNN"、URL内の pull/NNNN、h3内の class="pr-num"）は除外。
-sed -E 's|<a class="pr-ref"[^>]*>#[0-9]+</a>|__PR_REF__|g' <OUTPUT_FILENAME> \
+sed -E 's|<a class="pr-ref"[^>]*>#[0-9]+</a>|__PR_REF__|g' <OUTPUT_RELPATH> \
   | grep -nE '#[0-9]{2,}' \
   | grep -v 'id="pr-' \
   | grep -v 'href="#pr-' \
@@ -369,30 +385,95 @@ sed -E 's|<a class="pr-ref"[^>]*>#[0-9]+</a>|__PR_REF__|g' <OUTPUT_FILENAME> \
 
 何か出力が出れば、その箇所はプレーンテキストの `#NNNN` が残っている。該当箇所を `<a class="pr-ref" href="https://github.com/{owner}/{repo}/pull/{N}" target="_blank" rel="noopener">#{N}</a>`（`{owner}/{repo}` は `gh repo view --json nameWithOwner --jq .nameWithOwner` で取得）に置換し、ファイルを再書き出ししてから再度チェックする。0件になるまで繰り返す。
 
-## O-Step 4: ブラウザで表示する
+このセルフチェックは個別リリースHTML（O-Step 2 の出力）に対してのみ行う。インデックスHTML（O-Step 4 の出力）はPR本文を含まないため対象外。
 
-書き出し後、以下のコマンドでブラウザペインに表示する（`<OUTPUT_FILENAME>` は O-Step 2 で書き出したファイル名）:
+## O-Step 4: リリース一覧インデックスHTMLを生成する
+
+`releases/` 配下にある全リリースHTMLへのリンクを、**リリース日時の降順**（進行中は先頭）で一覧にしたインデックスHTMLを **リポジトリルート直下** に書き出す。スキル実行のたびに作り直す（差分更新ではなく毎回フル再生成）。
+
+### O-Step 4.1: `releases/` 配下のファイルを列挙し分類する
 
 ```bash
-cmux browser open "file://$(pwd)/<OUTPUT_FILENAME>"
+ls -1 releases/ 2>/dev/null | grep -E '\.html$'
 ```
 
-成功すると `OK surface=surface:N pane=pane:M placement=split` のような出力が返る。失敗時はエラー文をそのままユーザーに伝え、出力ファイルパスだけ案内する。
+各ファイル名を以下の正規表現で分類する。`<REPO_NAME>` は O-Step 2 と同じ取得方法:
+
+- マージ済み（last 由来）: `^<REPO_NAME>-release-([0-9]+)-([0-9]{8})-([0-9]{4})\.html$`
+  - キャプチャ1: PR番号 `<PR_NUMBER>`
+  - キャプチャ2: 日付 `<YYYYMMDD>`
+  - キャプチャ3: 時刻 `<HHMM>`
+- 進行中（progress 由来）: `^<REPO_NAME>-release-([0-9]+)\.html$`
+  - キャプチャ1: PR番号 `<PR_NUMBER>`
+
+どちらの正規表現にも一致しないファイルは無視する。
+
+### O-Step 4.2: 各ファイルからタイトルを取り出す
+
+```bash
+grep -oE '<title>[^<]*</title>' releases/<ファイル名> \
+  | head -1 \
+  | sed -E 's|</?title>||g'
+```
+
+これを各エントリの `{{RELEASE_TITLE}}` に使う。`<title>` 内には HTML エンティティが含まれる可能性があるため、追加のエスケープはせずそのまま埋め込む。
+
+### O-Step 4.3: ソートする
+
+1. 進行中（`progress` 由来）の行を **先頭** にまとめる。複数あれば `<PR_NUMBER>` の降順。
+2. 続いてマージ済み（`last` 由来）の行を **`<YYYYMMDD><HHMM>` の降順**（新しいリリースが上）。同じ分単位のマージは `<PR_NUMBER>` の降順。
+
+### O-Step 4.4: 各行を組み立てる
+
+`release-index-template.md` の「各リリース行」セクションに従い、各エントリを `<tr>` に展開する。
+
+- `{{ROW_CLASS}}` / `{{STATUS_CLASS}}` / `{{STATUS_LABEL}}`:
+  - マージ済み: `merged` / `merged` / `マージ済み`
+  - 進行中: `progress` / `progress` / `進行中`
+- `{{RELEASE_HREF}}`: `./releases/<ファイル名>`
+- `{{PR_NUMBER}}`: 上で抽出した PR 番号
+- `{{RELEASE_TITLE}}`: O-Step 4.2 で取り出した `<title>` の中身
+- `{{MERGED_AT_JST}}`:
+  - マージ済み: `<YYYYMMDD>-<HHMM>` を `YYYY-MM-DD HH:MM JST` 形式に整形。例: `20260426-0956` → `2026-04-26 09:56 JST`
+  - 進行中: `—`
+
+該当ファイルが0件なら、`<tbody>` の中身は `<tr><td colspan="4" class="empty">リリースHTMLがまだありません</td></tr>` のみとする。
+
+### O-Step 4.5: テンプレートに値を埋めて書き出す
+
+`release-index-template.md` の「テンプレート本体」HTMLを取り出し、以下を埋め込む:
+
+- `{{REPO_NAME}}`: `gh repo view --json nameWithOwner --jq '.nameWithOwner | split("/")[1]'`
+- `{{REPO_FULL_NAME}}`: `gh repo view --json nameWithOwner --jq '.nameWithOwner'`
+- `{{REPO_URL}}`: `https://github.com/<REPO_FULL_NAME>`
+- `{{GENERATED_AT}}`: 現在時刻を JST で `YYYY-MM-DD HH:MM JST` 形式（macOS: `TZ='Asia/Tokyo' date '+%Y-%m-%d %H:%M JST'`）
+- `{{RELEASE_COUNT}}`: 一覧化したエントリ数（命名規則に一致したファイルのみカウント）
+- `{{RELEASE_ROWS}}`: O-Step 4.4 で組み立てた `<tr>` を改行で連結
+
+書き出し先は **リポジトリルート直下**:
+
+```
+./<REPO_NAME>-release-index.html
+```
+
+既存ファイルは上書きする。
 
 ## O-Step 5: チャットへは1〜2行のサマリのみ
 
-出力ファイルを開いたあと、チャットには「`./<書き出したファイル名>` に書き出してブラウザで開きました（リリースPR `#<番号>`、機能PR `<件数>` 件）」程度の短い報告だけを返す。HTMLの中身（PR一覧や概要）はチャットに再掲しない。
+書き出しが終わったら、チャットには「`./<OUTPUT_RELPATH>` に書き出しました（リリースPR `#<番号>`、機能PR `<件数>` 件）。リリース一覧を `./<REPO_NAME>-release-index.html` に更新しました（全 `<件数>` 件）」程度の短い報告だけを返す（`<OUTPUT_RELPATH>` は O-Step 2 で書き出した相対パス。`releases/...`）。HTMLの中身（PR一覧や概要）はチャットに再掲しない。ブラウザでの表示は行わず、ユーザーが必要に応じてファイルを開く。
 
 ## フォーマット遵守の注意
 
-- HTMLテンプレートは `release-template.md` のものを **改変せず** 使う。CSSや見出し構造を勝手に変えない。
+- HTMLテンプレートは `release-template.md` および `release-index-template.md` のものを **改変せず** 使う。CSSや見出し構造を勝手に変えない。
 - PR一覧と本文見出しの両方で、PR番号の後ろにPRタイトルを半角スペース区切りで併記する。タイトルは改変・要約せず GitHub の原文ママ（HTMLエスケープのみ）。
 - last モードのタイトル日時は JST に変換したうえで `YYYY-MM-DD HH:MM JST` 形式。秒は出さない。progress モードはタイトルに日時を含めない。
 - 「概要」4節（機能 / GraphQLスキーマ / DBスキーマ / インフラ）は順序固定。該当なしでも節を省略しない。
 - HTMLエスケープ: PRタイトルや概要本文に `<` `>` `&` `"` `'` が含まれる場合はエスケープすること。
 - リリースPR自身の番号は機能PR一覧から除外する。
-- 概要・PR詳細本文中の `#NNNN` 表記は **すべて** GitHub PR へのリンクにする（`<a class="pr-ref" href="https://github.com/{owner}/{repo}/pull/{N}" target="_blank" rel="noopener">#{N}</a>`）。プレーンテキストの `#NNNN` を残さない。TOC とPR Article の `<h3>` 内のリンクはテンプレート既定のままでよい。書き出し後・ブラウザ表示前に **O-Step 3 の自己チェックを必ず実施** し、プレーン `#NNNN` が0件になっていることを確認する。
+- 概要・PR詳細本文中の `#NNNN` 表記は **すべて** GitHub PR へのリンクにする（`<a class="pr-ref" href="https://github.com/{owner}/{repo}/pull/{N}" target="_blank" rel="noopener">#{N}</a>`）。プレーンテキストの `#NNNN` を残さない。TOC とPR Article の `<h3>` 内のリンクはテンプレート既定のままでよい。書き出した後に **O-Step 3 の自己チェックを必ず実施** し、プレーン `#NNNN` が0件になっていることを確認する。
 - GraphQLスキーマ／DBスキーマ概要は、変更内容ごとにdiffを直後に並べる構造（`<li>` 内に要約 + 該当 `<details class="schema-diff">`）にする。要約だけまとめて出してdiffを末尾にまとめる構造にしない。HTML仕様は `release-template.md` の「スキーマ diff の埋め込み」セクション参照。diffは要約・改変せず原文ママを行クラス分けして出す。
+- 個別リリースHTMLは `./releases/` 配下、インデックスHTMLは **リポジトリルート直下** に書き出す。配置場所を入れ替えない。
+- インデックスHTMLは O-Step 4 の手順で **毎回フル再生成** する。差分追記ではなく、`releases/` 配下を全件スキャンし直して書き直す。
 
 ---
 
@@ -404,7 +485,6 @@ cmux browser open "file://$(pwd)/<OUTPUT_FILENAME>"
 - progress モードで複数 Open PR があり1件に絞り込んだ場合 → 採用したPR番号と理由（`updatedAt` 最新）
 - last モードで release ブランチが複数候補あり絞り込んだ場合 → 採用したブランチ名
 - 機能PR一覧の取得方法（通常マージ／Squash merge）で分岐があった場合 → 採用したロジック
-- `cmux browser open` がエラーになった場合 → エラー内容と書き出したファイル（last: `<リポジトリ名>-release-<番号>-<YYYYMMDD-hhmm>.html` / progress: `<リポジトリ名>-release-<番号>.html`）のフルパスを案内
 
 不要な前置きは省く。HTMLの中身をチャットに再掲しない。
 
@@ -412,12 +492,14 @@ cmux browser open "file://$(pwd)/<OUTPUT_FILENAME>"
 
 # やってはいけないこと
 
-- HTMLテンプレート（`release-template.md`）の改変・要約。CSS や見出し構造を変更しない。
+- HTMLテンプレート（`release-template.md` / `release-index-template.md`）の改変・要約。CSS や見出し構造を変更しない。
 - 出力フォーマットの改変（見出し追加・順序変更・JSTを別タイムゾーンに変える等）
 - 推測で「概要」を埋めること。PR本文・変更内容から読み取れない場合は「PR本文に記載なし」と書く。
-- 概要・PR詳細本文中に **プレーンテキストの `#NNNN` を残すこと**。PR本文をそのまま転記して `#NNNN` がリンク化されないまま出力するのは仕様違反。書き出し後・ブラウザ表示前に O-Step 3 のセルフチェックを必ず通す。
+- 概要・PR詳細本文中に **プレーンテキストの `#NNNN` を残すこと**。PR本文をそのまま転記して `#NNNN` がリンク化されないまま出力するのは仕様違反。書き出し後に O-Step 3 のセルフチェックを必ず通す。
 - スキーマ diff の要約・改変。`gh pr diff` で得られた diff は行クラス分けと HTML エスケープ・上限超過時の中略以外の編集を加えない。
 - HTML本体の中身（PR一覧・概要）をチャットに再掲すること。チャットへは O-Step 5 の短いサマリのみ。
-- O-Step 2 で定めたファイル名（last: `<リポジトリ名>-release-<PR番号>-<YYYYMMDD-hhmm>.html` / progress: `<リポジトリ名>-release-<PR番号>.html`）以外への書き出し（ユーザーが明示的に別パスを指定した場合のみ従う）。
+- 書き出した HTML を `cmux browser open` などで自動的にブラウザ表示すること。表示はユーザーに任せる。
+- O-Step 2 で定めたファイル名・配置（last: `./releases/<リポジトリ名>-release-<PR番号>-<YYYYMMDD-hhmm>.html` / progress: `./releases/<リポジトリ名>-release-<PR番号>.html`）以外への書き出し（ユーザーが明示的に別パスを指定した場合のみ従う）。インデックスHTMLは `./<リポジトリ名>-release-index.html`（リポジトリルート直下）以外に書き出さない。
+- インデックスHTMLの生成をスキップすること。`releases/` 配下のHTMLが0件であっても、テンプレートの「empty」用 `<tr>` を使ったインデックスHTMLは必ず書き出す。
 - `git push` の使用、コミット履歴の改変
 - リポジトリ外のファイルへのアクセス
