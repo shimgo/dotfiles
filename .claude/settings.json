@@ -2,9 +2,11 @@
   "$schema": "https://json.schemastore.org/claude-code-settings.json",
   "permissions": {
     "allow": [],
+    "ask": [
+      "Bash(rm:*)"
+    ],
     "deny": [
       "Bash(sudo:*)",
-      "Bash(rm:*)",
       "Bash(dd:*)",
       "Bash(mkfs:*)",
       "Bash(git push:*)",
@@ -67,7 +69,6 @@
       "READ(.env*)",
       "Write(.env*)",
       "Write(*_gen.go)",
-      "Bash(rm -rf:*)",
       "Bash(git push --force:*)",
       "Bash(git push -f:*)",
       "Read(id_rsa)",
