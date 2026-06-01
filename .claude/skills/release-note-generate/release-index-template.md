@@ -19,57 +19,50 @@
 ### 各リリース行（`{{RELEASE_ROWS}}` の各要素）
 
 ```html
-<tr class="release-row {{ROW_CLASS}}">
-  <td class="col-status"><span class="status-badge {{STATUS_CLASS}}">{{STATUS_LABEL}}</span></td>
+<tr class="release-row merged">
+  <td class="col-status"><span class="status-badge merged">マージ済み</span></td>
   <td class="col-pr"><a class="release-link" href="{{RELEASE_HREF}}">#{{PR_NUMBER}}</a></td>
   <td class="col-title">{{RELEASE_TITLE}}</td>
   <td class="col-date">{{MERGED_AT_JST}}</td>
 </tr>
 ```
 
+index に載せるのはマージ済み（last 由来）のリリースのみ。進行中（progress 由来）のファイルは O-Step 4.1 で無視するため、状態表示は常にマージ済み固定。
+
 各セルの値:
 
-- `{{ROW_CLASS}}`: `merged`（last モード由来＝マージ済み）または `progress`（progress モード由来＝進行中）
-- `{{STATUS_CLASS}}` / `{{STATUS_LABEL}}`:
-  - マージ済み: `merged` / `マージ済み`
-  - 進行中: `progress` / `進行中`
 - `{{RELEASE_HREF}}`: そのリリースHTMLへの相対パス（`./releases/<ファイル名>`）
 - `{{PR_NUMBER}}`: リリースPRの番号（数値のみ）
-- `{{RELEASE_TITLE}}`: そのリリースHTMLの `<title>` から取り出したタイトル（HTMLエスケープ）。`<title>` 例:
-  - last: `リリース内容（#19053 2026-04-26 09:56 JST）`
-  - progress: `リリース予定内容（#19053）`
-- `{{MERGED_AT_JST}}`:
-  - マージ済み: `YYYY-MM-DD HH:MM JST` 形式（last モードのファイル名 `...-YYYYMMDD-HHMM.html` から復元、または `<title>` から抽出）
-  - 進行中: `—`（emダッシュ）
+- `{{RELEASE_TITLE}}`: そのリリースHTMLの `<title>` から取り出したタイトル（HTMLエスケープ）。`<title>` 例: `リリース内容（#19053 2026-04-26 09:56 JST）`
+- `{{MERGED_AT_JST}}`: `YYYY-MM-DD HH:MM JST` 形式（ファイル名 `...-YYYYMMDD-HHMM.html` から復元、または `<title>` から抽出）
 
 ---
 
 ## ソートルール
 
-- 進行中（`progress` 由来）の行を先頭にまとめる。複数あれば PR 番号の降順。
-- 続いてマージ済み（`last` 由来）の行を **マージ日時の降順**（新しいリリースが上）。同じ分のマージは PR 番号の降順。
+- マージ済み（`last` 由来）の行を **マージ日時の降順**（新しいリリースが上）に並べる。同じ分のマージは PR 番号の降順。
 
 ---
 
 ## ファイル名からの情報抽出
 
-`releases/` 配下のHTMLは以下のいずれかの命名規則になっている:
+index に載せるのはマージ済み（last 由来）のみ。`releases/` 配下のHTMLを以下の命名規則で分類する:
 
-- `<REPO_NAME>-release-<PR番号>-<YYYYMMDD>-<HHMM>.html` → マージ済み（last 由来）
-- `<REPO_NAME>-release-<PR番号>.html` → 進行中（progress 由来）
+- `<REPO_NAME>-release-<PR番号>-<YYYYMMDD>-<HHMM>.html` → マージ済み（last 由来）→ **index に載せる**
+- `<REPO_NAME>-release-<PR番号>.html` → 進行中（progress 由来）→ **index には載せない（無視する）**
 
 正規表現で分類する:
 
 ```bash
 # 例: ls -1 releases/*.html
-# def-release-19053-20260426-0956.html  ← マージ済み
-# def-release-19120.html                ← 進行中
+# def-release-19053-20260426-0956.html  ← マージ済み（index に載せる）
+# def-release-19120.html                ← 進行中（無視する）
 ```
 
-それぞれのファイルから:
+index に載せるマージ済みファイルから:
 
 1. PR番号: ファイル名の `release-<N>` 部分
-2. 日時（マージ済みのみ）: `release-<N>-<YYYYMMDD>-<HHMM>.html` から `<YYYYMMDD>-<HHMM>` を取り出し、`YYYY-MM-DD HH:MM JST` に整形
+2. 日時: `release-<N>-<YYYYMMDD>-<HHMM>.html` から `<YYYYMMDD>-<HHMM>` を取り出し、`YYYY-MM-DD HH:MM JST` に整形
 3. タイトル: ファイル本体の `<title>...</title>` を読み取り、HTML エンティティをデコードしない素のままで使用（テンプレート埋め込み時に HTML エスケープ済みであることを前提）
 
 `<title>` を取り出す参考:
@@ -108,8 +101,6 @@ grep -oE '<title>[^<]*</title>' releases/<ファイル名>.html \
     --code-bg: #f6f8fa;
     --merged: #1a7f37;
     --merged-bg: #dafbe1;
-    --progress: #9a6700;
-    --progress-bg: #fff8c5;
   }
   @media (prefers-color-scheme: dark) {
     :root {
@@ -122,8 +113,6 @@ grep -oE '<title>[^<]*</title>' releases/<ファイル名>.html \
       --code-bg: #161b22;
       --merged: #56d364;
       --merged-bg: #0f2417;
-      --progress: #e3b341;
-      --progress-bg: #271d08;
     }
   }
   * { box-sizing: border-box; }
@@ -182,9 +171,6 @@ grep -oE '<title>[^<]*</title>' releases/<ファイル名>.html \
   table.release-list .col-pr { width: 110px; white-space: nowrap; }
   table.release-list .col-date { width: 180px; white-space: nowrap; color: var(--muted); font-variant-numeric: tabular-nums; }
   table.release-list .col-title { word-break: break-word; }
-  table.release-list tr.release-row.progress {
-    background: var(--progress-bg);
-  }
   table.release-list a.release-link {
     color: var(--accent);
     text-decoration: none;
@@ -205,7 +191,6 @@ grep -oE '<title>[^<]*</title>' releases/<ファイル名>.html \
     line-height: 1.6;
   }
   .status-badge.merged { color: var(--merged); background: var(--merged-bg); }
-  .status-badge.progress { color: var(--progress); background: var(--progress-bg); }
   .empty {
     color: var(--muted);
     padding: 24px 0;

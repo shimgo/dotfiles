@@ -25,7 +25,7 @@ description: >
 加えて、リポジトリルート直下に **リリース一覧のインデックスHTML** を書き出す:
 
 - `./<リポジトリ名>-release-index.html`（例: `./def-release-index.html`）
-- `releases/` 配下に存在する全リリースHTMLへのリンクを、リリース日時の降順で一覧化する（進行中のリリースは先頭にまとめる）
+- `releases/` 配下に存在するマージ済みリリースHTMLへのリンクを、リリース日時の降順で一覧化する（進行中＝progress 由来のHTMLは index には載せない）
 
 書き出し後にブラウザで自動表示はしない。ユーザーが必要に応じて出力ファイルを開く。
 
@@ -392,7 +392,7 @@ sed -E 's|<a class="pr-ref"[^>]*>#[0-9]+</a>|__PR_REF__|g' <OUTPUT_RELPATH> \
 
 ## O-Step 4: リリース一覧インデックスHTMLを生成する
 
-`releases/` 配下にある全リリースHTMLへのリンクを、**リリース日時の降順**（進行中は先頭）で一覧にしたインデックスHTMLを **リポジトリルート直下** に書き出す。スキル実行のたびに作り直す（差分更新ではなく毎回フル再生成）。
+`releases/` 配下にあるマージ済みリリースHTMLへのリンクを、**リリース日時の降順**で一覧にしたインデックスHTMLを **リポジトリルート直下** に書き出す。進行中（progress 由来）のHTMLは index には載せない。スキル実行のたびに作り直す（差分更新ではなく毎回フル再生成）。
 
 ### O-Step 4.1: `releases/` 配下のファイルを列挙し分類する
 
@@ -402,14 +402,13 @@ ls -1 releases/ 2>/dev/null | grep -E '\.html$'
 
 各ファイル名を以下の正規表現で分類する。`<REPO_NAME>` は O-Step 2 と同じ取得方法:
 
-- マージ済み（last 由来）: `^<REPO_NAME>-release-([0-9]+)-([0-9]{8})-([0-9]{4})\.html$`
+- マージ済み（last 由来）: `^<REPO_NAME>-release-([0-9]+)-([0-9]{8})-([0-9]{4})\.html$` → **index に載せる**
   - キャプチャ1: PR番号 `<PR_NUMBER>`
   - キャプチャ2: 日付 `<YYYYMMDD>`
   - キャプチャ3: 時刻 `<HHMM>`
-- 進行中（progress 由来）: `^<REPO_NAME>-release-([0-9]+)\.html$`
-  - キャプチャ1: PR番号 `<PR_NUMBER>`
+- 進行中（progress 由来）: `^<REPO_NAME>-release-([0-9]+)\.html$` → **index には載せない（無視する）**
 
-どちらの正規表現にも一致しないファイルは無視する。
+マージ済みの正規表現に一致しないファイル（進行中由来を含む）はすべて無視する。
 
 ### O-Step 4.2: 各ファイルからタイトルを取り出す
 
@@ -423,22 +422,16 @@ grep -oE '<title>[^<]*</title>' releases/<ファイル名> \
 
 ### O-Step 4.3: ソートする
 
-1. 進行中（`progress` 由来）の行を **先頭** にまとめる。複数あれば `<PR_NUMBER>` の降順。
-2. 続いてマージ済み（`last` 由来）の行を **`<YYYYMMDD><HHMM>` の降順**（新しいリリースが上）。同じ分単位のマージは `<PR_NUMBER>` の降順。
+マージ済み（`last` 由来）の行を **`<YYYYMMDD><HHMM>` の降順**（新しいリリースが上）に並べる。同じ分単位のマージは `<PR_NUMBER>` の降順。
 
 ### O-Step 4.4: 各行を組み立てる
 
-`release-index-template.md` の「各リリース行」セクションに従い、各エントリを `<tr>` に展開する。
+`release-index-template.md` の「各リリース行」セクションに従い、各エントリ（マージ済みのみ）を `<tr>` に展開する。行の状態表示は常にマージ済み（`<tr class="release-row merged">` / `<span class="status-badge merged">マージ済み</span>`）。
 
-- `{{ROW_CLASS}}` / `{{STATUS_CLASS}}` / `{{STATUS_LABEL}}`:
-  - マージ済み: `merged` / `merged` / `マージ済み`
-  - 進行中: `progress` / `progress` / `進行中`
 - `{{RELEASE_HREF}}`: `./releases/<ファイル名>`
 - `{{PR_NUMBER}}`: 上で抽出した PR 番号
 - `{{RELEASE_TITLE}}`: O-Step 4.2 で取り出した `<title>` の中身
-- `{{MERGED_AT_JST}}`:
-  - マージ済み: `<YYYYMMDD>-<HHMM>` を `YYYY-MM-DD HH:MM JST` 形式に整形。例: `20260426-0956` → `2026-04-26 09:56 JST`
-  - 進行中: `—`
+- `{{MERGED_AT_JST}}`: `<YYYYMMDD>-<HHMM>` を `YYYY-MM-DD HH:MM JST` 形式に整形。例: `20260426-0956` → `2026-04-26 09:56 JST`
 
 該当ファイルが0件なら、`<tbody>` の中身は `<tr><td colspan="4" class="empty">リリースHTMLがまだありません</td></tr>` のみとする。
 
