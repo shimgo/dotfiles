@@ -64,11 +64,11 @@
       "Read(**/*.p12)",
       "Read(**/*token*)",
       "Read(**/*key*)",
-      "Write(**/.env*)",
-      "Write(**/secrets/**)",
-      "READ(.env*)",
-      "Write(.env*)",
-      "Write(*_gen.go)",
+      "Edit(**/.env*)",
+      "Edit(**/secrets/**)",
+      "Read(.env*)",
+      "Edit(.env*)",
+      "Edit(*_gen.go)",
       "Bash(git push --force:*)",
       "Bash(git push -f:*)",
       "Read(id_rsa)",
@@ -125,7 +125,7 @@
   },
   "enabledPlugins": {
     "example-skills@anthropic-agent-skills": true,
-    "gopls-lsp@claude-plugins-official": true,
+    "gopls-lsp@claude-plugins-official": false,
     "session-report@claude-plugins-official": true
   },
   "extraKnownMarketplaces": {

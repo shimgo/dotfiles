@@ -101,4 +101,7 @@ Plug 'folke/trouble.nvim'
 -- 便利プラグインの詰め合わせ。
 Plug "folke/snacks.nvim"
 
+-- マークダウン表示
+Plug "delphinus/md-render.nvim"
+
 vim.call('plug#end')

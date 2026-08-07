@@ -1545,3 +1545,16 @@ vim.api.nvim_create_autocmd("BufRead", {
 })
 
 -- }}}
+
+-- md-render.nvim {{{
+-- max_width を渡さないと 80 桁で頭打ちになるため、ウィンドウ幅を明示してそれに合わせる。
+-- render 側のウィンドウは number/signcolumn/foldcolumn が無効化され gutter を持たないので、
+-- textoff を引かずウィンドウ幅を基準にする。
+-- ただし幅ギリギリだと折り返しが崩れるため、右端に少し余白を確保して上限にする。
+local MD_RENDER_MARGIN = 4
+vim.keymap.set("n", "<leader>mt", function()
+  require("md-render").preview.toggle {
+    max_width = vim.api.nvim_win_get_width(0) - MD_RENDER_MARGIN,
+  }
+end, { desc = "Markdown preview in tab (toggle)" })
+-- }}}
