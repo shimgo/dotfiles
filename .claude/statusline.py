@@ -80,6 +80,10 @@ if week is not None:
         label += f' {DIM}→{reset}{R}'
     groups.append(label)
 
+session_id = data.get('session_id')
+if session_id:
+    groups.append(f'{DIM}{session_id}{R}')
+
 # Stopフック用にコンテキスト使用率と累計コストをファイルに書き出す
 if ctx is not None:
     with open('/tmp/claude_ctx_pct.txt', 'w') as f:
