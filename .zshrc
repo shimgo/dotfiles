@@ -71,7 +71,8 @@ precmd() {
         local elapsed=$(( SECONDS - _cmd_start ))
 
         # 除外したいインタラクティブコマンド一覧
-        local excluded=(fzf vim nvim nano less more man htop top tig lazygit peco gh frl claude)
+        # preexecの$1はエイリアス展開前のため、エイリアス名（c）も列挙する
+        local excluded=(fzf vim nvim nano less more man htop top tig lazygit peco gh frl claude c)
 
         if (( elapsed >= 10 )) && [[ ! " ${excluded[@]} " =~ " ${_cmd_name} " ]]; then
             afplay /System/Library/Sounds/Funk.aiff &
@@ -285,6 +286,9 @@ ftmux() {
 alias g="git"
 # ローカルのブランチを、main、develop、staging、releaseを除いた、mainへマージ済みのブランチを全て削除
 alias gbclean="git branch --merged main | grep -vE '^\*|main$|develop$|staging$|release$' | xargs -I % git branch -d %"
+
+## claude
+alias c="claude"
 
 # Deno settings
 . "/Users/shimgo/.deno/env"
