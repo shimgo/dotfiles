@@ -142,7 +142,7 @@ vim.o.foldenable = false
 
 -- キー設定 {{{
 vim.keymap.set('i', 'jj', '<ESC>')
-vim.keymap.set('v', '<C-j><C-j>', '<ESC>')
+vim.keymap.set('v', '<C-l><C-l>', '<ESC>') -- herdrのプレフィックス(ctrl+j)と衝突するため<C-j><C-j>から移設
 vim.keymap.set('t', 'jj', '<C-\\><C-n>')
 vim.keymap.set('n', ';', ':')
 vim.keymap.set('n', ':', ';')
@@ -158,7 +158,7 @@ vim.keymap.set('n', '<leader>l', '$')
 vim.keymap.set('v', '<leader>l', '$')
 vim.keymap.set('n', '<C-h>', ':<C-u>%s/') -- 置換
 vim.keymap.set('n', '<C-k>', '<C-y>') -- カーソルを固定して上にスクロール
-vim.keymap.set('n', '<C-j>', '<C-e>') -- カーソルを固定して下にスクロール
+vim.keymap.set('n', '<C-l>', '<C-e>') -- カーソルを固定して下にスクロール。herdrのプレフィックス(ctrl+j)と衝突するため<C-j>から移設
 vim.keymap.set('c', '<C-a>', '<Home>', { noremap = true, desc = "コマンドラインモードでカーソルを行頭へ移動" })
 vim.keymap.set('c', '<C-e>', '<End>', { noremap = true, desc = "コマンドラインモードでカーソルを行末へ移動" })
 
