@@ -157,8 +157,6 @@ vim.keymap.set('v', '<leader>h', '^')
 vim.keymap.set('n', '<leader>l', '$')
 vim.keymap.set('v', '<leader>l', '$')
 vim.keymap.set('n', '<C-h>', ':<C-u>%s/') -- 置換
-vim.keymap.set('n', '<C-k>', '<C-y>') -- カーソルを固定して上にスクロール
-vim.keymap.set('n', '<C-l>', '<C-e>') -- カーソルを固定して下にスクロール。herdrのプレフィックス(ctrl+j)と衝突するため<C-j>から移設
 vim.keymap.set('c', '<C-a>', '<Home>', { noremap = true, desc = "コマンドラインモードでカーソルを行頭へ移動" })
 vim.keymap.set('c', '<C-e>', '<End>', { noremap = true, desc = "コマンドラインモードでカーソルを行末へ移動" })
 
