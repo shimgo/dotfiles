@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!--
+  herdrのサイドバーにワークスペース番号を表示するための同期プロセス。
+  ~/.config/herdr/sync-workspace-numbers.py の説明を参照。
+
+  スクリプトは接続失敗時も自身で再試行し続けるため通常は終了しないが、
+  異常終了しても復帰するようKeepAliveを有効にしている。
+  launchdはPATHを引き継がないのでpython3は絶対パスで指定する。
+-->
+<plist version="1.0">
+<dict>
+	<key>Label</key>
+	<string>com.github.shimgo.herdr-workspace-numbers</string>
+	<key>ProgramArguments</key>
+	<array>
+		<string>/usr/bin/python3</string>
+		<string>/Users/shimgo/.config/herdr/sync-workspace-numbers.py</string>
+		<string>--watch</string>
+	</array>
+	<key>RunAtLoad</key>
+	<true/>
+	<key>KeepAlive</key>
+	<true/>
+	<key>StandardOutPath</key>
+	<string>/dev/null</string>
+	<key>StandardErrorPath</key>
+	<string>/Users/shimgo/.config/herdr/workspace-numbers.log</string>
+</dict>
+</plist>

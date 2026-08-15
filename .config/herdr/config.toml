@@ -1,0 +1,26 @@
+onboarding = false
+
+[keys]
+# デフォルトのctrl+bはneovimのページ送り(CTRL-B)と衝突するためctrl+jに変更。
+# neovim側はスクロール(下)とビジュアルモードの離脱がctrl+jだったが、
+# いずれもctrl+lへ移設して空けた(init.lua)。
+# ただしctrl+jはLF(0x0A)そのものであり、Claude Codeの改行挿入と
+# zshのaccept-lineを奪う。
+# なおプレフィックスの2度押しでリテラルのctrl+jを内側のアプリへ送出できる。
+prefix = "ctrl+j"
+
+# ワークスペースの上下移動。プレフィックス無しの直接バインド。
+# iTerm2はCmd修飾キーを端末アプリへ送出しないためctrl+cmdの組み合わせは使えない。
+# OptionはEsc+方式(Option Key Sends = 2)で送出されるためctrl+altなら到達する。
+previous_workspace = "ctrl+alt+["
+next_workspace = "ctrl+alt+]"
+
+# ワークスペースの直接切り替え。ctrl+alt+1〜9で1〜9番目のワークスペースへ移動する。
+# 上下移動と同じくプレフィックス無しの直接バインド。
+switch_workspace = "ctrl+alt+1..9"
+
+[ui.sidebar.spaces]
+rows = [["state_icon", "$num", "workspace"], ["branch", "git_status"]]
+
+[ui.toast]
+delivery = "herdr"
