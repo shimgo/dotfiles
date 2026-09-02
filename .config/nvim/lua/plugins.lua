@@ -40,10 +40,8 @@ Plug 'sindrets/diffview.nvim'
 Plug 'pwntester/octo.nvim'
 -- }}}
 
--- Copilot {{{
-Plug 'github/copilot.vim'
-Plug 'nvim-lua/plenary.nvim'
-Plug 'CopilotC-Nvim/CopilotChat.nvim'
+-- codecompanion.nvim {{{
+Plug 'nvim-lua/plenary.nvim' -- codecompanion.nvim, octo.nvimの依存
 Plug 'olimorris/codecompanion.nvim'
 -- }}}
 
