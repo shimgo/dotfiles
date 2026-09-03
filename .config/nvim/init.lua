@@ -526,7 +526,26 @@ require('mason-lspconfig').setup({
 -- https://neovim.io/doc/user/lsp.html#vim.lsp.config()
 -- masonでインストールしたLSPも個別に設定・有効化する必要がある（mason-lspconfigのautomatic_enableをfalseにしてるので）
 vim.lsp.config('graphql', {})
-vim.lsp.config('gopls', {})
+vim.lsp.config('gopls', {
+  -- goplsはworktreeごとに1プロセス起動し、大規模なモノレポでは1プロセスあたり3GBを超える。
+  -- -remote=autoで複数のnvimが1つのgoplsデーモンを共有し、標準ライブラリと依存モジュールの型情報の重複を避ける。
+  -- ただしワークスペース内パッケージの型情報はディレクトリごとに別キーとなり共有されないため、
+  -- 同一モノレポのworktreeを同時に多数開くとデーモンのヒープはその数に比例して増加する。
+  -- また最後のクライアントが切断してから既定1分でデーモンが終了する仕様だが、
+  -- nvimを常時1つ以上開いている運用では発火せず、デーモンは常駐してキャッシュが単調増加する。
+  cmd = { 'gopls', '-remote=auto' },
+  -- GOMEMLIMITはGoのGCに与えるソフト上限。ヒープが上限へ近づくとGCが積極的に回収し、CPUと引き換えにメモリを抑える。
+  -- モノレポでは2GiBまで下げるとGCが回り続けて重くなるため4GiBとする。
+  cmd_env = { GOMEMLIMIT = '4GiB' },
+  settings = {
+    gopls = {
+      -- goplsのワークスペース走査は.gitignoreを参照しないため、除外対象を明示する。
+      -- 既定値は-node_modulesのみ。リポジトリ直下の.claude/worktrees/配下にworktreeが入れ子で存在する場合、
+      -- 除外しないとモノレポ全体がもう一組ビューとして構築される。
+      directoryFilters = { '-.claude', '-node_modules', '-.git' },
+    },
+  },
+})
 vim.lsp.config('lua_ls', {
   on_init = function(client)
     local path = client.workspace_folders[1].name
