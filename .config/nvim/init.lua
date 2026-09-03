@@ -1021,7 +1021,8 @@ require('neoscroll').setup({
   mappings = {                 -- Keys to be mapped to their corresponding default scrolling animation
     '<C-u>', '<C-d>',
     '<C-b>', '<C-f>',
-    '<C-y>', '<C-e>',
+    -- <C-y>, <C-e> はデフォルトだとウィンドウ高さの10%スクロールするため、
+    -- 下で個別に定義する
     'zt', 'zz', 'zb',
   },
   hide_cursor = false,          -- Hide cursor while scrolling デフォルトから変えた
@@ -1037,6 +1038,16 @@ require('neoscroll').setup({
       'WinScrolled', 'CursorMoved'
   },
 })
+
+-- <C-y>, <C-e> は3行スクロール（整数を渡すと行数、小数を渡すとウィンドウ高さに対する割合として扱われる）
+-- duration は省略不可。neoscroll側のデフォルト値に duration が含まれておらず、
+-- 省略すると duration_multiplier との乗算で nil エラーになる
+vim.keymap.set({ 'n', 'v' }, '<C-y>', function()
+  require('neoscroll').scroll(-3, { move_cursor = false, duration = 100 })
+end, { silent = true, desc = "3行上へスクロール" })
+vim.keymap.set({ 'n', 'v' }, '<C-e>', function()
+  require('neoscroll').scroll(3, { move_cursor = false, duration = 100 })
+end, { silent = true, desc = "3行下へスクロール" })
 -- }}}
 
 -- lualine.nvim {{{
