@@ -1,0 +1,42 @@
+{
+  "version": 3,
+  "skills": {
+    "difit": {
+      "source": "yoshiko-pg/difit",
+      "sourceType": "github",
+      "sourceUrl": "https://github.com/yoshiko-pg/difit.git",
+      "skillPath": "skills/difit/SKILL.md",
+      "skillFolderHash": "47e1e0b8e8bbdcd5492d10bf493f950cb720b604",
+      "installedAt": "2026-09-08T01:43:33.966Z",
+      "updatedAt": "2026-09-08T01:43:33.966Z"
+    },
+    "difit-review": {
+      "source": "yoshiko-pg/difit",
+      "sourceType": "github",
+      "sourceUrl": "https://github.com/yoshiko-pg/difit.git",
+      "skillPath": "skills/difit-review/SKILL.md",
+      "skillFolderHash": "cf5bc26312f2d0372fed1415c65f63402da0a948",
+      "installedAt": "2026-09-08T01:43:33.969Z",
+      "updatedAt": "2026-09-08T01:43:33.969Z"
+    }
+  },
+  "dismissed": {
+    "findSkillsPrompt": true
+  },
+  "lastSelectedAgents": [
+    "amp",
+    "antigravity",
+    "antigravity-cli",
+    "cline",
+    "codex",
+    "cursor",
+    "deepagents",
+    "gemini-cli",
+    "github-copilot",
+    "kimi-code-cli",
+    "opencode",
+    "warp",
+    "zed",
+    "claude-code"
+  ]
+}
