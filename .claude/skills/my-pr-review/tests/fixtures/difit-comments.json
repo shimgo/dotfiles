@@ -1,0 +1,25 @@
+{
+  "version": 3,
+  "threads": [
+    {"id": "claude-fix", "filePath": "offset.go", "position": {"side": "new", "line": 14},
+     "messages": [{"id": "m1", "body": "指摘A", "author": "claude"}, {"id": "m2", "body": "対応 ただしログは warn で", "author": null}]},
+    {"id": "claude-dismiss", "filePath": "offset.go", "position": {"side": "new", "line": 15},
+     "messages": [{"id": "m1", "body": "指摘B", "author": "claude"}, {"id": "m2", "body": "不要: バックフィル済み", "author": null}]},
+    {"id": "claude-question", "filePath": "offset.go", "position": {"side": "new", "line": 16},
+     "messages": [{"id": "m1", "body": "指摘C", "author": "claude"}, {"id": "m2", "body": "質問: 他の方法は？", "author": null}]},
+    {"id": "claude-answered", "filePath": "offset.go", "position": {"side": "new", "line": 17},
+     "messages": [{"id": "m1", "body": "指摘D", "author": "claude"}, {"id": "m2", "body": "質問: なぜ？", "author": null}, {"id": "m3", "body": "回答", "author": "claude"}]},
+    {"id": "claude-pending", "filePath": "offset.go", "position": {"side": "new", "line": 18},
+     "messages": [{"id": "m1", "body": "指摘E", "author": "claude"}]},
+    {"id": "claude-unclear", "filePath": "offset.go", "position": {"side": "new", "line": 19},
+     "messages": [{"id": "m1", "body": "指摘F", "author": "claude"}, {"id": "m2", "body": "うーん", "author": null}]},
+    {"id": "user-question", "filePath": "offset.go", "position": {"side": "new", "line": 10},
+     "messages": [{"id": "m1", "body": "質問: ここは分けるべき？", "author": null}]},
+    {"id": "user-finding", "filePath": "offset.go", "position": {"side": "new", "line": 11},
+     "messages": [{"id": "m1", "body": "err をラップして", "author": null}]},
+    {"id": "user-finding-dismissed", "filePath": "offset.go", "position": {"side": "new", "line": 12},
+     "messages": [{"id": "m1", "body": "命名が気になる", "author": null}, {"id": "m2", "body": "不要 やっぱり良い", "author": null}]},
+    {"id": "PRRC_open_root", "filePath": "offset.go", "position": {"side": "new", "line": 14},
+     "messages": [{"id": "PRRC_open_root", "body": "NewFlag の意味は？", "author": "alice"}]}
+  ]
+}

@@ -1,0 +1,40 @@
+{
+  "pull_request_id": "PR_1",
+  "viewer_login": "reviewer",
+  "viewer_pending_review_id": null,
+  "threads": [
+    {
+      "id": "PRRT_open", "isResolved": false, "isOutdated": false, "subjectType": "LINE",
+      "path": "offset.go", "diffSide": "RIGHT", "startDiffSide": null, "line": 14, "startLine": null,
+      "originalLine": 14, "originalStartLine": null,
+      "comments": {"nodes": [
+        {"id": "PRRC_open_root", "body": "NewFlag の意味は？", "createdAt": "2026-09-01T00:00:00Z", "updatedAt": "2026-09-01T00:00:00Z", "author": {"login": "alice"}},
+        {"id": "PRRC_open_reply", "body": "新規ユーザーの印です", "createdAt": "2026-09-01T01:00:00Z", "updatedAt": "2026-09-01T01:00:00Z", "author": {"login": "bob"}}
+      ]}
+    },
+    {
+      "id": "PRRT_resolved", "isResolved": true, "isOutdated": false, "subjectType": "LINE",
+      "path": "offset.go", "diffSide": "RIGHT", "startDiffSide": "RIGHT", "line": 12, "startLine": 11,
+      "originalLine": 12, "originalStartLine": 11,
+      "comments": {"nodes": [
+        {"id": "PRRC_resolved_root", "body": "err のラップ", "createdAt": "2026-09-01T00:00:00Z", "updatedAt": "2026-09-01T00:00:00Z", "author": {"login": "alice"}}
+      ]}
+    },
+    {
+      "id": "PRRT_outdated", "isResolved": false, "isOutdated": true, "subjectType": "LINE",
+      "path": "offset.go", "diffSide": "RIGHT", "startDiffSide": null, "line": null, "startLine": null,
+      "originalLine": 3, "originalStartLine": null,
+      "comments": {"nodes": [
+        {"id": "PRRC_outdated_root", "body": "古い指摘", "createdAt": "2026-09-01T00:00:00Z", "updatedAt": "2026-09-01T00:00:00Z", "author": {"login": "alice"}}
+      ]}
+    },
+    {
+      "id": "PRRT_left", "isResolved": false, "isOutdated": false, "subjectType": "LINE",
+      "path": "offset.go", "diffSide": "LEFT", "startDiffSide": null, "line": 5, "startLine": null,
+      "originalLine": 5, "originalStartLine": null,
+      "comments": {"nodes": [
+        {"id": "PRRC_left_root", "body": "削除された行", "createdAt": "2026-09-01T00:00:00Z", "updatedAt": "2026-09-01T00:00:00Z", "author": {"login": "alice"}}
+      ]}
+    }
+  ]
+}

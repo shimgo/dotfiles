@@ -1,0 +1,51 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "my-pr-review findings",
+  "description": "リポジトリ固有のレビュースキルの出力を、difit-post.sh に渡すために変換した形式。",
+  "type": "object",
+  "required": ["findings"],
+  "properties": {
+    "findings": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["file", "line", "perspective", "summary", "body"],
+        "properties": {
+          "file": { "type": "string", "description": "リポジトリルートからの相対パス" },
+          "side": { "type": "string", "enum": ["new", "old"], "default": "new", "description": "new は変更後のファイルの行、old は削除された行" },
+          "line": {
+            "description": "指摘対象の行番号。範囲なら {start, end}",
+            "oneOf": [
+              { "type": "integer", "minimum": 1 },
+              {
+                "type": "object",
+                "required": ["start", "end"],
+                "properties": {
+                  "start": { "type": "integer", "minimum": 1 },
+                  "end": { "type": "integer", "minimum": 1 }
+                }
+              }
+            ]
+          },
+          "perspective": { "type": ["string", "null"], "description": "観点名。レビュースキルの観点をそのまま使う。同じ箇所・同じ観点の判定に使うので表記を揃える" },
+          "summary": { "type": "string", "description": "1 行の要約。fingerprint の材料になる" },
+          "body": { "type": "string", "description": "difit に表示する本文 (Markdown)。根拠と修正案を含める" }
+        }
+      }
+    }
+  },
+  "examples": [
+    {
+      "findings": [
+        {
+          "file": "internal/point/offset.go",
+          "side": "new",
+          "line": { "start": 42, "end": 44 },
+          "perspective": "観点5: 破壊的な変更の確認",
+          "summary": "既存ユーザーで NewFlag が暗黙的に false になる",
+          "body": "`NewFlag` は新規カラムですが、既存レコードのバックフィルがこの PR に含まれていません。\n旧コードが動いている間に NULL が入る経路がないか確認してください。"
+        }
+      ]
+    }
+  ]
+}

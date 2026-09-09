@@ -1,0 +1,36 @@
+{
+  "skill_name": "my-pr-review",
+  "note": "このスキルは実在の PR、worktree、difit サーバ、GitHub の pending review を操作するため、自動評価は実行していない。手動で試すときの想定プロンプトを残す。",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "https://github.com/<owner>/<repo>/pull/1234 のレビュー依頼が来た。difit でレビューセッションを始めて、リポジトリのレビュースキルで指摘を出して difit に載せて。",
+      "expected_output": "session-start.sh を worktree モードで実行し、difit の URL と GitHub 取り込み件数を報告する。worktree で Claude を起動し直す案内をしてから、リポジトリ固有のレビュースキルを実行し findings JSON に変換して difit-post.sh で投稿し、投稿・抑止件数を報告する。",
+      "files": []
+    },
+    {
+      "id": 2,
+      "prompt": "difit で返信つけ終わった。対応要否を処理して、対応が必要なものは GitHub に pending コメントで入れておいて。",
+      "expected_output": "difit-fetch.sh で分類し、dismiss は set-status してから difit resolve、fix と user_finding は本文を整えて github-pending.sh で pending review に追加する。unclear があればユーザーに確認する。",
+      "files": []
+    },
+    {
+      "id": 3,
+      "prompt": "PR の作者が直したって言ってるから、GitHub の最新を取り込んで指摘が直ってるか確認して resolve して。",
+      "expected_output": "sync.sh を実行して新しい difit URL と reconciled の内訳を報告し、posted と outdated の各指摘について diff を読んで修正を判断し、修正済みは github-resolve.sh で resolve する。未対応と要判断のものを一覧にする。",
+      "files": []
+    },
+    {
+      "id": 4,
+      "prompt": "セルフレビューしたい。今のブランチの PR で difit 立ち上げてレビューして。",
+      "expected_output": "自分の PR かつ現在のブランチなので --local で session-start.sh を実行し、review フェーズに進む。",
+      "files": []
+    },
+    {
+      "id": 5,
+      "prompt": "このファイルの関数をレビューして、気になるところを教えて。",
+      "expected_output": "difit も PR も出てこないため、このスキルは使わず通常のレビューとして応答する。",
+      "files": []
+    }
+  ]
+}
