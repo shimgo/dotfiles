@@ -36,4 +36,4 @@ difit comment resolve <difit_thread_id>... --port <port>
 4. 修正内容そのものに新たな問題がないかは `phases/review.md` で再レビューする。再指摘防止リストが効くので、
    過去に不要とした指摘は抑止され、修正で変わった箇所だけが新たに指摘される。
 
-5. resolve した件数、未対応の一覧、ユーザーの判断を要するものを報告する。
+5. `$SKILL_DIR/scripts/phase-done.sh <state-dir> verify` を実行し、resolve した件数、未対応の一覧、ユーザーの判断を要するものを報告する。

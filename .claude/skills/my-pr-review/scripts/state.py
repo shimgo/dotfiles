@@ -39,6 +39,8 @@ STATUSES = ("open", "dismissed", "posted", "resolved", "outdated")
 FIX_PREFIXES = ("対応",)
 DISMISS_PREFIXES = ("不要",)
 QUESTION_PREFIXES = ("質問", "@claude", "Q:", "q:", "？", "?")
+# 本文がこの 1 文字だけのときの省略記法。先頭一致にしないのは、"- 項目" のような箇条書きを誤認しないため。
+EXACT_SHORTHAND = {"+": "fix", "-": "dismiss", "＋": "fix", "－": "dismiss", "ー": "dismiss"}
 
 
 # ---------------------------------------------------------------------------
@@ -362,6 +364,8 @@ def github_thread_to_imports(thread: dict) -> list[dict]:
 def classify_reply(body: str) -> tuple[str, str]:
     """返信本文を (種別, 残りの本文) に分類する。種別は fix / dismiss / question / other。"""
     text = body.strip()
+    if text in EXACT_SHORTHAND:
+        return EXACT_SHORTHAND[text], ""
     for prefixes, kind in ((DISMISS_PREFIXES, "dismiss"), (FIX_PREFIXES, "fix"), (QUESTION_PREFIXES, "question")):
         for p in prefixes:
             if text.startswith(p):

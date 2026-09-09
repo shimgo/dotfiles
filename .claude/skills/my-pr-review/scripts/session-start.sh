@@ -103,7 +103,7 @@ jq -n \
   --arg base_sha "${BASE_SHA}" --arg head_sha "${HEAD_SHA}" --argjson difit "${DIFIT_JSON}" \
   --arg review_skill "${REVIEW_SKILL}" --arg now "$(date +%Y-%m-%dT%H:%M:%S%z)" \
   '{repo:$repo, pr:$pr, pr_url:$pr_url, mode:$mode, worktree:$worktree, base_ref:$base_ref, head_ref:$head_ref,
-    base_sha:$base_sha, head_sha:$head_sha, reviewed_head_sha:null, difit:$difit,
+    base_sha:$base_sha, head_sha:$head_sha, reviewed_head_sha:null, last_phase:"start", difit:$difit,
     review_skill:(if $review_skill == "" then null else $review_skill end), started_at:$now, updated_at:$now,
     state_dir:($worktree|tostring|"")}' \
   | jq --arg d "${STATE_DIR}" '.state_dir = $d' > "${SESSION}"

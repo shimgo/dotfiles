@@ -1,6 +1,6 @@
 # triage: 対応要否の返信を処理する
 
-ユーザーは difit 上で Claude の各指摘に `対応` か `不要: 理由` を返信する。ユーザー自身が書いたレビューコメントも difit 上にある。
+ユーザーは difit 上で Claude の各指摘に `対応` (省略形 `+`) か `不要: 理由` (省略形 `-`) を返信する。ユーザー自身が書いたレビューコメントも difit 上にある。
 このフェーズはそれらを状態ファイルと GitHub、またはコードに反映する。
 
 ## 手順
@@ -68,6 +68,9 @@ difit comment resolve <id> --port <port>
 - すべて実装したら `scripts/sync.sh <state-dir>` で difit を新しい HEAD で作り直し、`phases/review.md` に進んで
   `reviewed_head_sha..HEAD` の差分だけを再レビューする。この再レビューは自動で続ける。ユーザーが「対応を依頼する」と言った時点で再レビューまでを 1 つの仕事とみなしている。
 
-### 5. 報告
+### 5. 完了の記録と報告
+
+ケース 1 は `$SKILL_DIR/scripts/phase-done.sh <state-dir> triage` を実行する。
+ケース 2 は続けて実行した review フェーズが `last_phase` を `review` にするので、ここでは実行しない。
 
 不要にした件数と理由の一覧、GitHub に投稿した件数 (ケース 1)、コミット一覧と再レビュー結果 (ケース 2) を報告する。

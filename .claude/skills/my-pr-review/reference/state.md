@@ -36,6 +36,7 @@ worktree の削除や head の更新をまたいで信頼できないためで�
 | `base_ref`, `head_ref` | ブランチ名 |
 | `base_sha`, `head_sha` | 現在の diff の両端。`base_sha` は merge-base |
 | `reviewed_head_sha` | 最後にレビュースキルを実行したときの head。差分のみの再レビューの起点 |
+| `last_phase` | 最後に完了したフェーズ。`next.sh` の判定に使う |
 | `difit` | `{port, url, pid}` |
 | `review_skill` | リポジトリ固有のレビュースキル名 |
 | `state_dir` | このディレクトリ自身のパス |

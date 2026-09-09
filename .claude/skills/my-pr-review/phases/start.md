@@ -22,7 +22,7 @@ $SKILL_DIR/scripts/session-start.sh <PR> [--local] --review-skill <スキル名>
 3. 取り込んだ GitHub スレッドの件数を伝える。既に GitHub 上にレビューがある PR では、それらが difit に表示されている。
 4. ケース 1 で現在のディレクトリが worktree でなければ、リポジトリ固有のレビュースキルが worktree を見られるように、
    worktree で Claude Code を起動し直すか `/add-dir` で追加するようユーザーに案内する。
-5. 続けてレビューを求められていれば `phases/review.md` に進む。
+5. 続けてレビューを求められていれば `phases/review.md` に進む。`last_phase` は session-start.sh が `start` にしている。
 
 ## 補足
 

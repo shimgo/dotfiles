@@ -26,7 +26,7 @@ $SKILL_DIR/scripts/sync.sh <state-dir>
 - `reimported.outdated`: head が変わって位置を特定できなくなった未投稿の指摘。修正で消えた行に対する指摘なら対応済みの可能性が高い。verify で扱う。
 - `session.difit.url`: 新しい difit の URL。ポートが変わっていることがあるので必ず伝える。
 
-3. head が変わっていれば、次は `phases/verify.md` で指摘箇所の修正を確認する。
+3. `$SKILL_DIR/scripts/phase-done.sh <state-dir> sync` を実行する。head が変わっていれば、次は `phases/verify.md` で指摘箇所の修正を確認する。
 
 ## 補足
 

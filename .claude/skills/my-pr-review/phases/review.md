@@ -54,9 +54,10 @@ $SKILL_DIR/scripts/difit-post.sh <state-dir> <findings.json>
 
 ```bash
 jq '.reviewed_head_sha = .head_sha' <state-dir>/session.json > /tmp/s.json && mv /tmp/s.json <state-dir>/session.json
+$SKILL_DIR/scripts/phase-done.sh <state-dir> review
 ```
 
 ### 6. 報告
 
 投稿件数、抑止件数、difit の URL を伝える。ユーザーは difit 上で各指摘に対応要否を返信するので、
-`reference/reply-convention.md` の書式を一言添える。
+`reference/reply-convention.md` の書式 (`+` で対応、`-` で不要、`不要: 理由` で理由付き) を一言添える。

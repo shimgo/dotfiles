@@ -24,4 +24,5 @@ difit comment add --port <port> '{"type":"reply","filePath":"<file>","position":
 `reply` は thread id ではなく filePath と position でスレッドを探し、同じ位置に複数のスレッドがあれば最新のものに付く。
 同じ行に複数のスレッドがある場合は、返信の冒頭に「指摘Xについて」のように対象を書いて区別できるようにする。
 
-5. 答えた件数と要点を報告する。ユーザーが回答を見て対応要否を決めるので、状態ファイルの更新はここでは行わない。
+5. `$SKILL_DIR/scripts/phase-done.sh <state-dir> answer` を実行し、答えた件数と要点を報告する。
+   ユーザーが回答を見て対応要否を決めるので、threads.jsonl の更新はここでは行わない。

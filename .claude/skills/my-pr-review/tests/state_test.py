@@ -199,6 +199,17 @@ class GithubTest(unittest.TestCase):
         self.assertEqual(len(out["warnings"]), 1)
 
 
+class ShorthandTest(unittest.TestCase):
+    def test_plus_and_minus_alone(self):
+        self.assertEqual(state.classify_reply("+"), ("fix", ""))
+        self.assertEqual(state.classify_reply(" - \n"), ("dismiss", ""))
+        self.assertEqual(state.classify_reply("＋"), ("fix", ""))
+
+    def test_bullet_list_is_not_shorthand(self):
+        self.assertEqual(state.classify_reply("- 項目1\n- 項目2")[0], "other")
+        self.assertEqual(state.classify_reply("+1 です")[0], "other")
+
+
 class TriageTest(unittest.TestCase):
     def test_classification(self):
         with open(os.path.join(FIXTURES, "difit-comments.json"), encoding="utf-8") as f:
