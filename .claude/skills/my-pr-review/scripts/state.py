@@ -399,7 +399,7 @@ def github_body(root: dict, replies: list[dict]) -> str:
     """GitHub のレビューコメント本文を組み立てる。
 
     Claude の指摘に対しては「ユーザーの返信 --- Claude の指摘 (注記を除く)」の順にする。
-    ユーザー自身のスレッドは本文とユーザーの返信をそのまま連結する。
+    ユーザー自身のスレッドは本文をそのまま使う (返信は含めない)。
     """
     user_texts = [
         (m.get("body") or "").strip()
@@ -407,12 +407,12 @@ def github_body(root: dict, replies: list[dict]) -> str:
         if not is_claude(m) and (m.get("body") or "").strip() and not is_bare_directive(m.get("body") or "")
     ]
     root_body = (root.get("body") or "").strip()
-    if is_claude(root):
-        root_body = strip_annotation(root_body)
-        if not user_texts:
-            return root_body
-        return "\n\n".join(user_texts) + "\n\n---\n\n" + root_body
-    return "\n\n".join([root_body, *user_texts])
+    if not is_claude(root):
+        return root_body
+    root_body = strip_annotation(root_body)
+    if not user_texts:
+        return root_body
+    return "\n\n".join(user_texts) + "\n\n---\n\n" + root_body
 
 
 def triage_thread(thread: dict, record: dict | None) -> dict:

@@ -262,9 +262,9 @@ class GithubBodyTest(unittest.TestCase):
         self.assertTrue(body.startswith("質問: なぜ？\n\n対応 ではそれで\n\n---"))
         self.assertNotIn("回答です", body)
 
-    def test_user_thread_keeps_root_and_replies(self):
+    def test_user_thread_is_posted_as_is(self):
         body = state.github_body({"body": "err をラップして", "author": None}, [{"body": "ここも同様", "author": None}])
-        self.assertEqual(body, "err をラップして\n\nここも同様")
+        self.assertEqual(body, "err をラップして")
 
     def test_triage_output_has_github_body(self):
         with open(os.path.join(FIXTURES, "difit-comments.json"), encoding="utf-8") as f:
