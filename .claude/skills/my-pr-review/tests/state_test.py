@@ -244,6 +244,38 @@ class RegisterTest(unittest.TestCase):
         self.assertEqual(recs["claude-dismiss"]["origin"], "claude")
 
 
+class GithubBodyTest(unittest.TestCase):
+    claude_root = {"body": "> 過去の判断: 既出\n> 理由: x\n\n#1 [重要度] 中🟡\n\n[修正案]\n\n寄せてください。", "author": "claude"}
+
+    def test_reply_then_separator_then_finding_without_annotation(self):
+        body = state.github_body(self.claude_root, [{"body": "対応した方が良さそう。", "author": None}])
+        self.assertEqual(body, "対応した方が良さそう。\n\n---\n\n#1 [重要度] 中🟡\n\n[修正案]\n\n寄せてください。")
+
+    def test_bare_directive_is_omitted(self):
+        body = state.github_body(self.claude_root, [{"body": "+", "author": None}])
+        self.assertEqual(body, "#1 [重要度] 中🟡\n\n[修正案]\n\n寄せてください。")
+        body = state.github_body(self.claude_root, [{"body": "対応", "author": None}])
+        self.assertFalse(body.startswith("対応"))
+
+    def test_claude_replies_are_not_included(self):
+        body = state.github_body(self.claude_root, [{"body": "質問: なぜ？", "author": None}, {"body": "回答です", "author": "claude"}, {"body": "対応 ではそれで", "author": None}])
+        self.assertTrue(body.startswith("質問: なぜ？\n\n対応 ではそれで\n\n---"))
+        self.assertNotIn("回答です", body)
+
+    def test_user_thread_keeps_root_and_replies(self):
+        body = state.github_body({"body": "err をラップして", "author": None}, [{"body": "ここも同様", "author": None}])
+        self.assertEqual(body, "err をラップして\n\nここも同様")
+
+    def test_triage_output_has_github_body(self):
+        with open(os.path.join(FIXTURES, "difit-comments.json"), encoding="utf-8") as f:
+            payload = f.read()
+        with tempfile.TemporaryDirectory() as d:
+            out = run(["triage", "--state", os.path.join(d, "threads.jsonl")], payload)
+        got = {t["difit_thread_id"]: t["github_body"] for t in out["threads"]}
+        self.assertEqual(got["claude-fix"], "対応 ただしログは warn で\n\n---\n\n指摘A")
+        self.assertEqual(got["user-finding"], "err をラップして")
+
+
 class RelocateTest(unittest.TestCase):
     def test_relocate_finds_unique_snippet(self):
         rec = state.new_record(key="k", file="offset.go", side="new", line=99, snippet="  if user.NewFlag {\n return nil", status="open", summary="s")

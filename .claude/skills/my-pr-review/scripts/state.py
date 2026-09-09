@@ -378,6 +378,43 @@ def is_claude(message: dict) -> bool:
     return (message.get("author") or "") == CLAUDE_AUTHOR
 
 
+def strip_annotation(body: str) -> str:
+    """to-difit が先頭に付けた過去の判断の注記 ("> " で始まる行) を取り除く。GitHub には載せない内部情報のため。"""
+    lines = body.split("\n")
+    i = 0
+    while i < len(lines) and lines[i].startswith("> "):
+        i += 1
+    if i == 0:
+        return body
+    return "\n".join(lines[i:]).lstrip("\n")
+
+
+def is_bare_directive(body: str) -> bool:
+    """"+" や "対応" のように、意思表示だけで本文を持たない返信か。"""
+    kind, rest = classify_reply(body)
+    return kind in ("fix", "dismiss") and rest == ""
+
+
+def github_body(root: dict, replies: list[dict]) -> str:
+    """GitHub のレビューコメント本文を組み立てる。
+
+    Claude の指摘に対しては「ユーザーの返信 --- Claude の指摘 (注記を除く)」の順にする。
+    ユーザー自身のスレッドは本文とユーザーの返信をそのまま連結する。
+    """
+    user_texts = [
+        (m.get("body") or "").strip()
+        for m in replies
+        if not is_claude(m) and (m.get("body") or "").strip() and not is_bare_directive(m.get("body") or "")
+    ]
+    root_body = (root.get("body") or "").strip()
+    if is_claude(root):
+        root_body = strip_annotation(root_body)
+        if not user_texts:
+            return root_body
+        return "\n\n".join(user_texts) + "\n\n---\n\n" + root_body
+    return "\n\n".join([root_body, *user_texts])
+
+
 def triage_thread(thread: dict, record: dict | None) -> dict:
     messages = thread.get("messages") or []
     root = messages[0] if messages else {"body": "", "author": None}
@@ -398,6 +435,7 @@ def triage_thread(thread: dict, record: dict | None) -> dict:
         "replies": [{"author": m.get("author"), "body": m.get("body") or ""} for m in replies],
         "classification": "none",
         "text": "",
+        "github_body": github_body(root, replies),
     }
 
     last = messages[-1] if messages else None

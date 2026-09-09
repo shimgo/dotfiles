@@ -37,13 +37,30 @@ difit comment resolve <id> --port <port>
 
 ### 3. ケース 1: GitHub の pending review に反映する
 
-対象は `fix` の Claude スレッドと `user_finding` スレッド。1 スレッドを 1 件の指摘にまとめる。
+対象は `fix` の Claude スレッドと `user_finding` スレッド。1 スレッドを 1 件の指摘にする。
 
-- Claude の指摘にユーザーが補足を返信していれば、その意図を取り込んで本文を書き直す。
-- 本文はレビュー依頼者に向けた文章にする。「Claude の指摘」という体裁は残さず、根拠と修正案を簡潔に書く。
-- 本文は Markdown。コードは fenced code block にする。
+本文は `difit-fetch.sh` の出力にある `github_body` をそのまま使う。組み立て方は次のとおりで、Claude が書き直したり要約したりしない。
 
-`[{"difit_thread_id": "...", "body": "..."}]` の配列を作って投稿する。
+- Claude の指摘へのユーザーの返信を先頭に置き、`---` で区切って、その下に Claude の指摘本文を原文のまま載せる。
+- `+` や `対応` だけの返信は本文に含めない (指摘本文だけになる)。「対応した方が良さそう。」のように文があれば含める。
+- 再指摘防止の注記 (`> 過去の判断: ...`) は取り除く。
+- ユーザー自身のスレッドは本文と自分の返信をそのまま連結する。
+
+例:
+
+```
+対応した方が良さそう。
+
+---
+
+#1 [重要度] 中🟡
+
+[修正案]
+
+...
+```
+
+`[{"difit_thread_id": "...", "body": <github_body>}]` の配列を作って投稿する。
 
 ```bash
 $SKILL_DIR/scripts/github-pending.sh <state-dir> < items.json
