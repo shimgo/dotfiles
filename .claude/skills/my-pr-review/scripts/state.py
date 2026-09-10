@@ -43,8 +43,8 @@ DISMISS_PREFIXES = ("不要",)
 TO_CLAUDE_RE = re.compile(r"^[qQ][ \t\u3000:：\n]")
 # 先頭語の後に続く、無視してよい区切り文字。
 SEPARATORS = " \t\u3000:：\n"
-# 本文がこの 1 文字だけのときの省略記法。先頭一致にしないのは、"- 項目" のような箇条書きを誤認しないため。
-EXACT_SHORTHAND = {"+": "fix", "-": "dismiss", "＋": "fix", "－": "dismiss", "ー": "dismiss"}
+# 先頭 1 文字の省略記法。"対応" / "不要" と同じく先頭一致で判定し、続く本文は補足または理由として扱う。
+SHORTHAND_PREFIXES = {"+": "fix", "-": "dismiss", "＋": "fix", "－": "dismiss", "ー": "dismiss"}
 
 
 # ---------------------------------------------------------------------------
@@ -371,10 +371,10 @@ def classify_reply(body: str) -> tuple[str, str]:
     other は q も + も - も付いていない本文で、レビュイーへのコメントとして扱う。
     """
     text = body.strip()
-    if text in EXACT_SHORTHAND:
-        return EXACT_SHORTHAND[text], ""
     if TO_CLAUDE_RE.match(text):
         return "to_claude", text[1:].lstrip(SEPARATORS)
+    if text and text[0] in SHORTHAND_PREFIXES:
+        return SHORTHAND_PREFIXES[text[0]], text[1:].lstrip(SEPARATORS)
     for prefixes, kind in ((DISMISS_PREFIXES, "dismiss"), (FIX_PREFIXES, "fix")):
         for p in prefixes:
             if not text.startswith(p):
@@ -412,6 +412,15 @@ def is_to_claude(body: str) -> bool:
     return classify_reply(body)[0] == "to_claude"
 
 
+def directive_stripped_body(body: str) -> str:
+    """先頭語 ("+" / "-" / "対応" / "不要") を取り除いた本文を返す。先頭語が無ければ本文をそのまま返す。
+
+    レビュイーは対応要否の表明そのものを読む必要がないため、GitHub へ載せる本文からは先頭語を落とす。
+    """
+    kind, rest = classify_reply(body)
+    return rest if kind in ("fix", "dismiss") else body.strip()
+
+
 def github_body(root: dict, replies: list[dict]) -> str:
     """GitHub のレビューコメント本文を組み立てる。
 
@@ -421,7 +430,7 @@ def github_body(root: dict, replies: list[dict]) -> str:
     ユーザー自身のスレッドの本文が "q ..." だけの場合は空文字列を返し、投稿する前に本文を書き直させる。
     """
     user_texts = [
-        (m.get("body") or "").strip()
+        directive_stripped_body(m.get("body") or "")
         for m in replies
         if not is_claude(m)
         and (m.get("body") or "").strip()

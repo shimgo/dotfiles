@@ -205,9 +205,14 @@ class ShorthandTest(unittest.TestCase):
         self.assertEqual(state.classify_reply(" - \n"), ("dismiss", ""))
         self.assertEqual(state.classify_reply("＋"), ("fix", ""))
 
-    def test_bullet_list_is_not_shorthand(self):
-        self.assertEqual(state.classify_reply("- 項目1\n- 項目2")[0], "other")
-        self.assertEqual(state.classify_reply("+1 です")[0], "other")
+    def test_plus_and_minus_take_following_text(self):
+        # "+" / "-" は "対応" / "不要" と同じ先頭一致で、続く本文を補足または理由として扱う。
+        # 箇条書きの "- 項目" や "+1" を対応要否と読むことになるが、実運用で困らないため許容する。
+        self.assertEqual(state.classify_reply("+ 明細ごとの切り捨ては問題ありません"), ("fix", "明細ごとの切り捨ては問題ありません"))
+        self.assertEqual(state.classify_reply("+\n明細ごとの切り捨ては問題ありません"), ("fix", "明細ごとの切り捨ては問題ありません"))
+        self.assertEqual(state.classify_reply("- マイグレーションで対応済み"), ("dismiss", "マイグレーションで対応済み"))
+        self.assertEqual(state.classify_reply("- 項目1\n- 項目2"), ("dismiss", "項目1\n- 項目2"))
+        self.assertEqual(state.classify_reply("+1 です"), ("fix", "1 です"))
 
 
 class ToClaudePrefixTest(unittest.TestCase):
@@ -313,7 +318,8 @@ class GithubBodyTest(unittest.TestCase):
         with tempfile.TemporaryDirectory() as d:
             out = run(["triage", "--state", os.path.join(d, "threads.jsonl")], payload)
         got = {t["difit_thread_id"]: t["github_body"] for t in out["threads"]}
-        self.assertEqual(got["claude-fix"], "対応 ただしログは warn で\n\n---\n\n指摘A")
+        # レビュイーは対応要否の表明そのものを読む必要がないため、先頭語を落とした本文を載せる。
+        self.assertEqual(got["claude-fix"], "ただしログは warn で\n\n---\n\n指摘A")
         self.assertEqual(got["user-finding"], "err をラップして")
 
 
