@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # GitHub の最新状態を状態ファイルに反映し、difit を最新の head で作り直す。
 #
-# 使い方: sync.sh <状態ディレクトリ> [--no-restart]
+# 使い方: sync.sh <状態ディレクトリ> [--no-restart] [--allow-empty-snapshot]
 #
 # 実施内容:
 #   1. GitHub の reviewThreads を取得し、resolved / 削除されたスレッドの status を更新する
@@ -16,8 +16,17 @@
 source "$(dirname "${BASH_SOURCE[0]}")/common.sh"
 need gh git jq difit python3 curl
 load_session "$1"
+shift
 RESTART=true
-[ "${2:-}" = "--no-restart" ] && RESTART=false
+ALLOW_EMPTY_SNAPSHOT=false
+while [ $# -gt 0 ]; do
+  case "$1" in
+    --no-restart) RESTART=false ;;
+    --allow-empty-snapshot) ALLOW_EMPTY_SNAPSHOT=true ;;
+    *) echo "error: 不明なオプション: $1" >&2; exit 1 ;;
+  esac
+  shift
+done
 
 # 1. GitHub との突き合わせ
 THREADS_JSON="$("${SCRIPT_DIR}/github-fetch-threads.sh" "${REPO}" "${PR}")"
@@ -49,6 +58,18 @@ fi
 SNAPSHOT="${STATE_DIR}/difit-last.json"
 if difit_alive; then
   difit comment get --port "${DIFIT_PORT}" --format json > "${SNAPSHOT}"
+  # 対応要否の判断 (返信) は difit にしか無く、状態ファイルには triage を通すまで残らない。
+  # スナップショットが空なのに再投入する open なスレッドがあるなら、取得に失敗した可能性が高い。
+  # そのまま作り直すと返信を失うため中断する。
+  SNAPSHOT_THREADS="$(jq '.threads | length' "${SNAPSHOT}" 2>/dev/null || echo 0)"
+  OPEN_THREADS="$(python3 "${STATE_PY}" latest --state "${STATE_FILE}" | jq '[.[] | select(.status == "open")] | length')"
+  if [ "${SNAPSHOT_THREADS}" -eq 0 ] && [ "${OPEN_THREADS}" -gt 0 ] && [ "${ALLOW_EMPTY_SNAPSHOT}" = false ]; then
+    echo "error: difit は動いていますがスレッドを 0 件しか取得できませんでした (open なスレッドは ${OPEN_THREADS} 件)。" >&2
+    echo "       このまま作り直すと difit 上の返信 (対応要否の判断) を失います。" >&2
+    echo "       difit comment get --port ${DIFIT_PORT} --format json を手で確認してください。" >&2
+    echo "       返信を失ってよいと判断したら --allow-empty-snapshot を付けて再実行してください。" >&2
+    exit 1
+  fi
 fi
 stop_difit "${DIFIT_PID}"
 DIFIT_JSON="$(start_difit "${WORKTREE}" "${HEAD_SHA}" "${BASE_SHA}" "${MODE}")"
