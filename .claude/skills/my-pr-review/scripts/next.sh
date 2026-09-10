@@ -5,8 +5,8 @@
 # 出力 (JSON): {"phase": "...", "reason": "...", "mode": "...", "last_phase": "...", "difit": {分類ごとの件数}}
 #
 # 判定の優先順位:
-#   1. difit に未回答の質問があれば answer
-#   2. difit に未処理の返信 (fix / dismiss / user_finding / unclear) があれば triage
+#   1. difit に未処理の Claude Code 宛ての本文 ("q ...") があれば answer
+#   2. difit に未処理の返信 (fix / dismiss / user_finding) があれば triage
 #   3. それ以外は直前のフェーズから決める
 #        start / なし → review
 #        review / answer → wait (ユーザーが difit で対応要否を付けるのを待つ)
@@ -35,8 +35,8 @@ emit() {
   exit 0
 }
 
-[ "$(count question)" -gt 0 ] && emit answer "未回答の質問が $(count question) 件ある"
-PENDING_REPLIES=$(( $(count fix) + $(count dismiss) + $(count user_finding) + $(count unclear) ))
+[ "$(count to_claude)" -gt 0 ] && emit answer "未処理の Claude Code 宛ての本文が $(count to_claude) 件ある"
+PENDING_REPLIES=$(( $(count fix) + $(count dismiss) + $(count user_finding) ))
 [ "${PENDING_REPLIES}" -gt 0 ] && emit triage "未処理の返信が ${PENDING_REPLIES} 件ある"
 
 case "${LAST}" in

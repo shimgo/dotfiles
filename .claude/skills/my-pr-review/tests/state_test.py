@@ -210,16 +210,27 @@ class ShorthandTest(unittest.TestCase):
         self.assertEqual(state.classify_reply("+1 です")[0], "other")
 
 
-class QuestionPrefixTest(unittest.TestCase):
-    def test_q_with_separator_is_question(self):
-        self.assertEqual(state.classify_reply("q この記述は正しいですか？"), ("question", "この記述は正しいですか？"))
-        self.assertEqual(state.classify_reply("Q: なぜ？"), ("question", "なぜ？"))
-        self.assertEqual(state.classify_reply("q\nなぜ？"), ("question", "なぜ？"))
-        self.assertEqual(state.classify_reply("q　全角空白でも"), ("question", "全角空白でも"))
+class ToClaudePrefixTest(unittest.TestCase):
+    def test_q_with_separator_is_to_claude(self):
+        self.assertEqual(state.classify_reply("q この記述は正しいですか？"), ("to_claude", "この記述は正しいですか？"))
+        self.assertEqual(state.classify_reply("Q: なぜ？"), ("to_claude", "なぜ？"))
+        self.assertEqual(state.classify_reply("q\nなぜ？"), ("to_claude", "なぜ？"))
+        self.assertEqual(state.classify_reply("q　全角空白でも"), ("to_claude", "全角空白でも"))
+        self.assertEqual(state.classify_reply("q この指摘は取り下げて"), ("to_claude", "この指摘は取り下げて"))
 
-    def test_q_without_separator_is_not_question(self):
+    def test_q_without_separator_is_not_to_claude(self):
         self.assertEqual(state.classify_reply("query が空のときは？")[0], "other")
         self.assertEqual(state.classify_reply("q")[0], "other")
+
+    def test_other_prefixes_are_reviewee_comments(self):
+        for body in ("質問: この関数は分けるべき？", "@claude これは？", "? ここは意図的ですか", "？ なぜ"):
+            self.assertEqual(state.classify_reply(body), ("other", body))
+
+    def test_prefix_needs_separator(self):
+        self.assertEqual(state.classify_reply("不要な変数が残っている"), ("other", "不要な変数が残っている"))
+        self.assertEqual(state.classify_reply("対応した方が良さそう。"), ("other", "対応した方が良さそう。"))
+        self.assertEqual(state.classify_reply("不要"), ("dismiss", ""))
+        self.assertEqual(state.classify_reply("対応 ただしログは warn で"), ("fix", "ただしログは warn で"))
 
 
 class TriageTest(unittest.TestCase):
@@ -231,13 +242,13 @@ class TriageTest(unittest.TestCase):
         got = {t["difit_thread_id"]: (t["classification"], t["text"]) for t in out["threads"]}
         self.assertEqual(got["claude-fix"], ("fix", "ただしログは warn で"))
         self.assertEqual(got["claude-dismiss"], ("dismiss", "バックフィル済み"))
-        self.assertEqual(got["claude-question"], ("question", "他の方法は？"))
+        self.assertEqual(got["claude-to-claude"], ("to_claude", "他の方法は？"))
         self.assertEqual(got["claude-answered"][0], "none")
         self.assertEqual(got["claude-pending"][0], "pending")
-        self.assertEqual(got["claude-unclear"][0], "unclear")
-        self.assertEqual(got["user-question"], ("question", "ここは分けるべき？"))
-        self.assertEqual(got["claude-q-short"], ("question", "この記述は正しいですか？"))
-        self.assertEqual(got["user-q-short"], ("question", "ここは分けるべき？"))
+        # q も + も - も付かない返信はレビュイーへのコメントなので fix になる
+        self.assertEqual(got["claude-reviewee-comment"], ("fix", "ここは仕様の変更が必要では？"))
+        self.assertEqual(got["user-to-claude"], ("to_claude", "ここは分けるべき？"))
+        self.assertEqual(got["claude-to-claude-after-plus"], ("to_claude", "この記述は正しいですか？"))
         self.assertEqual(got["user-finding"][0], "user_finding")
         self.assertEqual(got["user-finding-dismissed"], ("dismiss", "やっぱり良い"))
         self.assertEqual(got["PRRC_open_root"][0], "github")
@@ -271,19 +282,26 @@ class GithubBodyTest(unittest.TestCase):
         body = state.github_body(self.claude_root, [{"body": "対応", "author": None}])
         self.assertFalse(body.startswith("対応"))
 
-    def test_claude_replies_and_questions_are_not_included(self):
-        body = state.github_body(self.claude_root, [{"body": "質問: なぜ？", "author": None}, {"body": "回答です", "author": "claude"}, {"body": "対応 ではそれで", "author": None}])
-        self.assertTrue(body.startswith("対応 ではそれで\n\n---"))
+    def test_claude_replies_and_q_are_not_included(self):
+        body = state.github_body(self.claude_root, [{"body": "q なぜ？", "author": None}, {"body": "回答です", "author": "claude"}, {"body": "ではそれで", "author": None}])
+        self.assertTrue(body.startswith("ではそれで\n\n---"))
         self.assertNotIn("回答です", body)
         self.assertNotIn("なぜ？", body)
 
-    def test_q_shorthand_question_is_not_included(self):
+    def test_q_reply_is_not_included(self):
         body = state.github_body(self.claude_root, [{"body": "q この記述は正しいですか？", "author": None}, {"body": "回答です", "author": "claude"}, {"body": "+", "author": None}])
         self.assertEqual(body, "#1 [重要度] 中🟡\n\n[修正案]\n\n寄せてください。")
 
-    def test_user_question_thread_has_no_body(self):
+    def test_reviewee_comment_is_included(self):
+        body = state.github_body(self.claude_root, [{"body": "ここは仕様の変更が必要では？", "author": None}])
+        self.assertTrue(body.startswith("ここは仕様の変更が必要では？\n\n---"))
+
+    def test_user_thread_starting_with_q_has_no_body(self):
         self.assertEqual(state.github_body({"body": "q ここは分けるべき？", "author": None}, []), "")
-        self.assertEqual(state.github_body({"body": "質問: ここは分けるべき？", "author": None}, [{"body": "+", "author": None}]), "")
+        self.assertEqual(state.github_body({"body": "q ここは分けるべき？", "author": None}, [{"body": "+", "author": None}]), "")
+
+    def test_github_thread_is_kept_as_is(self):
+        self.assertEqual(state.github_body({"body": "質問: なぜ？", "author": "alice"}, []), "質問: なぜ？")
 
     def test_user_thread_is_posted_as_is(self):
         body = state.github_body({"body": "err をラップして", "author": None}, [{"body": "ここも同様", "author": None}])
@@ -323,7 +341,7 @@ class RebuildTest(unittest.TestCase):
             with open(snapshot, "w", encoding="utf-8") as f:
                 json.dump({"threads": [
                     {"id": "claude-1", "filePath": "offset.go", "position": {"side": "new", "line": 99},
-                     "messages": [{"id": "m1", "body": "指摘", "author": "claude"}, {"id": "m2", "body": "質問: なぜ？", "author": None}]},
+                     "messages": [{"id": "m1", "body": "指摘", "author": "claude"}, {"id": "m2", "body": "q なぜ？", "author": None}]},
                     {"id": "user-1", "filePath": "offset.go", "position": {"side": "new", "line": 17},
                      "messages": [{"id": "u1", "body": "ここは分ける", "author": None}]},
                     {"id": "user-gone", "filePath": "offset.go", "position": {"side": "new", "line": 3},

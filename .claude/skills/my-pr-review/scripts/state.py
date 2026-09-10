@@ -38,10 +38,9 @@ STATUSES = ("open", "dismissed", "posted", "resolved", "outdated")
 # difit 上の返信書式。reference/reply-convention.md と一致させること。
 FIX_PREFIXES = ("対応",)
 DISMISS_PREFIXES = ("不要",)
-QUESTION_PREFIXES = ("質問", "@claude", "？", "?")
-# "q この記述は正しいですか？" や "q: なぜ？" のように 1 文字の q で始まる質問。区切り文字を必須にするのは
-# "query が空のとき" のような語の先頭を質問と誤認しないためである。
-QUESTION_SHORT_RE = re.compile(r"^[qQ][ \t\u3000:：\n]")
+# "q この記述は正しいですか？" のように 1 文字の q で始まる本文は Claude Code 宛て。質問に限らず指示も含む。
+# 区切り文字を必須にするのは "query が空のとき" のような語の先頭を誤認しないためである。
+TO_CLAUDE_RE = re.compile(r"^[qQ][ \t\u3000:：\n]")
 # 先頭語の後に続く、無視してよい区切り文字。
 SEPARATORS = " \t\u3000:：\n"
 # 本文がこの 1 文字だけのときの省略記法。先頭一致にしないのは、"- 項目" のような箇条書きを誤認しないため。
@@ -367,17 +366,23 @@ def github_thread_to_imports(thread: dict) -> list[dict]:
 
 
 def classify_reply(body: str) -> tuple[str, str]:
-    """返信本文を (種別, 残りの本文) に分類する。種別は fix / dismiss / question / other。"""
+    """返信本文を (種別, 残りの本文) に分類する。種別は fix / dismiss / to_claude / other。
+
+    other は q も + も - も付いていない本文で、レビュイーへのコメントとして扱う。
+    """
     text = body.strip()
     if text in EXACT_SHORTHAND:
         return EXACT_SHORTHAND[text], ""
-    if QUESTION_SHORT_RE.match(text):
-        return "question", text[1:].lstrip(SEPARATORS)
-    for prefixes, kind in ((DISMISS_PREFIXES, "dismiss"), (FIX_PREFIXES, "fix"), (QUESTION_PREFIXES, "question")):
+    if TO_CLAUDE_RE.match(text):
+        return "to_claude", text[1:].lstrip(SEPARATORS)
+    for prefixes, kind in ((DISMISS_PREFIXES, "dismiss"), (FIX_PREFIXES, "fix")):
         for p in prefixes:
-            if text.startswith(p):
-                rest = text[len(p) :].lstrip(SEPARATORS)
-                return kind, rest
+            if not text.startswith(p):
+                continue
+            rest = text[len(p) :]
+            if rest and rest[0] not in SEPARATORS:
+                continue  # "不要な変数が残っている" のように語の一部なら先頭語ではない
+            return kind, rest.lstrip(SEPARATORS)
     return "other", text
 
 
@@ -402,9 +407,9 @@ def is_bare_directive(body: str) -> bool:
     return kind in ("fix", "dismiss") and rest == ""
 
 
-def is_question(body: str) -> bool:
-    """Claude への質問か。質問は Claude 宛てであり、PR 作者に見せる本文には含めない。"""
-    return classify_reply(body)[0] == "question"
+def is_to_claude(body: str) -> bool:
+    """Claude Code 宛ての本文 ("q ...") か。レビュイーに見せる本文には含めない。"""
+    return classify_reply(body)[0] == "to_claude"
 
 
 def github_body(root: dict, replies: list[dict]) -> str:
@@ -412,8 +417,8 @@ def github_body(root: dict, replies: list[dict]) -> str:
 
     Claude の指摘に対しては「ユーザーの返信 --- Claude の指摘 (注記を除く)」の順にする。
     ユーザー自身のスレッドは本文をそのまま使う (返信は含めない)。
-    Claude への質問 ("q ..." や "質問: ...") は PR 作者宛てではないので本文に含めない。
-    質問だけで組み立てられないときは空文字列を返し、投稿する前に本文を書き直させる。
+    Claude Code 宛ての本文 ("q ...") はレビュイー宛てではないので含めない。
+    ユーザー自身のスレッドの本文が "q ..." だけの場合は空文字列を返し、投稿する前に本文を書き直させる。
     """
     user_texts = [
         (m.get("body") or "").strip()
@@ -421,12 +426,12 @@ def github_body(root: dict, replies: list[dict]) -> str:
         if not is_claude(m)
         and (m.get("body") or "").strip()
         and not is_bare_directive(m.get("body") or "")
-        and not is_question(m.get("body") or "")
+        and not is_to_claude(m.get("body") or "")
     ]
     root_body = (root.get("body") or "").strip()
     if not is_claude(root):
-        # author が無いものだけがユーザー自身の書き込み。GitHub から取り込んだスレッドの本文は質問でもそのまま使う。
-        return "" if (not root.get("author") and is_question(root_body)) else root_body
+        # author が無いものだけがユーザー自身の書き込み。GitHub から取り込んだスレッドの本文はそのまま使う。
+        return "" if (not root.get("author") and is_to_claude(root_body)) else root_body
     root_body = strip_annotation(root_body)
     if not user_texts:
         return root_body
@@ -467,21 +472,22 @@ def triage_thread(thread: dict, record: dict | None) -> dict:
             result["classification"] = "pending"
             return result
         kind, rest = classify_reply(user_replies[-1].get("body") or "")
-        result["classification"] = kind if kind != "other" else "unclear"
+        # q も + も - も付かない返信はレビュイーへのコメントなので、指摘と一緒に GitHub へ投稿する
+        result["classification"] = "fix" if kind == "other" else kind
         result["text"] = rest
         return result
 
     # ユーザー起点、または GitHub 由来のスレッド
     kind, rest = classify_reply(root.get("body") or "")
-    if kind == "question" and not replies:
-        result["classification"] = "question"
+    if kind == "to_claude" and not replies:
+        result["classification"] = "to_claude"
         result["text"] = rest
         return result
     if replies:
         last_user = [m for m in replies if not is_claude(m)]
         if last_user:
             kind2, rest2 = classify_reply(last_user[-1].get("body") or "")
-            if kind2 in ("question", "dismiss", "fix"):
+            if kind2 in ("to_claude", "dismiss", "fix"):
                 result["classification"] = kind2
                 result["text"] = rest2
                 return result

@@ -11,7 +11,7 @@
     {
       "id": 2,
       "prompt": "difit で返信つけ終わった。対応要否を処理して、対応が必要なものは GitHub に pending コメントで入れておいて。",
-      "expected_output": "difit-fetch.sh で分類し、dismiss は set-status してから difit resolve、fix と user_finding は本文を整えて github-pending.sh で pending review に追加する。unclear があればユーザーに確認する。",
+      "expected_output": "difit-fetch.sh で分類し、dismiss は set-status してから difit resolve、fix と user_finding は github_body をそのまま使って github-pending.sh で pending review に追加する。q も + も - も付かない返信はレビュイーへのコメントなので fix として投稿する。",
       "files": []
     },
     {
@@ -29,7 +29,7 @@
     {
       "id": 5,
       "prompt": "next",
-      "expected_output": "next.sh の判定に従う。difit に \"q \" や \"質問:\" で始まる未回答のスレッドがあれば answer フェーズを先に実行し、worktree のコードを読んで difit に author=claude の返信を投稿する。GitHub への pending 投稿は行わない。未回答の質問が無くなってから triage に進む。",
+      "expected_output": "next.sh の判定に従う。difit に \"q \" で始まる未処理のスレッドがあれば answer フェーズを先に実行し、worktree のコードを読んで difit に author=claude の返信を投稿する。GitHub への pending 投稿は行わない。未処理の q が無くなってから triage に進む。",
       "files": []
     },
     {

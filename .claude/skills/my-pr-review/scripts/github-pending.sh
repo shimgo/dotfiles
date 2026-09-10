@@ -14,7 +14,7 @@ load_session "$1"
 difit_alive || { echo "error: difit (port ${DIFIT_PORT}) に接続できません" >&2; exit 1; }
 
 ITEMS="$(cat)"
-# 本文が空のものは投稿しない。Claude への質問だけで構成されたスレッドがここに来る。
+# 本文が空のものは投稿しない。Claude Code 宛ての本文 ("q ...") だけで構成されたスレッドがここに来る。
 EMPTY="$(jq -r '[.[] | select(((.body // "") | gsub("\\s"; "")) == "") | .difit_thread_id] | join(", ")' <<<"${ITEMS}")"
 [ -z "${EMPTY}" ] || { echo "error: 本文が空のスレッドがあります: ${EMPTY}。difit 上でスレッド本文を書き直してください" >&2; exit 1; }
 DIFIT_THREADS="$(difit comment get --port "${DIFIT_PORT}" --format json | jq -c '.threads')"
