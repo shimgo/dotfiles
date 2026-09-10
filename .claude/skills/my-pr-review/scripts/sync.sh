@@ -72,7 +72,7 @@ if difit_alive; then
   fi
 fi
 stop_difit "${DIFIT_PID}"
-DIFIT_JSON="$(start_difit "${WORKTREE}" "${HEAD_SHA}" "${BASE_SHA}" "${MODE}")"
+DIFIT_JSON="$(start_difit "${WORKTREE}" "${HEAD_SHA}" "${BASE_SHA}" "${MODE}" "${BASE_REF}")"
 DIFIT_PORT="$(jq -r '.port' <<<"${DIFIT_JSON}")"
 # 以降の手順が失敗しても difit が迷子にならないよう、起動直後に session.json へ書く
 update_session ".head_sha = \"${HEAD_SHA}\" | .base_sha = \"${BASE_SHA}\" | .difit = ${DIFIT_JSON} | .updated_at = \"${NOW}\""

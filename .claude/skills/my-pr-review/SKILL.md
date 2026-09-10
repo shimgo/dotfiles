@@ -56,6 +56,10 @@ start → review ─┬→ answer (随時)
 - **`$SKILL_DIR`** は手順書中で `~/.claude/skills/my-pr-review` を指す。スクリプトはすべてこの下の `scripts/` にある。
 - **状態ディレクトリ** は `scripts/common.sh` の `state_dir_for` が決める。以降のスクリプトはすべて第 1 引数に状態ディレクトリを取る。
   `session.json` の `state_dir` にも同じ値が入っているので、迷ったらそこを読む。
+- **difit はコメントを差分の対象ごとに持つ。** 画面右上のセレクタで対象を切り替えると、その対象にコメントが無いので何も表示されず、
+  `difit comment get` も 0 件を返す。起動時の対象とユーザーが見る対象を揃える必要があるため、local モードでは
+  `difit . origin/<base_ref> --merge-base` で起動し、difit の画面が既定で選ぶ "origin/<base_ref>...Uncommitted Changes (merge-base)" に合わせている。
+  コメントが見えないと言われたら、まず `ps` で difit の起動引数を確認し、画面のセレクタの表示と一致しているかを見る。
 - **difit 上のスレッドは resolve すると消える。** resolved という状態は difit に存在しない。
   したがって resolve や削除の前に必ず `state.py set-status` で記録を残す。順序を逆にすると判断が失われる。
   `state.py set-status` は状態ファイルへ自分で追記し、追記したレコードを標準出力へ出す。`append` へパイプしない。

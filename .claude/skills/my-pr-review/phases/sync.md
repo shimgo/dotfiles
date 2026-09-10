@@ -37,5 +37,5 @@ $SKILL_DIR/scripts/sync.sh <state-dir>
 - **対応要否の判断 (difit 上の返信) は difit にしか無い。** triage を通すまで状態ファイルには残らないため、作り直しで消えると復元できない。
   difit が動いているのにスレッドを 0 件しか取得できないときは、`sync.sh` が中断して返信の消失を防ぐ。
   取得の失敗ではなく本当に 0 件だと確かめたときだけ `--allow-empty-snapshot` を付けて再実行する。
-- **local モードでは difit の対象を作業ツリー (`.`) にする。** 指摘へ対応するたびにコミットしなくても差分へ反映されるので、
-  コミット前に自分で確認できる。worktree モード (他人の PR) は他人の head をそのまま対象にする。
+- **local モードでは difit を `difit . origin/<base_ref> --merge-base` で起動する。** 指摘へ対応するたびにコミットしなくても差分へ反映され、
+  コミット前に自分で確認できる。worktree モード (他人の PR) は他人の head と base の SHA をそのまま対象にする。
