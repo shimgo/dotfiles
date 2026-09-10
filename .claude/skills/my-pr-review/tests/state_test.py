@@ -210,6 +210,18 @@ class ShorthandTest(unittest.TestCase):
         self.assertEqual(state.classify_reply("+1 です")[0], "other")
 
 
+class QuestionPrefixTest(unittest.TestCase):
+    def test_q_with_separator_is_question(self):
+        self.assertEqual(state.classify_reply("q この記述は正しいですか？"), ("question", "この記述は正しいですか？"))
+        self.assertEqual(state.classify_reply("Q: なぜ？"), ("question", "なぜ？"))
+        self.assertEqual(state.classify_reply("q\nなぜ？"), ("question", "なぜ？"))
+        self.assertEqual(state.classify_reply("q　全角空白でも"), ("question", "全角空白でも"))
+
+    def test_q_without_separator_is_not_question(self):
+        self.assertEqual(state.classify_reply("query が空のときは？")[0], "other")
+        self.assertEqual(state.classify_reply("q")[0], "other")
+
+
 class TriageTest(unittest.TestCase):
     def test_classification(self):
         with open(os.path.join(FIXTURES, "difit-comments.json"), encoding="utf-8") as f:
@@ -224,6 +236,8 @@ class TriageTest(unittest.TestCase):
         self.assertEqual(got["claude-pending"][0], "pending")
         self.assertEqual(got["claude-unclear"][0], "unclear")
         self.assertEqual(got["user-question"], ("question", "ここは分けるべき？"))
+        self.assertEqual(got["claude-q-short"], ("question", "この記述は正しいですか？"))
+        self.assertEqual(got["user-q-short"], ("question", "ここは分けるべき？"))
         self.assertEqual(got["user-finding"][0], "user_finding")
         self.assertEqual(got["user-finding-dismissed"], ("dismiss", "やっぱり良い"))
         self.assertEqual(got["PRRC_open_root"][0], "github")
@@ -257,10 +271,19 @@ class GithubBodyTest(unittest.TestCase):
         body = state.github_body(self.claude_root, [{"body": "対応", "author": None}])
         self.assertFalse(body.startswith("対応"))
 
-    def test_claude_replies_are_not_included(self):
+    def test_claude_replies_and_questions_are_not_included(self):
         body = state.github_body(self.claude_root, [{"body": "質問: なぜ？", "author": None}, {"body": "回答です", "author": "claude"}, {"body": "対応 ではそれで", "author": None}])
-        self.assertTrue(body.startswith("質問: なぜ？\n\n対応 ではそれで\n\n---"))
+        self.assertTrue(body.startswith("対応 ではそれで\n\n---"))
         self.assertNotIn("回答です", body)
+        self.assertNotIn("なぜ？", body)
+
+    def test_q_shorthand_question_is_not_included(self):
+        body = state.github_body(self.claude_root, [{"body": "q この記述は正しいですか？", "author": None}, {"body": "回答です", "author": "claude"}, {"body": "+", "author": None}])
+        self.assertEqual(body, "#1 [重要度] 中🟡\n\n[修正案]\n\n寄せてください。")
+
+    def test_user_question_thread_has_no_body(self):
+        self.assertEqual(state.github_body({"body": "q ここは分けるべき？", "author": None}, []), "")
+        self.assertEqual(state.github_body({"body": "質問: ここは分けるべき？", "author": None}, [{"body": "+", "author": None}]), "")
 
     def test_user_thread_is_posted_as_is(self):
         body = state.github_body({"body": "err をラップして", "author": None}, [{"body": "ここも同様", "author": None}])

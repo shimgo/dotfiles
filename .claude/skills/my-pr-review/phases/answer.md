@@ -1,7 +1,10 @@
 # answer: difit 上の質問に返信する
 
 ユーザーはレビュー中に気になった箇所へ、difit 上で質問を書く。書式は `reference/reply-convention.md` のとおりで、
-新しいスレッドの本文、または Claude のスレッドへの返信のどちらでも `質問:` で始まる。
+新しいスレッドの本文、または Claude のスレッドへの返信のどちらでも `質問:` か省略形の `q ` で始まる。
+
+質問の宛先は Claude Code であり PR 作者ではない。質問本文を GitHub に投稿してはならない。
+未回答の質問が残っている限り triage の GitHub 投稿には進まず、このフェーズを先に終わらせる。
 
 ## 手順
 
@@ -25,4 +28,5 @@ difit comment add --port <port> '{"type":"reply","filePath":"<file>","position":
 同じ行に複数のスレッドがある場合は、返信の冒頭に「指摘Xについて」のように対象を書いて区別できるようにする。
 
 5. `$SKILL_DIR/scripts/phase-done.sh <state-dir> answer` を実行し、答えた件数と要点を報告する。
-   ユーザーが回答を見て対応要否を決めるので、threads.jsonl の更新はここでは行わない。
+   ユーザーが回答を見て `+` か `-` で対応要否を決めるので、threads.jsonl の更新はここでは行わない。
+   回答後に未回答の質問が残っていなければ、次の `next` で triage に進む。

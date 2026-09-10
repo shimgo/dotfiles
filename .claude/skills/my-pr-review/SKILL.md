@@ -25,7 +25,7 @@ difit は表示層として毎ラウンド作り直す。設計の背景は `ref
 | `next` | (下記) | 次の工程へ進む。difit の状態と直前のフェーズから次のフェーズを判定して実行する |
 | `start` | `phases/start.md` | レビュー依頼を受けた、または自分の PR を作った直後。worktree と difit とセッションを準備する |
 | `review` | `phases/review.md` | リポジトリ固有のレビュースキルを実行し、指摘を difit に投稿する。再レビューもここ |
-| `answer` | `phases/answer.md` | ユーザーが difit 上に書いた質問に返信する |
+| `answer` | `phases/answer.md` | ユーザーが difit 上に書いた Claude Code への質問 (`質問:` / `q `) に返信する。triage より優先する |
 | `triage` | `phases/triage.md` | ユーザーが difit 上で付けた対応要否を処理する。GitHub への pending 投稿や実装もここ |
 | `sync` | `phases/sync.md` | レビュー送信後や PR 作者の修正後に、GitHub の状態を取り込んで difit を作り直す |
 | `verify` | `phases/verify.md` | 指摘が修正されたかを確認し、GitHub と difit の両方で resolve する |
@@ -61,6 +61,8 @@ start → review ─┬→ answer (随時)
 - **Claude が difit に書くときは `author` を `claude` にする。** `scripts/state.py` はこの値でユーザーの発言と区別する。
   返信を直接 `difit comment add` で書く場合も `"author":"claude"` を付ける。
 - **ユーザーの返信書式** は `reference/reply-convention.md` に従って解釈する。書式に合わない返信は `unclear` として扱い、勝手に判断せずユーザーに確認する。
+- **`質問:` と `q ` はユーザーから Claude Code への質問**であり、PR 作者への質問ではない。GitHub に投稿せず answer フェーズで回答する。
+  未回答の質問が残っている間は GitHub への pending 投稿に進まない。
 - **GitHub へ書き込むのは pending review へのコメント追加と resolve だけ**。レビューの送信 (submit) はユーザーが GitHub 上で行う。
 - **作業ディレクトリ**: リポジトリ固有のレビュースキルは現在のディレクトリを対象にする。ケース 1 では worktree で Claude Code を起動しているか、
   `session.json` の `worktree` と現在のディレクトリが一致しているかを review の前に確認する。

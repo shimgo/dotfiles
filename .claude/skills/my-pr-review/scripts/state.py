@@ -38,7 +38,12 @@ STATUSES = ("open", "dismissed", "posted", "resolved", "outdated")
 # difit 上の返信書式。reference/reply-convention.md と一致させること。
 FIX_PREFIXES = ("対応",)
 DISMISS_PREFIXES = ("不要",)
-QUESTION_PREFIXES = ("質問", "@claude", "Q:", "q:", "？", "?")
+QUESTION_PREFIXES = ("質問", "@claude", "？", "?")
+# "q この記述は正しいですか？" や "q: なぜ？" のように 1 文字の q で始まる質問。区切り文字を必須にするのは
+# "query が空のとき" のような語の先頭を質問と誤認しないためである。
+QUESTION_SHORT_RE = re.compile(r"^[qQ][ \t\u3000:：\n]")
+# 先頭語の後に続く、無視してよい区切り文字。
+SEPARATORS = " \t\u3000:：\n"
 # 本文がこの 1 文字だけのときの省略記法。先頭一致にしないのは、"- 項目" のような箇条書きを誤認しないため。
 EXACT_SHORTHAND = {"+": "fix", "-": "dismiss", "＋": "fix", "－": "dismiss", "ー": "dismiss"}
 
@@ -366,10 +371,12 @@ def classify_reply(body: str) -> tuple[str, str]:
     text = body.strip()
     if text in EXACT_SHORTHAND:
         return EXACT_SHORTHAND[text], ""
+    if QUESTION_SHORT_RE.match(text):
+        return "question", text[1:].lstrip(SEPARATORS)
     for prefixes, kind in ((DISMISS_PREFIXES, "dismiss"), (FIX_PREFIXES, "fix"), (QUESTION_PREFIXES, "question")):
         for p in prefixes:
             if text.startswith(p):
-                rest = text[len(p) :].lstrip(" :：\n")
+                rest = text[len(p) :].lstrip(SEPARATORS)
                 return kind, rest
     return "other", text
 
@@ -395,20 +402,31 @@ def is_bare_directive(body: str) -> bool:
     return kind in ("fix", "dismiss") and rest == ""
 
 
+def is_question(body: str) -> bool:
+    """Claude への質問か。質問は Claude 宛てであり、PR 作者に見せる本文には含めない。"""
+    return classify_reply(body)[0] == "question"
+
+
 def github_body(root: dict, replies: list[dict]) -> str:
     """GitHub のレビューコメント本文を組み立てる。
 
     Claude の指摘に対しては「ユーザーの返信 --- Claude の指摘 (注記を除く)」の順にする。
     ユーザー自身のスレッドは本文をそのまま使う (返信は含めない)。
+    Claude への質問 ("q ..." や "質問: ...") は PR 作者宛てではないので本文に含めない。
+    質問だけで組み立てられないときは空文字列を返し、投稿する前に本文を書き直させる。
     """
     user_texts = [
         (m.get("body") or "").strip()
         for m in replies
-        if not is_claude(m) and (m.get("body") or "").strip() and not is_bare_directive(m.get("body") or "")
+        if not is_claude(m)
+        and (m.get("body") or "").strip()
+        and not is_bare_directive(m.get("body") or "")
+        and not is_question(m.get("body") or "")
     ]
     root_body = (root.get("body") or "").strip()
     if not is_claude(root):
-        return root_body
+        # author が無いものだけがユーザー自身の書き込み。GitHub から取り込んだスレッドの本文は質問でもそのまま使う。
+        return "" if (not root.get("author") and is_question(root_body)) else root_body
     root_body = strip_annotation(root_body)
     if not user_texts:
         return root_body
