@@ -29,6 +29,23 @@ difit comment add --port <port> '{"type":"reply","filePath":"<file>","position":
 `reply` は thread id ではなく filePath と position でスレッドを探し、同じ位置に複数のスレッドがあれば最新のものに付く。
 同じ行に複数のスレッドがある場合は、返信の冒頭に「指摘Xについて」のように対象を書いて区別できるようにする。
 
-5. `$SKILL_DIR/scripts/phase-done.sh <state-dir> answer` を実行し、応答した件数と要点を報告する。
-   ユーザーが応答を見て `+` か `-` で対応要否を決めるので、threads.jsonl の更新はここでは行わない。
-   応答後に未処理の `q` が残っていなければ、次の `next` で triage に進む。
+5. 実行を終えた指示のスレッドを resolve する。
+
+`q` の中身が **質問** なら open のまま残す。ユーザーが応答を読んで `+` か `-` で対応要否を決めるためである。
+`q` の中身が **指示** で、手順 3 でその実行を終えたなら、ユーザーの判断を待つものが無いのでここで閉じる。
+
+difit のスレッドは resolve すると消えるため、必ず記録を先に残す。
+
+```bash
+python3 $SKILL_DIR/scripts/state.py set-status --state <state-dir>/threads.jsonl --difit-id <difit の thread id> --status resolved --reason "<実行した内容>"
+difit comment resolve <difit の thread id>... --port <port>
+```
+
+- `--difit-id` には `difit-fetch.sh` の `difit_thread_id` を渡す。ユーザーが書いたスレッドも Claude の指摘のスレッドも同じように指定できる。
+- `--reason` には実行した内容を書く。難しい判断をした指示ほど、後から経緯を辿れる価値が高い。
+- **`set-status` の出力を `append` へパイプしない。** `set-status` は自身で状態ファイルへ追記し、追記したレコードを標準出力へ整形して出す。パイプすると二重に追記しようとして、複数行 JSON のためパースにも失敗する。
+- `difit comment resolve` は thread id を複数渡せるので、記録を全件終えてから 1 回で resolve してよい。
+
+6. `$SKILL_DIR/scripts/phase-done.sh <state-dir> answer` を実行し、応答した件数・resolve した件数・要点を報告する。
+   open のまま残したスレッドは、ユーザーが `+` か `-` で対応要否を決める。
+   未処理の `q` が残っていなければ、次の `next` で triage に進む。

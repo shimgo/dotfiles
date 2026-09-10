@@ -105,6 +105,7 @@ Go 以外のファイルは常に null。その場合は照合の 3 段目が成
 ## 6. status の遷移
 
 ```
+open ──(answer: 指示を実行)──▶ resolved
 open ──(triage: 不要)──▶ dismissed
 open ──(triage: ケース1 pending 投稿)──▶ posted ──(sync: GitHub で resolved)──▶ resolved
                                           posted ──(sync: 送信前に削除)──▶ dismissed
