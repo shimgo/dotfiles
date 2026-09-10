@@ -19,6 +19,7 @@ $SKILL_DIR/scripts/session-start.sh <PR> [--local] --review-skill <スキル名>
 ```
 
 2. 出力された session.json の `difit.url` をユーザーに伝える。`--background` 起動なのでブラウザは自動では開かない。
+   `--local` では difit の対象が base と作業ツリー (`.`) の差分になるため、未コミットの変更もそのまま差分に載る。
 3. 取り込んだ GitHub スレッドの件数を伝える。既に GitHub 上にレビューがある PR では、それらが difit に表示されている。
 4. ケース 1 で現在のディレクトリが worktree でなければ、リポジトリ固有のレビュースキルが worktree を見られるように、
    worktree で Claude Code を起動し直すか `/add-dir` で追加するようユーザーに案内する。

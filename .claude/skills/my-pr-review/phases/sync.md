@@ -34,3 +34,5 @@ $SKILL_DIR/scripts/sync.sh <state-dir>
   GitHub にあるスレッドは GitHub の行番号で、ローカルにしかないスレッドは snippet の検索で位置を決め直す。
 - Viewed の状態は difit のブラウザ側にしか無く API が無いため、同期の対象外である。Viewed は GitHub 上で管理する。
 - difit を作り直したくないだけなら `--no-restart` を付ける。GitHub との突き合わせだけを行う。
+- **local モードでは difit の対象を作業ツリー (`.`) にする。** 指摘へ対応するたびにコミットしなくても差分へ反映されるので、
+  コミット前に自分で確認できる。worktree モード (他人の PR) は他人の head をそのまま対象にする。

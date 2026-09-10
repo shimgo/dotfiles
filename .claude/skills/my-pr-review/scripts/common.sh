@@ -46,9 +46,16 @@ difit_alive() {
 }
 
 # difit をバックグラウンドで起動し、{"port","url","pid"} の JSON を返す。
+# local モード (自分の PR のセルフレビュー) では head ではなく作業ツリー (".") を対象にする。
+# 指摘へ対応するたびにコミットしなくても差分へ反映され、コミット前に自分で確認できるためである。
+# worktree モード (他人の PR) は他人の head を detach で見ているだけなので、head をそのまま対象にする。
 start_difit() {
-  local worktree="$1" head="$2" base="$3"
-  (cd "${worktree}" && difit "${head}" "${base}" --background --clean)
+  local worktree="$1" head="$2" base="$3" mode="${4:-worktree}"
+  local target="${head}"
+  if [ "${mode}" = "local" ]; then
+    target="."
+  fi
+  (cd "${worktree}" && difit "${target}" "${base}" --background --clean)
 }
 
 stop_difit() {
