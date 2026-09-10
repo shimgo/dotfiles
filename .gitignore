@@ -10,3 +10,4 @@
 .netrwhist
 .vim/UltiSnips/*stack*
 .agents/skills/
+__pycache__/
