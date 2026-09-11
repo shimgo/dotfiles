@@ -7,6 +7,7 @@
 # 判定の優先順位:
 #   1. difit に未処理の Claude Code 宛ての本文 ("q ...") があれば answer
 #   2. difit に未処理の返信 (fix / dismiss / user_finding) があれば triage
+#      GitHub への投稿などで処理済みのスレッドは processed に分類するので数えない
 #   3. それ以外は直前のフェーズから決める
 #        start / なし → review
 #        review / answer → wait (ユーザーが difit で対応要否を付けるのを待つ)

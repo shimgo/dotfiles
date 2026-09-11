@@ -23,10 +23,11 @@ $SKILL_DIR/scripts/difit-fetch.sh <state-dir>
 | `pending` | ユーザーがまだ返信していない | 何もしない |
 | `github` | GitHub 由来で返信なし | 何もしない |
 | `none` | Claude が最後に発言済み | 何もしない |
+| `processed` | 対応要否を処理済み (GitHub に投稿した、実装した、または対応不要と記録した) | 何もしない。GitHub に投稿した指摘の議論は GitHub で続ける |
 
 ### 2. 対応不要の記録と resolve
 
-`dismiss` は必ず **記録してから** difit で resolve する。difit の resolve はスレッドの削除であり、先に消すと理由が失われる。
+`dismiss` は必ず **記録してから** difit で resolve する。difit の resolve はスレッドの削除であり、先に消すと理由を失う。
 
 ```bash
 python3 $SKILL_DIR/scripts/state.py set-status --state <state-dir>/threads.jsonl --difit-id <id> --status dismissed --reason "<text の内容>"

@@ -259,6 +259,81 @@ class TriageTest(unittest.TestCase):
         self.assertEqual(got["PRRC_open_root"][0], "github")
 
 
+class ProcessedTriageTest(unittest.TestCase):
+    """対応要否の返信を処理済みのスレッド (status が posted / resolved / dismissed) を分類し直さないことを確かめる。"""
+
+    def setUp(self):
+        self.tmp = tempfile.TemporaryDirectory()
+        self.state_file = os.path.join(self.tmp.name, "threads.jsonl")
+
+    def tearDown(self):
+        self.tmp.cleanup()
+
+    def triage(self, threads):
+        out = run(["triage", "--state", self.state_file], json.dumps({"threads": threads}))
+        return {t["difit_thread_id"]: t for t in out["threads"]}
+
+    def test_posted_claude_thread_before_sync_is_processed(self):
+        # triage が GitHub に投稿した後も、sync で作り直すまで difit には + の返信が付いた投稿前のスレッドが残る
+        state.append_records(self.state_file, [state.new_record(key="fp", origin="claude", difit_thread_id="claude-1", github_thread_id="PRRT_1", status="posted", summary="s")])
+        got = self.triage([{"id": "claude-1", "filePath": "offset.go", "position": {"side": "new", "line": 14},
+                            "messages": [{"id": "m1", "body": "指摘", "author": "claude"}, {"id": "m2", "body": "+ 補足", "author": None}]}])
+        self.assertEqual(got["claude-1"]["classification"], "processed")
+        self.assertEqual(got["claude-1"]["key"], "fp")
+
+    def test_posted_thread_imported_from_github_is_processed(self):
+        # sync の後は GitHub のスレッドを取り込むため、PR 作者の返信が最後に並ぶ
+        state.append_records(self.state_file, [
+            state.new_record(key="fp", origin="claude", difit_thread_id="PRRC_1", github_thread_id="PRRT_1", status="posted", summary="s"),
+            state.new_record(key="user-1", origin="user", difit_thread_id="PRRC_2", github_thread_id="PRRT_2", status="posted", summary="s"),
+        ])
+        got = self.triage([
+            {"id": "PRRC_1", "filePath": "offset.go", "position": {"side": "new", "line": 14},
+             "messages": [{"id": "PRRC_1", "body": "補足\n\n---\n\n指摘", "author": "reviewer"}, {"id": "PRRC_1r", "body": "修正しました", "author": "bob"}]},
+            {"id": "PRRC_2", "filePath": "offset.go", "position": {"side": "new", "line": 15},
+             "messages": [{"id": "PRRC_2", "body": "err をラップして", "author": "reviewer"}, {"id": "PRRC_2r", "body": "対応しました", "author": "bob"}]},
+        ])
+        self.assertEqual(got["PRRC_1"]["classification"], "processed")
+        self.assertEqual(got["PRRC_2"]["classification"], "processed")
+
+    def test_resolved_and_dismissed_are_processed(self):
+        # set-status の後、difit comment resolve の前に中断すると、処理済みのスレッドが difit に残る
+        state.append_records(self.state_file, [
+            state.new_record(key="fp", origin="claude", difit_thread_id="claude-1", status="resolved", summary="s"),
+            state.new_record(key="user-1", origin="user", difit_thread_id="user-1", status="dismissed", summary="s"),
+        ])
+        got = self.triage([
+            {"id": "claude-1", "filePath": "offset.go", "position": {"side": "new", "line": 14},
+             "messages": [{"id": "m1", "body": "指摘", "author": "claude"}, {"id": "m2", "body": "+", "author": None}]},
+            {"id": "user-1", "filePath": "offset.go", "position": {"side": "new", "line": 15},
+             "messages": [{"id": "u1", "body": "命名が気になる", "author": None}, {"id": "u2", "body": "不要 やっぱり良い", "author": None}]},
+        ])
+        self.assertEqual(got["claude-1"]["classification"], "processed")
+        self.assertEqual(got["user-1"]["classification"], "processed")
+
+    def test_q_after_processing_is_to_claude(self):
+        state.append_records(self.state_file, [state.new_record(key="fp", origin="claude", difit_thread_id="claude-1", github_thread_id="PRRT_1", status="posted", summary="s")])
+        got = self.triage([{"id": "claude-1", "filePath": "offset.go", "position": {"side": "new", "line": 14},
+                            "messages": [{"id": "m1", "body": "指摘", "author": "claude"}, {"id": "m2", "body": "+", "author": None}, {"id": "m3", "body": "q この修正で足りる？", "author": None}]}])
+        self.assertEqual((got["claude-1"]["classification"], got["claude-1"]["text"]), ("to_claude", "この修正で足りる？"))
+
+    def test_former_difit_id_maps_to_latest_record(self):
+        # sync の from-github が difit_thread_id を GitHub の root comment id に置き換えても、前の id のスレッドを同じレコードに対応付ける
+        prior = state.new_record(key="fp", origin="claude", difit_thread_id="claude-1", github_thread_id="PRRT_1", status="posted", summary="s")
+        state.append_records(self.state_file, [prior, dict(prior, difit_thread_id="PRRC_1")])
+        got = self.triage([{"id": "claude-1", "filePath": "offset.go", "position": {"side": "new", "line": 14},
+                            "messages": [{"id": "m1", "body": "指摘", "author": "claude"}, {"id": "m2", "body": "+", "author": None}]}])
+        self.assertEqual(got["claude-1"]["key"], "fp")
+        self.assertEqual(got["claude-1"]["classification"], "processed")
+
+    def test_github_origin_thread_keeps_existing_classification(self):
+        # 他人のスレッド (origin が github) は reconcile が posted に戻すことがあるが、処理済みの扱いにしない
+        state.append_records(self.state_file, [state.new_record(key="PRRT_9", origin="github", difit_thread_id="PRRC_9", github_thread_id="PRRT_9", status="posted", summary="s")])
+        got = self.triage([{"id": "PRRC_9", "filePath": "offset.go", "position": {"side": "new", "line": 14},
+                            "messages": [{"id": "PRRC_9", "body": "NewFlag の意味は？", "author": "alice"}]}])
+        self.assertEqual(got["PRRC_9"]["classification"], "github")
+
+
 class FormerDifitIdTest(unittest.TestCase):
     """sync の from-github が difit_thread_id を置き換えた後も、前の id のスレッドを同じレコードとして扱うことを確かめる。"""
 

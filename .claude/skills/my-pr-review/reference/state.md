@@ -114,7 +114,10 @@ open ──(sync: 位置を特定できない)──▶ outdated
 resolved ──(sync: GitHub で unresolve)──▶ posted
 ```
 
-GitHub から取り込んだ他人のスレッドは `github` origin で `open` または `resolved` として記録される。
+Claude の指摘とユーザー自身のスレッドのうち、status が `posted` / `resolved` / `dismissed` のレコードは対応要否の返信を処理済みである。
+`state.py triage` はそのスレッドの返信を分類し直さず、`processed` に分類する (`reference/reply-convention.md`)。
+
+GitHub から取り込んだ他人のスレッドは、`from-github` が `github` origin の `open` または `resolved` として記録する。
 これは Claude の新しい指摘が同じ行に付いたときに注記を出すための索引であり、GitHub の状態を複製する目的ではない。
 
 ## 7. 削除

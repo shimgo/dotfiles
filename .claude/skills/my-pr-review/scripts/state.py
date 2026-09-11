@@ -34,6 +34,8 @@ import uuid
 SCHEMA_VERSION = 1
 CLAUDE_AUTHOR = "claude"
 STATUSES = ("open", "dismissed", "posted", "resolved", "outdated")
+# 対応要否の返信を処理済みの status。GitHub への投稿 (posted)、実装や指示の実行 (resolved)、対応不要の記録 (dismissed) を終えている。
+PROCESSED_STATUSES = ("posted", "resolved", "dismissed")
 
 # difit 上の返信書式。reference/reply-convention.md と一致させること。
 FIX_PREFIXES = ("対応",)
@@ -492,6 +494,19 @@ def triage_thread(thread: dict, record: dict | None) -> dict:
     last = messages[-1] if messages else None
     if last is not None and is_claude(last) and len(messages) > 1:
         # Claude が最後に発言したスレッドは、次のユーザー返信を待つ状態
+        return result
+
+    if record is not None and origin in ("claude", "user") and record.get("status") in PROCESSED_STATUSES:
+        # 対応要否の返信は triage (指示なら answer) で処理済みのため、分類し直さない。
+        # 分類し直すと、GitHub に投稿した指摘を重複して投稿したり、実装済みの指摘を再び実装したりする。
+        # GitHub に投稿した後の difit には、sync で作り直すまで投稿前のスレッドが、作り直した後は PR 作者の返信が付いた GitHub のスレッドが並ぶ。
+        # 処理した後に書いた Claude Code 宛ての本文 ("q ...") だけを answer の対象にする。
+        kind, rest = classify_reply(last.get("body") or "") if len(messages) > 1 else ("other", "")
+        if kind == "to_claude":
+            result["classification"] = "to_claude"
+            result["text"] = rest
+        else:
+            result["classification"] = "processed"
         return result
 
     if origin == "claude":
