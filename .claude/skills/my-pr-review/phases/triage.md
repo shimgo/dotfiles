@@ -74,7 +74,7 @@ difit comment resolve <id> --port <port>
 $SKILL_DIR/scripts/github-pending.sh <state-dir> < items.json
 ```
 
-pending review は 1 人につき 1 つしか持てないので、既にあればそれに追加される。
+pending review は 1 人につき 1 つしか持てないので、既にあれば `github-pending.sh` はそこへ追加する。
 投稿後は GitHub 上で pending コメントの見直しと送信、Viewed の管理をユーザーに任せる。
 送信後の同期は `phases/sync.md` で行う。
 

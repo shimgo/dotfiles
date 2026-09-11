@@ -767,7 +767,7 @@ def cmd_reconcile(a):
                 warnings.append(f"{r['key']}: GitHub にスレッドが見つかりませんが pending review が残っているため判断を保留します")
                 continue
             if r["status"] != "dismissed":
-                u = dict(r, status="dismissed", reason=r.get("reason") or "GitHub のレビュー送信前に削除された", updated_at=now_iso())
+                u = dict(r, status="dismissed", reason=r.get("reason") or "レビュアーが GitHub のレビュー送信前にコメントを削除した", updated_at=now_iso())
                 updates.append(u)
             continue
         if t.get("isResolved") and r["status"] != "resolved":

@@ -21,7 +21,7 @@ $SKILL_DIR/scripts/sync.sh <state-dir>
 
 2. 出力を読み、次を報告する。
 
-- `reconciled`: status が変わったレコード。`resolved` は GitHub 上で解決済みになったもの、`dismissed` は pending から送信までの間に削除されたもの (再指摘防止の対象になる)。
+- `reconciled`: status が変わったレコード。`resolved` は GitHub 上で解決済みになったもの、`dismissed` はレビュアーが pending から送信までの間に削除したもの (再指摘防止の対象になる)。
 - `warnings`: pending review が残っているため判断を保留したものなど。ユーザーが送信を忘れている可能性を伝える。
 - `reimported.outdated`: head が変わって位置を特定できなくなった未投稿の指摘。修正で消えた行に対する指摘なら対応済みの可能性が高い。verify で扱う。
 - `session.difit.url`: 新しい difit の URL。ポートが変わっていることがあるので必ず伝える。
@@ -40,5 +40,5 @@ $SKILL_DIR/scripts/sync.sh <state-dir>
 - **対応要否の判断 (difit 上の返信) は difit にしか無い。** triage を通すまで状態ファイルには残らないため、作り直しで消えると復元できない。
   difit が動いているのにスレッドを 0 件しか取得できないときは、`sync.sh` が中断して返信の消失を防ぐ。
   取得の失敗ではなく本当に 0 件だと確かめたときだけ `--allow-empty-snapshot` を付けて再実行する。
-- **local モードでは difit を `difit . origin/<base_ref> --merge-base` で起動する。** 指摘へ対応するたびにコミットしなくても差分へ反映され、
-  コミット前に自分で確認できる。worktree モード (他人の PR) は他人の head と base の SHA をそのまま対象にする。
+- **local モードでは difit を `difit . origin/<base_ref> --merge-base` で起動する。** difit が作業ツリーの変更を差分に含めるので、
+  指摘へ対応するたびにコミットしなくても、コミット前に自分で確認できる。worktree モード (他人の PR) は他人の head と base の SHA をそのまま対象にする。
