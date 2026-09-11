@@ -10,8 +10,8 @@ GitHub 上のコメント状況が正本になるため、ローカルの状態�
 
 ## 手順
 
-0. 先に `phases/triage.md` を済ませる。GitHub 由来のスレッドに difit 上で付けた返信は、作り直しのときに GitHub の内容で上書きされて消える。
-   Claude の指摘とユーザー自身のスレッドは返信ごと再投入されるので失われない。
+0. 先に `phases/triage.md` を済ませる。作り直すと、GitHub にあるスレッド (他人のスレッドと、GitHub に投稿した指摘) は GitHub の内容に置き換わり、difit 上で付けた返信は消える。
+   GitHub に投稿していない Claude の指摘とユーザー自身のスレッドは、`sync.sh` が返信ごと再投入するので、返信も残る。
 
 1. 実行する。
 
@@ -32,6 +32,9 @@ $SKILL_DIR/scripts/sync.sh <state-dir>
 
 - difit のスレッドは head が変わると行番号がずれるため、差分更新はせず `--clean` で作り直している。
   GitHub にあるスレッドは GitHub の行番号で、ローカルにしかないスレッドは snippet の検索で位置を決め直す。
+- GitHub に投稿した指摘は GitHub のスレッドとして取り込み、停止前の difit にあった投稿前のスレッドは再投入しない。
+  `from-github` がレコードの `difit_thread_id` を GitHub の id へ置き換えた後も、前の id が状態ファイルの履歴に残るため、
+  `rebuild` は投稿前のスレッドを状態ファイルに無いスレッドと取り違えない。
 - Viewed の状態は difit のブラウザ側にしか無く API が無いため、同期の対象外である。Viewed は GitHub 上で管理する。
 - difit を作り直したくないだけなら `--no-restart` を付ける。GitHub との突き合わせだけを行う。
 - **対応要否の判断 (difit 上の返信) は difit にしか無い。** triage を通すまで状態ファイルには残らないため、作り直しで消えると復元できない。

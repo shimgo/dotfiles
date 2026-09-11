@@ -259,6 +259,45 @@ class TriageTest(unittest.TestCase):
         self.assertEqual(got["PRRC_open_root"][0], "github")
 
 
+class FormerDifitIdTest(unittest.TestCase):
+    """sync の from-github が difit_thread_id を置き換えた後も、前の id のスレッドを同じレコードとして扱うことを確かめる。"""
+
+    def test_register_skips_former_difit_ids(self):
+        with open(os.path.join(FIXTURES, "difit-comments.json"), encoding="utf-8") as f:
+            payload = f.read()
+        with tempfile.TemporaryDirectory() as d:
+            state_file = os.path.join(d, "threads.jsonl")
+            prior = state.new_record(key="fp", origin="claude", difit_thread_id="claude-fix", github_thread_id="PRRT_1", status="posted", summary="s")
+            state.append_records(state_file, [prior, dict(prior, difit_thread_id="PRRC_1")])
+            out = run(["register", "--state", state_file, "--repo", "o/r", "--pr", "1", "--head-sha", "h", "--worktree", FIXTURES], payload)
+        self.assertNotIn("claude-fix", {r["key"] for r in out["records"]})
+
+    def test_rebuild_does_not_reimport_thread_replaced_by_github(self):
+        # 投稿済みの指摘は from-github が GitHub のスレッドとして取り込むため、スナップショットに残る投稿前のスレッドを再投入しない
+        with tempfile.TemporaryDirectory() as d:
+            state_file = os.path.join(d, "threads.jsonl")
+            snapshot = os.path.join(d, "difit-last.json")
+            posted = state.new_record(key="fp", file="offset.go", side="new", line=14, snippet="\tif user.NewFlag {", body="指摘", origin="claude", difit_thread_id="claude-1", github_thread_id="PRRT_1", status="posted", summary="s")
+            state.append_records(state_file, [posted, dict(posted, difit_thread_id="PRRC_1")])
+            with open(snapshot, "w", encoding="utf-8") as f:
+                json.dump({"threads": [
+                    {"id": "claude-1", "filePath": "offset.go", "position": {"side": "new", "line": 14},
+                     "messages": [{"id": "m1", "body": "指摘", "author": "claude"}, {"id": "m2", "body": "+", "author": None}]},
+                ]}, f)
+            out = run(["rebuild", "--state", state_file, "--repo", "o/r", "--pr", "1", "--head-sha", "new", "--worktree", FIXTURES, "--snapshot", snapshot])
+        self.assertEqual(out["imports"], [])
+        self.assertEqual(out["records"], [])
+
+    def test_set_status_accepts_former_difit_id(self):
+        # difit-fetch.sh は前の id のスレッドもレコードに対応付けるので、set-status もその id でレコードを引く
+        with tempfile.TemporaryDirectory() as d:
+            state_file = os.path.join(d, "threads.jsonl")
+            prior = state.new_record(key="fp", origin="claude", difit_thread_id="claude-1", github_thread_id="PRRT_1", status="posted", summary="s")
+            state.append_records(state_file, [prior, dict(prior, difit_thread_id="PRRC_1")])
+            updated = run(["set-status", "--state", state_file, "--difit-id", "claude-1", "--status", "resolved"])
+        self.assertEqual((updated["key"], updated["status"], updated["difit_thread_id"]), ("fp", "resolved", "PRRC_1"))
+
+
 class RegisterTest(unittest.TestCase):
     def test_register_only_unknown_threads(self):
         with open(os.path.join(FIXTURES, "difit-comments.json"), encoding="utf-8") as f:

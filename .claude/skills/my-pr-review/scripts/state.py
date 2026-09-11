@@ -14,7 +14,7 @@ threads.jsonl は追記のみのファイルであり、同じ key を持つ行�
   from-github  GitHub の reviewThreads を difit import JSON とレコードに変換する
   reconcile    GitHub の reviewThreads と状態ファイルを突き合わせ、status の更新行を生成する
   triage       difit の comment get --format json の出力を分類する
-  register     difit にあって状態ファイルに無いスレッド (ユーザーが書いたもの) のレコードを生成する
+  register     状態ファイルのどの行にも thread id が現れない difit のスレッド (ユーザーが書いたもの) のレコードを生成する
   relocate     有効な open レコードの位置を現在のファイル内容から特定し直す
   rebuild      difit 再構築時に再投入する import と追記行を生成する (relocate を内包する)
 """
@@ -132,6 +132,25 @@ def latest_records(records: list[dict]) -> dict[str, dict]:
     for r in records:
         latest[r["key"]] = r
     return latest
+
+
+def records_by_difit_id(records: list[dict]) -> dict[str, dict]:
+    """difit の thread id から有効なレコードを引く辞書を返す。
+
+    sync の from-github は GitHub に投稿したレコードの difit_thread_id を GitHub の root comment id に置き換えるが、
+    置き換える前の id も履歴の行に残る。停止前の difit のスナップショットや、作り直す前の difit には前の id のスレッドがあるため、
+    履歴に現れたすべての id を、その key の有効なレコードに対応付ける。
+    同じ id を現在の difit_thread_id に持つレコードがあれば、そちらを優先する。
+    """
+    latest = latest_records(records)
+    by_difit: dict[str, dict] = {}
+    for r in records:
+        if r.get("difit_thread_id"):
+            by_difit[r["difit_thread_id"]] = latest[r["key"]]
+    for r in latest.values():
+        if r.get("difit_thread_id"):
+            by_difit[r["difit_thread_id"]] = r
+    return by_difit
 
 
 def append_records(path: str, records: list[dict]) -> None:
@@ -631,12 +650,14 @@ def cmd_latest(a):
 
 
 def cmd_set_status(a):
-    latest = latest_records(load_records(a.state))
+    records = load_records(a.state)
+    latest = latest_records(records)
     target = None
     if a.key:
         target = latest.get(a.key)
     elif a.difit_id:
-        target = next((r for r in latest.values() if r.get("difit_thread_id") == a.difit_id), None)
+        # difit-fetch.sh の difit_thread_id をそのまま渡せるよう、triage と同じく置き換える前の id でも引く
+        target = records_by_difit_id(records).get(a.difit_id)
     elif a.github_id:
         target = next((r for r in latest.values() if r.get("github_thread_id") == a.github_id), None)
     if target is None:
@@ -744,8 +765,7 @@ def cmd_reconcile(a):
 def cmd_triage(a):
     payload = read_json() or {}
     threads = payload["threads"] if isinstance(payload, dict) else payload
-    latest = latest_records(load_records(a.state))
-    by_difit = {r["difit_thread_id"]: r for r in latest.values() if r.get("difit_thread_id")}
+    by_difit = records_by_difit_id(load_records(a.state))
     out = [triage_thread(t, by_difit.get(t["id"])) for t in threads]
     write_json({"threads": out})
 
@@ -757,7 +777,10 @@ def cmd_relocate(a):
 
 
 def register_threads(threads: list[dict], by_difit: dict[str, dict], a, new_rev: str | None = None) -> list[dict]:
-    """difit にあって状態ファイルに無いスレッドを、ユーザー (または Claude) のスレッドとして記録するレコードを作る。"""
+    """difit にあって状態ファイルに無いスレッドを、ユーザー (または Claude) のスレッドとして記録するレコードを作る。
+
+    by_difit には records_by_difit_id の戻り値を渡す。置き換える前の difit_thread_id のスレッドも既知として扱い、記録し直さないためである。
+    """
     new_records = []
     for t in threads:
         if t["id"] in by_difit:
@@ -801,18 +824,18 @@ def cmd_register(a):
     """difit の comment get --format json の出力を読み、状態ファイルに無いスレッドのレコードを出力する。"""
     payload = read_json() or {}
     threads = payload["threads"] if isinstance(payload, dict) else payload
-    latest = latest_records(load_records(a.state))
-    by_difit = {r["difit_thread_id"]: r for r in latest.values() if r.get("difit_thread_id")}
-    write_json({"records": register_threads(threads, by_difit, a)})
+    write_json({"records": register_threads(threads, records_by_difit_id(load_records(a.state)), a)})
 
 
 def cmd_rebuild(a):
     """difit を作り直すときに再投入する import と、状態ファイルへの追記行を生成する。
 
-    対象は GitHub に投稿されていない open なスレッド。snapshot (停止前の difit の comment get 出力) が
+    対象は GitHub に投稿していない open なスレッド。snapshot (停止前の difit の comment get 出力) が
     あれば、状態ファイルに無いスレッドをユーザーのものとして記録し、返信も一緒に再投入する。
+    GitHub に投稿した指摘は from-github が GitHub のスレッドとして取り込むため、snapshot に残る投稿前のスレッドは再投入しない。
     """
-    latest = latest_records(load_records(a.state))
+    records = load_records(a.state)
+    latest = latest_records(records)
     snapshot_threads: list[dict] = []
     if a.snapshot and os.path.exists(a.snapshot):
         with open(a.snapshot, encoding="utf-8") as f:
@@ -820,7 +843,9 @@ def cmd_rebuild(a):
     snapshot_by_id = {t["id"]: t for t in snapshot_threads}
     by_difit = {r["difit_thread_id"]: r for r in latest.values() if r.get("difit_thread_id")}
 
-    new_records = register_threads(snapshot_threads, by_difit, a, a.snapshot_head_sha)
+    # sync は from-github の追記を終えてから rebuild を実行するため、投稿済みのレコードの difit_thread_id は GitHub の id に置き換わっている。
+    # snapshot の投稿前のスレッドを状態ファイルに無いものと誤認しないよう、置き換える前の id も既知として扱う。
+    new_records = register_threads(snapshot_threads, records_by_difit_id(records), a, a.snapshot_head_sha)
     for rec in new_records:
         by_difit[rec["difit_thread_id"]] = rec
 

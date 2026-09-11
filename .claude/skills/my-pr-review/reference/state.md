@@ -62,7 +62,7 @@ worktree の削除や head の更新をまたいで信頼できないためで�
 | `reason` | 対応不要とした理由、または resolve の根拠 |
 | `fingerprint` | `perspective` と `summary` を連結して正規化したものの SHA-256 |
 | `origin` | `claude` / `user` / `github` |
-| `difit_thread_id` | difit 上の thread id。GitHub に投稿された後は GitHub の root comment id に置き換わる |
+| `difit_thread_id` | difit 上の thread id。GitHub に投稿した指摘は、sync が GitHub から取り込むときに GitHub の root comment id へ置き換える。置き換える前の id も履歴の行に残るので、difit のスレッドからレコードを引くときは履歴に現れたすべての id を使う (`state.py` の `records_by_difit_id`) |
 | `github_thread_id`, `github_comment_id` | GitHub の thread と root comment の node id |
 | `status` | `open` / `dismissed` / `posted` / `resolved` / `outdated` |
 
