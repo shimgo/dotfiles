@@ -95,7 +95,7 @@ difit comment resolve <id> --port <port>
 
 ### 5. 完了の記録と報告
 
-ケース 1 は `$SKILL_DIR/scripts/phase-done.sh <state-dir> triage` を実行する。
+ケース 1 は `$SKILL_DIR/scripts/phase-done.sh <state-dir> triage` を実行し、`scripts/next.sh` を再実行して `phase` が `wait` でなければ同じターンで続ける。
 ケース 2 は続けて実行した review フェーズが `last_phase` を `review` にするので、ここでは実行しない。
 
 不要にした件数と理由の一覧、GitHub に投稿した件数 (ケース 1)、コミット一覧と再レビュー結果 (ケース 2) を報告する。

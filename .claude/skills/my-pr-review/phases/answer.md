@@ -46,6 +46,11 @@ difit comment resolve <difit の thread id>... --port <port>
 - **`set-status` の出力を `append` へパイプしない。** `set-status` は自身で状態ファイルへ追記し、追記したレコードを標準出力へ整形して出す。パイプすると二重に追記しようとして、複数行 JSON のためパースにも失敗する。
 - `difit comment resolve` は thread id を複数渡せるので、記録を全件終えてから 1 回で resolve してよい。
 
-6. `$SKILL_DIR/scripts/phase-done.sh <state-dir> answer` を実行し、応答した件数・resolve した件数・要点を報告する。
+6. `$SKILL_DIR/scripts/phase-done.sh <state-dir> answer` を実行する。
+
+7. `$SKILL_DIR/scripts/next.sh <state-dir>` を再実行し、`phase` が `wait` でなければ同じターンでそのフェーズに進む。
+   `+` や `-` の返信が残っていれば `phase` は `triage` になる。**ここでターンを終えず、`phases/triage.md` を続けて実行する。**
+   `q` への応答だけを終えて `+` の返信を次のターンに残すと、ユーザーは同じ `next` をもう一度打つことになる。
+
+   `wait` に到達したら、応答した件数・resolve した件数・要点と、続けて実行したフェーズの結果をまとめて報告する。
    open のまま残したスレッドは、ユーザーが `+` か `-` で対応要否を決める。
-   未処理の `q` が残っていなければ、次の `next` で triage に進む。
