@@ -18,6 +18,7 @@ $SKILL_DIR/scripts/difit-fetch.sh <state-dir>
 2. `classification` が `to_claude` のスレッドを対象にする。`text` に `q` を除いた本文、`file` と `position` に箇所が入っている。
 3. worktree のコードを読んで応答する。指摘への反論や代替案の相談も多いので、結論だけでなく根拠となるコード箇所を示す。
    指示であればそれを実行し、実行した内容を返信に書く。
+   指示がコードの修正なら、`phases/triage.md` の手順 4 と同じく同じ修正が必要な他の箇所を探し、差分内のものは併せて直して返信に書く。
 4. 返信は同じ位置への `reply` として投稿する。`author` を `claude` にすることを忘れない。
 
 ```bash
