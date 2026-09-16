@@ -74,6 +74,12 @@ wait_difit_ready() {
   return 1
 }
 
+# difit が使える状態になったことを URL 付きで標準エラーへ知らせる。
+# 呼び出し側のスクリプトが GitHub の取り込みを終えるのを待たずに、Claude がこの行を読んで URL をユーザーへ伝えられるようにする。
+announce_difit_url() {
+  echo "difit ready: $1" >&2
+}
+
 stop_difit() {
   local pid="$1"
   if [ -n "${pid}" ] && kill -0 "${pid}" 2>/dev/null; then

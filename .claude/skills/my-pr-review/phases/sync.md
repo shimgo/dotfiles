@@ -25,6 +25,7 @@ $SKILL_DIR/scripts/sync.sh <state-dir>
 - `warnings`: pending review が残っているため判断を保留したものなど。ユーザーが送信を忘れている可能性を伝える。
 - `reimported.outdated`: head が変わって位置を特定できなくなった未投稿の指摘。修正で消えた行に対する指摘なら対応済みの可能性が高い。verify で扱う。
 - `session.difit.url`: 新しい difit の URL。ポートが変わっていることがあるので必ず伝える。
+  起動直後に `difit ready: <URL>` として標準エラーへ出るので、残りの出力を読むより先に、また後続のフェーズに進む前に伝える。
 
 3. `$SKILL_DIR/scripts/phase-done.sh <state-dir> sync` を実行し、`scripts/next.sh` を再実行して `phase` が `wait` でなければ同じターンで続ける。head が変わっていれば `verify` になるので、`phases/verify.md` で指摘箇所の修正を確認する。
 

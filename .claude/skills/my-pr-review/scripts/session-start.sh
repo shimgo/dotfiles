@@ -9,10 +9,10 @@
 #
 # 実施内容:
 #   1. PR 情報の取得と worktree の準備
-#   2. difit をバックグラウンドで起動
-#   3. GitHub 上の未解決スレッドを difit に取り込み、状態ファイルに記録
-#   4. 前回のセッションが残っていれば、GitHub 未投稿の open なスレッドを再投入
-#   5. session.json の書き出し
+#   2. difit をバックグラウンドで起動し、応答を待って session.json を書き出す
+#   3. difit の URL を標準エラーへ出す (以降の取り込みを待たずにユーザーがレビューを始められるようにする)
+#   4. GitHub 上の未解決スレッドを difit に取り込み、状態ファイルに記録
+#   5. 前回のセッションが残っていれば、GitHub 未投稿の open なスレッドを再投入
 #
 # 同じ PR の difit が動いている間は実行を拒否する (head の更新は sync.sh が担当)。
 #
@@ -85,6 +85,20 @@ DIFIT_JSON="$(start_difit "${WORKTREE}" "${HEAD_SHA}" "${BASE_SHA}" "${MODE}" "$
 DIFIT_PORT="$(jq -r '.port' <<<"${DIFIT_JSON}")"
 wait_difit_ready "${DIFIT_PORT}"
 
+# GitHub の取り込みより先に session.json を書き、URL を知らせる。
+# ユーザーは取り込みの完了を待たずに差分を読み始められる。以降の手順が失敗しても difit が迷子にならない。
+jq -n \
+  --arg repo "${REPO}" --argjson pr "${PR}" --arg pr_url "${PR_URL}" --arg mode "${MODE}" \
+  --arg worktree "${WORKTREE}" --arg base_ref "${BASE_REF}" --arg head_ref "${HEAD_REF}" \
+  --arg base_sha "${BASE_SHA}" --arg head_sha "${HEAD_SHA}" --argjson difit "${DIFIT_JSON}" \
+  --arg review_skill "${REVIEW_SKILL}" --arg now "$(date +%Y-%m-%dT%H:%M:%S%z)" \
+  '{repo:$repo, pr:$pr, pr_url:$pr_url, mode:$mode, worktree:$worktree, base_ref:$base_ref, head_ref:$head_ref,
+    base_sha:$base_sha, head_sha:$head_sha, reviewed_head_sha:null, last_phase:"start", difit:$difit,
+    review_skill:(if $review_skill == "" then null else $review_skill end), started_at:$now, updated_at:$now,
+    state_dir:($worktree|tostring|"")}' \
+  | jq --arg d "${STATE_DIR}" '.state_dir = $d' > "${SESSION}"
+announce_difit_url "$(jq -r '.url' <<<"${DIFIT_JSON}")"
+
 THREADS_JSON="$("${SCRIPT_DIR}/github-fetch-threads.sh" "${REPO}" "${PR}")"
 CONVERTED="$(printf '%s' "${THREADS_JSON}" | python3 "${STATE_PY}" from-github \
   --state "${STATE_FILE}" --repo "${REPO}" --pr "${PR}" --head-sha "${HEAD_SHA}" \
@@ -97,16 +111,5 @@ REBUILT="$(python3 "${STATE_PY}" rebuild --state "${STATE_FILE}" --repo "${REPO}
   --worktree "${WORKTREE}" --base-sha "${BASE_SHA}" --snapshot "${STATE_DIR}/difit-last.json" --snapshot-head-sha "${PREV_HEAD_SHA}")"
 difit_import "${DIFIT_PORT}" "$(jq -c '.imports' <<<"${REBUILT}")"
 jq -c '.records' <<<"${REBUILT}" | python3 "${STATE_PY}" append --state "${STATE_FILE}"
-
-jq -n \
-  --arg repo "${REPO}" --argjson pr "${PR}" --arg pr_url "${PR_URL}" --arg mode "${MODE}" \
-  --arg worktree "${WORKTREE}" --arg base_ref "${BASE_REF}" --arg head_ref "${HEAD_REF}" \
-  --arg base_sha "${BASE_SHA}" --arg head_sha "${HEAD_SHA}" --argjson difit "${DIFIT_JSON}" \
-  --arg review_skill "${REVIEW_SKILL}" --arg now "$(date +%Y-%m-%dT%H:%M:%S%z)" \
-  '{repo:$repo, pr:$pr, pr_url:$pr_url, mode:$mode, worktree:$worktree, base_ref:$base_ref, head_ref:$head_ref,
-    base_sha:$base_sha, head_sha:$head_sha, reviewed_head_sha:null, last_phase:"start", difit:$difit,
-    review_skill:(if $review_skill == "" then null else $review_skill end), started_at:$now, updated_at:$now,
-    state_dir:($worktree|tostring|"")}' \
-  | jq --arg d "${STATE_DIR}" '.state_dir = $d' > "${SESSION}"
 
 cat "${SESSION}"

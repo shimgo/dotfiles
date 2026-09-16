@@ -3,7 +3,7 @@
 ## 前提
 
 - `session.json` が存在し、difit が起動していること。無ければ `phases/start.md` から。
-- `session.json` の `review_skill` にスキル名があること。無ければ start と同じ基準で決める。
+- `session.json` の `review_skill` にスキル名があること。無ければ start と同じ基準で決め、`phases/start.md` の手順 5 で session.json に書く。
 
 ## 手順
 

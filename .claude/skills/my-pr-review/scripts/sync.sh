@@ -6,7 +6,7 @@
 # 実施内容:
 #   1. GitHub の reviewThreads を取得し、resolved / 削除されたスレッドの status を更新する
 #   2. PR の head を取得し直す (worktree モードでは detach で checkout、local モードでは現在の HEAD を採用)
-#   3. difit を停止し、新しい head と base で --clean 起動する (--no-restart で省略)
+#   3. difit を停止し、新しい head と base で --clean 起動して URL を標準エラーへ出す (--no-restart で省略)
 #      停止前のスレッドは difit-last.json に保存し、状態ファイルに無いユーザーのスレッドと返信を失わないようにする
 #   4. GitHub の未解決スレッドと、ローカルで open なスレッドを difit に再投入する
 #      ローカルのスレッドは snippet で位置を探し直し、見つからなければ status を outdated にする
@@ -77,6 +77,7 @@ DIFIT_PORT="$(jq -r '.port' <<<"${DIFIT_JSON}")"
 # 以降の手順が失敗しても difit が迷子にならないよう、起動直後に session.json へ書く
 update_session ".head_sha = \"${HEAD_SHA}\" | .base_sha = \"${BASE_SHA}\" | .difit = ${DIFIT_JSON} | .updated_at = \"${NOW}\""
 wait_difit_ready "${DIFIT_PORT}"
+announce_difit_url "$(jq -r '.url' <<<"${DIFIT_JSON}")"
 
 # 4a. GitHub の未解決スレッド
 CONVERTED="$(printf '%s' "${THREADS_JSON}" | python3 "${STATE_PY}" from-github \

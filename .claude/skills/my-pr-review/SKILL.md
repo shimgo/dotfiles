@@ -46,6 +46,7 @@ $SKILL_DIR/scripts/next.sh <state-dir>
 `phase` が `wait` のときは実行するものが無いので、`reason` を伝えて終わる
 (ユーザーが difit で対応要否を付けている途中、または GitHub で pending review を送信していない)。
 報告は `wait` に到達した時点で、そのターンに実行したフェーズすべての結果をまとめて行う。
+ただし difit の URL だけは例外で、作り直すたびにその場で伝える (ポートが変わるため、古い URL のままではユーザーが見られない)。
 判定は difit の未処理の返信と `session.json` の `last_phase` から行うので、各フェーズの最後に必ず `scripts/phase-done.sh` を実行して `last_phase` を更新する。
 「レビューの続きをして」のように曖昧な依頼も `next` として扱う。
 
@@ -64,6 +65,9 @@ start → review ─┬→ answer (随時)
 - **`$SKILL_DIR`** は手順書中で `~/.claude/skills/my-pr-review` を指す。スクリプトはすべてこの下の `scripts/` にある。
 - **状態ディレクトリ** は `scripts/common.sh` の `state_dir_for` が決める。以降のスクリプトはすべて第 1 引数に状態ディレクトリを取る。
   `session.json` の `state_dir` にも同じ値が入っているので、迷ったらそこを読む。
+- **difit の URL は最優先でユーザーに伝える。** ユーザーは Claude のレビューの完了を待たず、並行して自分で差分を読み始める。
+  `session-start.sh` と `sync.sh` は difit が応答した直後に `difit ready: <URL>` を標準エラーへ出す。この行を見つけたら、
+  GitHub の取り込み結果を読むよりも、レビューを始めるよりも先に、その URL を本文としてユーザーに出す。
 - **difit はコメントを差分の対象ごとに持つ。** 画面右上のセレクタで対象を切り替えると、その対象にコメントが無いので何も表示されず、
   `difit comment get` も 0 件を返す。起動時の対象とユーザーが見る対象を揃える必要があるため、local モードでは
   `difit . origin/<base_ref> --merge-base` で起動し、difit の画面が既定で選ぶ "origin/<base_ref>...Uncommitted Changes (merge-base)" に合わせている。
