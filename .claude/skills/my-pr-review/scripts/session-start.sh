@@ -83,6 +83,7 @@ BASE_SHA="$(git -C "${WORKTREE}" merge-base "${HEAD_SHA}" "origin/${BASE_REF}")"
 
 DIFIT_JSON="$(start_difit "${WORKTREE}" "${HEAD_SHA}" "${BASE_SHA}" "${MODE}" "${BASE_REF}")"
 DIFIT_PORT="$(jq -r '.port' <<<"${DIFIT_JSON}")"
+wait_difit_ready "${DIFIT_PORT}"
 
 THREADS_JSON="$("${SCRIPT_DIR}/github-fetch-threads.sh" "${REPO}" "${PR}")"
 CONVERTED="$(printf '%s' "${THREADS_JSON}" | python3 "${STATE_PY}" from-github \

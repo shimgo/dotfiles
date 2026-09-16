@@ -60,6 +60,20 @@ start_difit() {
   (cd "${worktree}" && difit "${head}" "${base}" --background --clean)
 }
 
+# difit --background は起動を待たずに JSON を返すため、API が応答するまで待ってから import する。
+# 待たずに import すると、起動前の投入が捨てられて difit が空のまま立ち上がる (返信ごと失う)。
+wait_difit_ready() {
+  local port="$1" i
+  for i in $(seq 1 50); do
+    if curl -sf --max-time 2 "http://localhost:${port}/api/comments-json" >/dev/null 2>&1; then
+      return 0
+    fi
+    sleep 0.2
+  done
+  echo "error: difit (port ${port}) が 10 秒以内に応答しませんでした" >&2
+  return 1
+}
+
 stop_difit() {
   local pid="$1"
   if [ -n "${pid}" ] && kill -0 "${pid}" 2>/dev/null; then
