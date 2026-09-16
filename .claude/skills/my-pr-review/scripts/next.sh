@@ -8,7 +8,9 @@
 #   1. difit に未処理の Claude Code 宛ての本文 ("q ...") があれば answer
 #   2. difit に未処理の返信 (fix / dismiss / user_finding) があれば triage
 #      GitHub への投稿などで処理済みのスレッドは processed に分類するので数えない
-#   3. それ以外は直前のフェーズから決める
+#   3. local モードで reviewed_head_sha 以降にコミットを積んでいれば review (先に sync.sh で difit と session.json の head を合わせる)
+#      answer / triage で実装したコミットを再レビューするため。直前のフェーズが review のときは判定しない (review が reviewed_head_sha を更新する)
+#   4. それ以外は直前のフェーズから決める
 #        start / なし → review
 #        review / answer → wait (ユーザーが difit で対応要否を付けるのを待つ)
 #        triage (worktree) → sync。ただし pending review が未送信なら wait
@@ -39,6 +41,13 @@ emit() {
 [ "$(count to_claude)" -gt 0 ] && emit answer "未処理の Claude Code 宛ての本文が $(count to_claude) 件ある"
 PENDING_REPLIES=$(( $(count fix) + $(count dismiss) + $(count user_finding) ))
 [ "${PENDING_REPLIES}" -gt 0 ] && emit triage "未処理の返信が ${PENDING_REPLIES} 件ある"
+
+if [ "${MODE}" = "local" ] && [ "${LAST}" != "review" ] && [ -n "${REVIEWED_HEAD_SHA}" ]; then
+  CURRENT_HEAD="$(git -C "${WORKTREE}" rev-parse HEAD)"
+  if [ "${CURRENT_HEAD}" != "${REVIEWED_HEAD_SHA}" ]; then
+    emit review "reviewed_head_sha 以降にコミットを積んでいる。sync.sh で difit を作り直してから差分を再レビューする"
+  fi
+fi
 
 case "${LAST}" in
   start) emit review "セッション開始直後でまだレビューしていない" ;;
