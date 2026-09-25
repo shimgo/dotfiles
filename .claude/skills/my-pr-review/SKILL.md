@@ -86,6 +86,9 @@ start → review ─┬→ answer (随時)
   review は投稿の前に `state.py directives` の一覧と指摘を突き合わせ、指示で実装した変更の取り消し・逆の方針の提案・判断理由の問い直しに当たる指摘には findings の `overrules` を書いて投稿から除く。
   除いた指摘は件数と要約を報告に載せる。指示が持ち込んだ不具合と、揃える作業の漏れは、指示を維持する修正案で投稿する。詳細は `phases/review.md` の手順 4。
 - **GitHub へ書き込むのは pending review へのコメント追加と resolve だけ**。レビューの送信 (submit) はユーザーが GitHub 上で行う。
+- **ケース 1 では PR の body を編集しない。** 他人が書いた PR の説明を書き換えることになるためである。
+  `gh pr edit --body` / `--body-file` も、`gh api` による PR の更新 (REST の `PATCH /repos/<owner>/<repo>/pulls/<番号>`、GraphQL の `updatePullRequest`) も実行しない。
+  ユーザーが `q` で body の編集を指示しても実行せず、ケース 1 では禁止されていることを返信する。body への意見は、レビューコメントとして pending review に投稿する。
 - **作業ディレクトリ**: リポジトリ固有のレビュースキルは現在のディレクトリを対象にする。ケース 1 では worktree で Claude Code を起動しているか、
   `session.json` の `worktree` と現在のディレクトリが一致しているかを review の前に確認する。
 - 秘密情報 (トークン、鍵、パスワード) を difit のコメントやコマンド引数に含めない。

@@ -37,6 +37,12 @@
       "prompt": "このファイルの関数をレビューして、気になるところを教えて。",
       "expected_output": "difit も PR も出てこないため、このスキルは使わず通常のレビューとして応答する。",
       "files": []
+    },
+    {
+      "id": 7,
+      "prompt": "next (worktree モードのセッションで、difit に \"q PR の説明に動作確認の手順を追記しておいて\" というスレッドがある)",
+      "expected_output": "answer フェーズで応答するが、ケース 1 なので gh pr edit などで PR の body を編集しない。実行しなかったことと理由を difit に返信し、スレッドは open のまま残す。",
+      "files": []
     }
   ]
 }
