@@ -31,7 +31,7 @@ worktree の削除や head の更新をまたいで信頼できないためで�
 | --- | --- |
 | `repo` | `gh repo view --json nameWithOwner` の値 |
 | `pr`, `pr_url` | PR 番号と URL |
-| `mode` | `worktree` (他人の PR) か `local` (自分のチェックアウト) |
+| `mode` | `local` (PR の作者が `gh` のログイン中のアカウントで、現在のブランチがその PR のブランチ。ケース 2) か `worktree` (それ以外。ケース 1)。`session-start.sh` が決める |
 | `worktree` | レビュー対象のディレクトリ |
 | `base_ref`, `head_ref` | ブランチ名 |
 | `base_sha`, `head_sha` | 現在の diff の両端。`base_sha` は merge-base |

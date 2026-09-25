@@ -23,7 +23,7 @@
     {
       "id": 4,
       "prompt": "セルフレビューしたい。今のブランチの PR で difit 立ち上げてレビューして。",
-      "expected_output": "自分の PR かつ現在のブランチなので --local で session-start.sh を実行し、review フェーズに進む。",
+      "expected_output": "session-start.sh を実行する。自分の PR かつ現在のブランチなので session-start.sh が local モードを選び、Claude は review フェーズに進む。",
       "files": []
     },
     {

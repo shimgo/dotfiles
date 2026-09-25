@@ -2,10 +2,12 @@
 # レビューセッションを開始する。
 #
 # 使い方:
-#   session-start.sh <PR の URL または番号> [--local] [--review-skill <スキル名>]
+#   session-start.sh <PR の URL または番号> [--review-skill <スキル名>]
 #
-# --local を付けると、現在のチェックアウトをそのまま使う (自分の PR のセルフレビュー)。
-# 付けなければ PR の head を fetch し、リポジトリの隣に <repo>-pr-<番号> という worktree を作る。
+# モードは PR の作者と現在のブランチから決める。
+#   local:    PR の作者が gh のログイン中のアカウントで、現在のブランチがその PR のブランチ。
+#             現在のチェックアウトをそのまま使う (自分の PR のセルフレビュー。ケース 2)
+#   worktree: それ以外。PR の head を fetch し、リポジトリの隣に <repo>-pr-<番号> という worktree を作る (ケース 1)
 #
 # 実施内容:
 #   1. PR 情報の取得と worktree の準備
@@ -23,27 +25,37 @@ need gh git jq difit python3 curl
 
 PR_ARG=""
 PREV_HEAD_SHA=""
-MODE="worktree"
 REVIEW_SKILL=""
 while [ $# -gt 0 ]; do
   case "$1" in
-    --local) MODE="local" ;;
     --review-skill) REVIEW_SKILL="$2"; shift ;;
     -*) echo "error: 不明なオプション: $1" >&2; exit 1 ;;
     *) PR_ARG="$1" ;;
   esac
   shift
 done
-[ -n "${PR_ARG}" ] || { echo "usage: session-start.sh <pr-url|number> [--local] [--review-skill NAME]" >&2; exit 1; }
+[ -n "${PR_ARG}" ] || { echo "usage: session-start.sh <pr-url|number> [--review-skill NAME]" >&2; exit 1; }
 
 REPO_ROOT="$(git rev-parse --show-toplevel)"
 REPO="$(gh repo view --json nameWithOwner -q .nameWithOwner)"
-PR_JSON="$(gh pr view "${PR_ARG}" --json number,url,headRefName,headRefOid,baseRefName,isCrossRepository)"
+PR_JSON="$(gh pr view "${PR_ARG}" --json number,url,headRefName,headRefOid,baseRefName,isCrossRepository,author)"
 PR="$(jq -r '.number' <<<"${PR_JSON}")"
 PR_URL="$(jq -r '.url' <<<"${PR_JSON}")"
 HEAD_REF="$(jq -r '.headRefName' <<<"${PR_JSON}")"
 HEAD_SHA="$(jq -r '.headRefOid' <<<"${PR_JSON}")"
 BASE_REF="$(jq -r '.baseRefName' <<<"${PR_JSON}")"
+
+# モードを Claude の判断に任せない。local モードでは Claude が現在のブランチへ実装をコミットするため、
+# 他人の PR を local モードで開くと、他人のブランチに変更を加えることになる。
+PR_AUTHOR="$(jq -r '.author.login' <<<"${PR_JSON}")"
+VIEWER="$(gh api user -q .login)"
+CURRENT_BRANCH="$(git branch --show-current)"
+if [ "${PR_AUTHOR}" = "${VIEWER}" ] && [ "${CURRENT_BRANCH}" = "${HEAD_REF}" ]; then
+  MODE="local"
+else
+  MODE="worktree"
+fi
+echo "info: ${MODE} モードで開始します (PR の作者: ${PR_AUTHOR}, gh のログイン: ${VIEWER}, 現在のブランチ: ${CURRENT_BRANCH:-(detached)}, PR のブランチ: ${HEAD_REF})" >&2
 
 STATE_DIR="$(state_dir_for "${REPO}" "${PR}")"
 SESSION="${STATE_DIR}/session.json"

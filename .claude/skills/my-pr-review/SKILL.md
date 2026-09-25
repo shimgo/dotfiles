@@ -52,7 +52,8 @@ $SKILL_DIR/scripts/next.sh <state-dir>
 
 ## 全体像
 
-ケース 1 (他人の PR) と ケース 2 (自分の PR) で流れが違うのは triage 以降だけである。
+ケース 1 (他人の PR。session.json の `mode` が `worktree`) と ケース 2 (自分の PR。`mode` が `local`) で流れが違うのは triage 以降だけである。
+ケースは `session-start.sh` が PR の作者と現在のブランチから決める (`phases/start.md`)。
 
 ```
 start → review ─┬→ answer (随時)
@@ -93,7 +94,7 @@ start → review ─┬→ answer (随時)
 
 | スクリプト | 役割 |
 | --- | --- |
-| `scripts/session-start.sh <PR> [--local] [--review-skill NAME]` | セッション開始。worktree、difit、GitHub スレッドの取り込み |
+| `scripts/session-start.sh <PR> [--review-skill NAME]` | セッション開始。PR の作者と現在のブランチからモードを決め、worktree、difit、GitHub スレッドの取り込みを行う |
 | `scripts/difit-post.sh <state-dir> <findings.json>` | 指摘を照合して difit に投稿し、記録する |
 | `scripts/difit-fetch.sh <state-dir> [--raw]` | difit のスレッドを取得し、返信を分類する |
 | `scripts/github-pending.sh <state-dir> < items.json` | difit のスレッドを GitHub の pending review に追加する |
