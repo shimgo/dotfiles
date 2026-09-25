@@ -10,6 +10,7 @@ threads.jsonl は追記のみのファイルであり、同じ key を持つ行�
   to-difit     decision 済み findings から difit の comment import JSON とレコードを生成する
   append       標準入力の JSON 配列 (または JSONL) を状態ファイルに追記する
   latest       有効なレコードを JSON 配列で出力する
+  directives   ユーザーの指示で実装した変更 (fix_commit を持つ resolved のレコード) を JSON 配列で出力する
   set-status   key を指定してレコードの status などを更新する (新しい行を追記する)
   from-github  GitHub の reviewThreads を difit import JSON とレコードに変換する
   reconcile    GitHub の reviewThreads と状態ファイルを突き合わせ、status の更新行を生成する
@@ -181,6 +182,9 @@ def new_record(**fields) -> dict:
         "summary": None,
         "body": None,
         "reason": None,
+        "instruction": None,
+        "fix_commit": None,
+        "overrules": None,
         "fingerprint": None,
         "origin": None,
         "difit_thread_id": None,
@@ -270,10 +274,25 @@ def enrich_one(item: dict, worktree: str, base_sha: str | None, new_rev: str | N
 # ---------------------------------------------------------------------------
 
 
+def is_directive(record: dict) -> bool:
+    """ユーザーの指示で実装した変更のレコードかを返す。triage のケース 2 が fix_commit を記録する。"""
+    return record.get("status") == "resolved" and bool(record.get("fix_commit"))
+
+
+def find_directive(ref: str, records: list[dict]) -> dict | None:
+    """findings の overrules が指すレコードを key または difit の thread id から引く。"""
+    latest = latest_records(records)
+    target = latest.get(ref) or records_by_difit_id(records).get(ref)
+    if target is None or not is_directive(target):
+        return None
+    return target
+
+
 def decide(finding: dict, latest: dict[str, dict]) -> tuple[str, dict | None]:
     """3 段階の照合ロジック。reference/state.md を参照。
 
     戻り値は (decision, prior)。decision は suppress / annotate / report。
+    overrules を持つ指摘は cmd_match がこの関数より先に overruled と判定する。
     """
     same_snippet = [
         r
@@ -578,10 +597,18 @@ def cmd_enrich(a):
 def cmd_match(a):
     payload = read_json() or {}
     findings = payload["findings"] if isinstance(payload, dict) else payload
-    latest = latest_records(load_records(a.state))
+    records = load_records(a.state)
+    latest = latest_records(records)
     out = []
     for f in findings:
-        decision, prior = decide(f, latest)
+        if f.get("overrules"):
+            # ユーザーの指示で実装した変更を覆す指摘は投稿しない。指す先が指示の記録でなければ、付け間違いを見逃さないよう中断する
+            directive = find_directive(f["overrules"], records)
+            if directive is None:
+                die(f"overrules が指すレコードがユーザーの指示で実装した変更ではありません: {f['overrules']} (state.py directives で確認してください)")
+            decision, prior = "overruled", directive
+        else:
+            decision, prior = decide(f, latest)
         item = dict(f)
         item["decision"] = decision
         item["prior"] = prior
@@ -595,6 +622,32 @@ def cmd_to_difit(a):
     imports, records = [], []
     for f in findings:
         if f.get("decision") == "suppress":
+            continue
+        if f.get("decision") == "overruled":
+            # difit には投稿せず、対応不要の記録だけを残す。次回以降は同じ箇所・同じ観点の照合でも抑止できる
+            prior = f.get("prior") or {}
+            records.append(
+                new_record(
+                    key=f["fingerprint"],
+                    repo=a.repo,
+                    pr=a.pr,
+                    head_sha=a.head_sha,
+                    file=f["file"],
+                    side=f.get("side") or "new",
+                    line=f["line"],
+                    scope=f.get("scope"),
+                    snippet=f.get("snippet"),
+                    snippet_sha256=f.get("snippet_sha256"),
+                    perspective=f.get("perspective"),
+                    summary=f["summary"],
+                    body=f["body"],
+                    reason=f"ユーザーの指示で実装した変更を覆す指摘のため投稿しない (指示: {prior.get('instruction') or '+'} / 元の指摘: {prior.get('summary')} / コミット: {prior.get('fix_commit')})",
+                    overrules=prior.get("key"),
+                    fingerprint=f["fingerprint"],
+                    origin="claude",
+                    status="dismissed",
+                )
+            )
             continue
         thread_id = f"claude-{uuid.uuid4().hex[:12]}"
         body = f["body"]
@@ -664,6 +717,17 @@ def cmd_latest(a):
     write_json(rows)
 
 
+def cmd_directives(a):
+    rows = [r for r in latest_records(load_records(a.state)).values() if is_directive(r)]
+    rows.sort(key=lambda r: r.get("updated_at") or "")
+    write_json(
+        [
+            {k: r.get(k) for k in ("key", "difit_thread_id", "file", "scope", "perspective", "summary", "body", "instruction", "fix_commit")}
+            for r in rows
+        ]
+    )
+
+
 def cmd_set_status(a):
     records = load_records(a.state)
     latest = latest_records(records)
@@ -682,6 +746,10 @@ def cmd_set_status(a):
         updated["status"] = a.status
     if a.reason is not None:
         updated["reason"] = a.reason
+    if a.instruction is not None:
+        updated["instruction"] = a.instruction
+    if a.fix_commit:
+        updated["fix_commit"] = a.fix_commit
     if a.github_thread_id:
         updated["github_thread_id"] = a.github_thread_id
     if a.github_comment_id:
@@ -934,6 +1002,10 @@ def main(argv=None):
     s.add_argument("--origin", action="append", choices=("claude", "user", "github"))
     s.set_defaults(func=cmd_latest)
 
+    s = sub.add_parser("directives")
+    s.add_argument("--state", required=True)
+    s.set_defaults(func=cmd_directives)
+
     s = sub.add_parser("set-status")
     s.add_argument("--state", required=True)
     g = s.add_mutually_exclusive_group(required=True)
@@ -942,6 +1014,8 @@ def main(argv=None):
     g.add_argument("--github-id")
     s.add_argument("--status", choices=STATUSES)
     s.add_argument("--reason")
+    s.add_argument("--instruction", help="実装を指示したユーザーの返信の本文 (先頭語を除く)。+ だけなら空文字")
+    s.add_argument("--fix-commit", help="ユーザーの指示を実装したコミットのハッシュ。これを持つ resolved のレコードを directives が返す")
     s.add_argument("--github-thread-id")
     s.add_argument("--github-comment-id")
     s.add_argument("--set-difit-id")

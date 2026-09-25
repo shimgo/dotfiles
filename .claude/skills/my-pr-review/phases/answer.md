@@ -44,6 +44,8 @@ difit comment resolve <difit の thread id>... --port <port>
 
 - `--difit-id` には `difit-fetch.sh` の `difit_thread_id` を渡す。ユーザーが書いたスレッドも Claude の指摘のスレッドも同じように指定できる。
 - `--reason` には実行した内容を書く。難しい判断をした指示ほど、後から経緯を辿れる価値が高い。
+- ケース 2 で指示がコードの修正で、コミットまで終えたなら、`--instruction "<q を除いた指示の本文>" --fix-commit "<コミットハッシュ>"` も付ける。
+  triage の実装と同じく「ユーザーの指示で実装した変更」の記録になり、再レビューがこの変更を覆す指摘を投稿しないために使う (`phases/review.md` の手順 4)。
 - **`set-status` の出力を `append` へパイプしない。** `set-status` は自身で状態ファイルへ追記し、追記したレコードを標準出力へ整形して出す。パイプすると二重に追記しようとして、複数行 JSON のためパースにも失敗する。
 - `difit comment resolve` は thread id を複数渡せるので、記録を全件終えてから 1 回で resolve してよい。
 

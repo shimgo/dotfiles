@@ -81,6 +81,9 @@ start → review ─┬→ answer (随時)
 - **`q ` で始まる本文はユーザーから Claude Code への質問や指示**であり、レビュイーへのコメントではない。GitHub に投稿せず answer フェーズで応答する。
   未処理の `q` が残っている間は GitHub への pending 投稿に進まない。
 - **`q` も `+` も `-` も付いていない本文はレビュイーへのコメント**として扱い、対応が必要なものとして GitHub に投稿する。書式を推測してユーザーに聞き返さない。
+- **ユーザーが指示して実装した変更を、再レビューの指摘で問い直さない。** ケース 2 の triage は、実装のたびにユーザーの指示とコミットを `state.py set-status --instruction --fix-commit` で記録する。
+  review は投稿の前に `state.py directives` の一覧と指摘を突き合わせ、指示で実装した変更の取り消し・逆の方針の提案・判断理由の問い直しに当たる指摘には findings の `overrules` を書いて投稿から除く。
+  除いた指摘は件数と要約を報告に載せる。指示が持ち込んだ不具合と、揃える作業の漏れは、指示を維持する修正案で投稿する。詳細は `phases/review.md` の手順 4。
 - **GitHub へ書き込むのは pending review へのコメント追加と resolve だけ**。レビューの送信 (submit) はユーザーが GitHub 上で行う。
 - **作業ディレクトリ**: リポジトリ固有のレビュースキルは現在のディレクトリを対象にする。ケース 1 では worktree で Claude Code を起動しているか、
   `session.json` の `worktree` と現在のディレクトリが一致しているかを review の前に確認する。
@@ -98,6 +101,6 @@ start → review ─┬→ answer (随時)
 | `scripts/sync.sh <state-dir> [--no-restart]` | GitHub との突き合わせと difit の再構築 |
 | `scripts/next.sh <state-dir>` | 次のフェーズを判定する |
 | `scripts/phase-done.sh <state-dir> <phase>` | フェーズの完了を session.json に記録する |
-| `scripts/state.py <subcommand>` | 状態ファイルの操作。`--help` で一覧 |
+| `scripts/state.py <subcommand>` | 状態ファイルの操作。`--help` で一覧。`directives` はユーザーの指示で実装した変更の一覧を返す |
 
 スクリプトの出力は JSON なので、結果をユーザーに伝えるときは件数と対象を日本語で要約する。

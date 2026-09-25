@@ -7,6 +7,7 @@
 # 出力 (JSON):
 #   suppressed: 抑止した指摘 (過去の判断と prior を含む)
 #   annotated:  過去の判断を注記して投稿した指摘
+#   overruled:  ユーザーの指示で実装した変更を覆すため投稿しなかった指摘 (findings の overrules で指定する。対応不要として記録する)
 #   posted:     投稿した件数
 
 source "$(dirname "${BASH_SOURCE[0]}")/common.sh"
@@ -26,5 +27,6 @@ jq -c '.records' <<<"${CONVERTED}" | python3 "${STATE_PY}" append --state "${STA
 jq -n --argjson d "${DECIDED}" --argjson c "${CONVERTED}" '{
   suppressed: [$d.findings[] | select(.decision == "suppress") | {file, line, perspective, summary, prior: {status: .prior.status, summary: .prior.summary, reason: .prior.reason}}],
   annotated:  [$d.findings[] | select(.decision == "annotate") | {file, line, perspective, summary, prior: {status: .prior.status, summary: .prior.summary, reason: .prior.reason}}],
+  overruled:  [$d.findings[] | select(.decision == "overruled") | {file, line, perspective, summary, directive: {summary: .prior.summary, instruction: .prior.instruction, fix_commit: .prior.fix_commit}}],
   posted: ($c.imports | length)
 }'

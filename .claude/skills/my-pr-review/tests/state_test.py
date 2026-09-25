@@ -126,6 +126,70 @@ class MatchTest(unittest.TestCase):
         self.assertEqual(out["records"][1]["difit_thread_id"], out["imports"][1]["id"])
 
 
+class DirectiveTest(unittest.TestCase):
+    def setUp(self):
+        self.tmp = tempfile.TemporaryDirectory()
+        self.state_file = os.path.join(self.tmp.name, "threads.jsonl")
+        self.fixed = state.new_record(
+            key="d1", file="offset.go", perspective="観点5", summary="兄弟と形が違う", body="b",
+            fingerprint="d1", origin="claude", difit_thread_id="claude-d1", status="open",
+        )
+        self.dismissed = state.new_record(key="d2", file="offset.go", summary="不要", origin="claude", difit_thread_id="claude-d2", status="open")
+        state.append_records(self.state_file, [self.fixed, self.dismissed])
+        run(["set-status", "--state", self.state_file, "--difit-id", "claude-d1", "--status", "resolved",
+             "--reason", "abc1234", "--instruction", "兄弟と揃えて", "--fix-commit", "abc1234"])
+        run(["set-status", "--state", self.state_file, "--difit-id", "claude-d2", "--status", "dismissed", "--reason", "理由"])
+
+    def tearDown(self):
+        self.tmp.cleanup()
+
+    def finding(self, **kw):
+        base = {"file": "offset.go", "line": 14, "perspective": "観点7", "summary": "元の形へ戻すべき", "body": "b"}
+        base.update(kw)
+        return base
+
+    def match(self, finding):
+        enriched = run(["enrich", "--worktree", FIXTURES], json.dumps({"findings": [finding]}))
+        return run(["match", "--state", self.state_file], json.dumps(enriched))
+
+    def test_directives_lists_only_resolved_records_with_fix_commit(self):
+        rows = run(["directives", "--state", self.state_file])
+        self.assertEqual([r["key"] for r in rows], ["d1"])
+        self.assertEqual(rows[0]["instruction"], "兄弟と揃えて")
+        self.assertEqual(rows[0]["fix_commit"], "abc1234")
+
+    def test_finding_with_overrules_is_overruled_by_key_or_difit_id(self):
+        for ref in ("d1", "claude-d1"):
+            f = self.match(self.finding(overrules=ref))["findings"][0]
+            self.assertEqual(f["decision"], "overruled")
+            self.assertEqual(f["prior"]["key"], "d1")
+
+    def test_overrules_pointing_to_non_directive_fails(self):
+        enriched = run(["enrich", "--worktree", FIXTURES], json.dumps({"findings": [self.finding(overrules="d2")]}))
+        p = subprocess.run([sys.executable, STATE_PY, "match", "--state", self.state_file], input=json.dumps(enriched), capture_output=True, text=True)
+        self.assertNotEqual(p.returncode, 0)
+        self.assertIn("overrules", p.stderr)
+
+    def test_to_difit_records_overruled_as_dismissed_without_import(self):
+        decided = self.match(self.finding(overrules="d1"))
+        out = run(["to-difit", "--repo", "o/r", "--pr", "1", "--head-sha", "abc"], json.dumps(decided))
+        self.assertEqual(out["imports"], [])
+        self.assertEqual(len(out["records"]), 1)
+        record = out["records"][0]
+        self.assertEqual(record["status"], "dismissed")
+        self.assertEqual(record["overrules"], "d1")
+        self.assertIsNone(record["difit_thread_id"])
+        self.assertIn("兄弟と揃えて", record["reason"])
+        self.assertIn("abc1234", record["reason"])
+
+    def test_overruled_record_suppresses_the_same_finding_next_time(self):
+        decided = self.match(self.finding(overrules="d1"))
+        out = run(["to-difit", "--repo", "o/r", "--pr", "1", "--head-sha", "abc"], json.dumps(decided))
+        run(["append", "--state", self.state_file], json.dumps(out["records"]))
+        f = self.match(self.finding())["findings"][0]
+        self.assertEqual(f["decision"], "suppress")
+
+
 class StatusTest(unittest.TestCase):
     def setUp(self):
         self.tmp = tempfile.TemporaryDirectory()

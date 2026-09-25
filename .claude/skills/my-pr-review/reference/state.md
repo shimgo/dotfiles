@@ -60,6 +60,9 @@ worktree の削除や head の更新をまたいで信頼できないためで�
 | `snippet_sha256` | `snippet` を正規化したものの SHA-256 |
 | `perspective`, `summary`, `body` | 観点、要約、difit に表示した本文 |
 | `reason` | 対応不要とした理由、または resolve の根拠 |
+| `instruction` | ケース 2 で実装を指示したユーザーの返信の本文 (先頭語を除く)。`+` だけなら空文字。指示で実装していないレコードは null |
+| `fix_commit` | ケース 2 でユーザーの指示を実装したコミット。これを持つ `resolved` のレコードを `state.py directives` が「ユーザーの指示で実装した変更」として返す |
+| `overrules` | このレコードの指摘が覆そうとした「ユーザーの指示で実装した変更」のレコードの `key`。該当しなければ null |
 | `fingerprint` | `perspective` と `summary` を連結して正規化したものの SHA-256 |
 | `origin` | `claude` / `user` / `github` |
 | `difit_thread_id` | difit 上の thread id。GitHub に投稿した指摘は、sync が GitHub から取り込むときに GitHub の root comment id へ置き換える。置き換える前の id も履歴の行に残るので、difit のスレッドからレコードを引くときは履歴に現れたすべての id を使う (`state.py` の `records_by_difit_id`) |
@@ -86,6 +89,18 @@ worktree の削除や head の更新をまたいで信頼できないためで�
 コードが変われば `snippet_sha256` が変わり、過去の判断は自動抑止から外れる。
 「かつて不要と判断したが、その後の修正で有効になった指摘」を握りつぶさないための設計である。
 
+### ユーザーの指示で実装した変更を覆す指摘
+
+上の照合とは別に、findings が `overrules` を持つ指摘を `state.py match` は `overruled` と判定する。
+`to-difit` はこの指摘を difit に投稿せず、status が `dismissed` で `overrules` に指示のレコードの `key` を持つレコードだけを生成する。
+記録が残るので、次回以降は同じ箇所・同じ観点の指摘を上の照合でも抑止できる。
+
+`overrules` を書くかどうかは Claude が `phases/review.md` の基準で判断する。再指摘防止の照合では意味的な一致の判定を採用していないが、ここで採用するのは次の理由による。
+
+- 覆す対象は「ユーザーの指示で実装した変更」に限られ、`state.py directives` が候補を列挙する。`match` は、`overrules` が指す先が `fix_commit` を持つ `resolved` のレコードでなければ中断するので、根拠の無い指摘の握りつぶしには使えない
+- 指示を覆す指摘は、コードが変わるたびに `snippet_sha256` も `summary` も変わるため、決定的な照合では捉えられない
+- 投稿しなかった指摘は必ずユーザーへの報告に載せるので、判定を誤ってもユーザーが気づける
+
 採用しないもの:
 
 - 前後数行を含めたハッシュ: 無関係な近傍の変更で失効する
@@ -109,7 +124,8 @@ open ──(answer: 指示を実行)──▶ resolved
 open ──(triage: 不要)──▶ dismissed
 open ──(triage: ケース1 pending 投稿)──▶ posted ──(sync: GitHub で resolved)──▶ resolved
                                           posted ──(sync: 送信前に削除)──▶ dismissed
-open ──(triage: ケース2 実装)──▶ resolved
+open ──(triage: ケース2 実装)──▶ resolved (instruction と fix_commit を記録する)
+(新規) ──(review: ユーザーの指示で実装した変更を覆す指摘)──▶ dismissed (overrules を記録し、difit には投稿しない)
 open ──(sync: 位置を特定できない)──▶ outdated
 resolved ──(sync: GitHub で unresolve)──▶ posted
 ```

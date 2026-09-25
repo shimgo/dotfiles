@@ -83,12 +83,17 @@ pending review は 1 人につき 1 つしか持てないので、既にあれ�
 対象は `fix` の Claude スレッドと `user_finding` スレッド。1 スレッドごとに実装してコミットする。
 
 - コミットは 1 スレッド 1 コミット。メッセージの末尾に `difit: <difit_thread_id>` を入れると、後で verify するときにどのコミットがどの指摘に対応したかを追える。
-- 実装後は状態を `resolved` にし、difit のスレッドを消す。
+- 実装後は状態を `resolved` にし、ユーザーの指示と実装したコミットを記録してから、difit のスレッドを消す。
 
 ```bash
-python3 $SKILL_DIR/scripts/state.py set-status --state <state-dir>/threads.jsonl --difit-id <id> --status resolved --reason "<コミットハッシュ>"
+python3 $SKILL_DIR/scripts/state.py set-status --state <state-dir>/threads.jsonl --difit-id <id> --status resolved --reason "<コミットハッシュ>" --instruction "<difit-fetch.sh の text>" --fix-commit "<コミットハッシュ>"
 difit comment resolve <id> --port <port>
 ```
+
+`--instruction` には `difit-fetch.sh` が返した `text` (先頭語を除いたユーザーの返信) をそのまま渡す。`+` だけの返信なら空文字を渡す。
+`--fix-commit` を持つ `resolved` のレコードは「ユーザーの指示で実装した変更」の記録になり、続く再レビューで、この変更を覆す指摘を difit に投稿しないために使う
+(`phases/review.md`「ユーザーの指示で実装した変更を覆す指摘を除く」)。`--fix-commit` を省くと、再レビューがユーザーの決めたことを問い直す指摘を投稿してしまう。
+複数のスレッドを 1 コミットで実装した場合は、それぞれのレコードに同じコミットハッシュを記録する。
 
 - すべて実装したら `scripts/sync.sh <state-dir>` で difit を新しい HEAD で作り直し、`phases/review.md` に進んで
   `reviewed_head_sha..HEAD` の差分だけを再レビューする。この再レビューは自動で続ける。ユーザーが「対応を依頼する」と言った時点で再レビューまでを 1 つの仕事とみなしている。

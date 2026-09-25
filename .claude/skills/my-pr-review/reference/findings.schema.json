@@ -29,7 +29,8 @@
           },
           "perspective": { "type": ["string", "null"], "description": "観点名。レビュースキルの観点をそのまま使う。同じ箇所・同じ観点の判定に使うので表記を揃える" },
           "summary": { "type": "string", "description": "1 行の要約。fingerprint の材料になる" },
-          "body": { "type": "string", "description": "difit に表示する本文 (Markdown)。根拠と修正案を含める" }
+          "body": { "type": "string", "description": "difit に表示する本文 (Markdown)。根拠と修正案を含める" },
+          "overrules": { "type": ["string", "null"], "description": "この指摘が、ユーザーの指示で実装した変更を覆す (取り消す・元へ戻す・その判断の理由を問い直す) 場合に、state.py directives が出力した該当レコードの key を書く。書いた指摘は difit に投稿せず、対応不要として記録する" }
         }
       }
     }
