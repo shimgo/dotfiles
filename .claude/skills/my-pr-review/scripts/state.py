@@ -340,11 +340,20 @@ def annotation_for(prior: dict) -> str:
 
 
 # ---------------------------------------------------------------------------
-# GitHub reviewThreads の変換 (difit の cli/github.js と同じ規則)
+# GitHub reviewThreads の変換 (difit の cli/github.js の規則に、範囲を表せないスレッドの扱いだけを変えて従う)
 # ---------------------------------------------------------------------------
 
 
 def github_thread_position(thread: dict) -> dict | None:
+    """GitHub の reviewThread の位置を difit の position に変換する。終了行を持たないスレッドは None を返す。
+
+    difit で表せない複数行の範囲 (始点が終了行より後・始点が正の整数でない・始点と終了行の side が違う) を持つスレッドは、
+    GitHub がコメントを表示する終了行の 1 行として返す。difit の cli/github.js はこのスレッドを捨てるが、ここでは捨てない。
+    GitHub は head の更新で範囲の始点の行が消えると、終了行 (line) だけを新しい行番号へ付け替え、始点 (startLine) を元の行番号のまま返す。
+    その結果 startLine が line を超えても、GitHub は isOutdated を false のまま返すため、未解決のスレッドは from-github の取り込み対象に残る。
+    捨てると、sync が作り直した difit はそのスレッドを表示しない。
+    """
+
     def positive(v):
         return isinstance(v, int) and v > 0
 
@@ -359,7 +368,7 @@ def github_thread_position(thread: dict) -> dict | None:
         if not multi:
             return {"side": "new", "line": line}
         if start_side != "RIGHT" or not positive(start) or start > line:
-            return None
+            return {"side": "new", "line": line}
         return {"side": "new", "line": {"start": start, "end": line}}
     if side == "LEFT":
         line, start = thread.get("originalLine"), thread.get("originalStartLine")
@@ -371,7 +380,7 @@ def github_thread_position(thread: dict) -> dict | None:
         if not multi:
             return {"side": "old", "line": line}
         if start_side != "LEFT" or not positive(start) or start > line:
-            return None
+            return {"side": "old", "line": line}
         return {"side": "old", "line": {"start": start, "end": line}}
     return None
 

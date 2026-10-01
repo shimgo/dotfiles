@@ -243,6 +243,25 @@ class GithubTest(unittest.TestCase):
         self.assertEqual(updated[0]["difit_thread_id"], "PRRC_open_root")
         self.assertEqual(updated[0]["status"], "posted")
 
+    def test_from_github_imports_thread_whose_start_line_was_deleted(self):
+        # head の更新で範囲の始点の行が消えると、GitHub は line だけを付け替え、startLine を元の行番号のまま返す
+        payload = json.loads(self.payload)
+        payload["threads"] = [
+            {
+                "id": "PRRT_stale_start", "isResolved": False, "isOutdated": False, "subjectType": "LINE",
+                "path": "offset.go", "diffSide": "RIGHT", "startDiffSide": "RIGHT", "line": 13, "startLine": 16,
+                "originalLine": 20, "originalStartLine": 16,
+                "comments": {"nodes": [
+                    {"id": "PRRC_stale_start_root", "body": "セットアップ関数を使ってください", "createdAt": "2026-09-01T00:00:00Z", "updatedAt": "2026-09-01T00:00:00Z", "author": {"login": "alice"}},
+                    {"id": "PRRC_stale_start_reply", "body": "修正しました", "createdAt": "2026-09-01T01:00:00Z", "updatedAt": "2026-09-01T01:00:00Z", "author": {"login": "bob"}},
+                ]},
+            }
+        ]
+        out = run(["from-github", "--state", self.state_file, "--repo", "o/r", "--pr", "1", "--head-sha", "abc", "--worktree", FIXTURES], json.dumps(payload))
+        self.assertEqual([i["id"] for i in out["imports"]], ["PRRC_stale_start_root", "PRRC_stale_start_reply"])
+        self.assertEqual(out["imports"][0]["position"], {"side": "new", "line": 13})
+        self.assertEqual(out["records"][0]["line"], 13)
+
     def test_reconcile(self):
         recs = [
             state.new_record(key="a", origin="claude", github_thread_id="PRRT_open", status="posted", summary="s"),
@@ -261,6 +280,35 @@ class GithubTest(unittest.TestCase):
         out = run(["reconcile", "--state", self.state_file], json.dumps(payload))
         self.assertEqual(out["records"], [])
         self.assertEqual(len(out["warnings"]), 1)
+
+
+class GithubThreadPositionTest(unittest.TestCase):
+    """GitHub の reviewThread の位置を difit の position に変換する規則を確かめる。"""
+
+    def thread(self, **overrides):
+        base = {"diffSide": "RIGHT", "startDiffSide": "RIGHT", "line": 10, "startLine": 8, "originalLine": 10, "originalStartLine": 8}
+        return {**base, **overrides}
+
+    def test_range_moved_by_head_update_is_kept(self):
+        # 始点の行が残っていれば、GitHub は line と startLine の両方を新しい行番号へ付け替える
+        position = state.github_thread_position(self.thread(line=127, startLine=125, originalLine=130, originalStartLine=128))
+        self.assertEqual(position, {"side": "new", "line": {"start": 125, "end": 127}})
+
+    def test_range_whose_start_is_after_end_becomes_end_line(self):
+        position = state.github_thread_position(self.thread(line=121, startLine=124, originalLine=143, originalStartLine=124))
+        self.assertEqual(position, {"side": "new", "line": 121})
+
+    def test_range_with_mismatched_start_side_becomes_end_line(self):
+        position = state.github_thread_position(self.thread(startDiffSide="LEFT"))
+        self.assertEqual(position, {"side": "new", "line": 10})
+
+    def test_left_range_whose_start_is_after_end_becomes_end_line(self):
+        position = state.github_thread_position(self.thread(diffSide="LEFT", startDiffSide="LEFT", originalLine=5, originalStartLine=7))
+        self.assertEqual(position, {"side": "old", "line": 5})
+
+    def test_thread_without_end_line_is_skipped(self):
+        # outdated のスレッドは line が null になる
+        self.assertIsNone(state.github_thread_position(self.thread(line=None, startLine=None)))
 
 
 class ShorthandTest(unittest.TestCase):
