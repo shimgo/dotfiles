@@ -571,8 +571,62 @@ def triage_thread(thread: dict, record: dict | None) -> dict:
 # ---------------------------------------------------------------------------
 
 
+# 前回の位置と比べる前後の行数。
+RELOCATE_CONTEXT_LINES = 5
+
+
+def snippet_hits(lines: list[str], target: list[str]) -> list[int]:
+    """正規化した snippet の行 (target) と一致する位置の開始行 (1 始まり) をすべて返す。"""
+    n = len(target)
+    return [i + 1 for i in range(len(lines) - n + 1) if [normalize_line(l) for l in lines[i : i + n]] == target]
+
+
+def context_score(previous: list[str], previous_start: int, current: list[str], current_start: int, n: int) -> int:
+    """前回のファイルの previous_start と現在のファイルの current_start から始まる n 行について、前後の行がいくつ一致するかを返す。"""
+    score = 0
+    for d in range(1, RELOCATE_CONTEXT_LINES + 1):
+        for p, c in ((previous_start - 1 - d, current_start - 1 - d), (previous_start - 2 + n + d, current_start - 2 + n + d)):
+            if 0 <= p < len(previous) and 0 <= c < len(current) and normalize_line(previous[p]) == normalize_line(current[c]):
+                score += 1
+    return score
+
+
+def narrow_hits(record: dict, lines: list[str], hits: list[int], target: list[str], worktree: str, base_sha: str | None) -> list[int]:
+    """snippet が複数の位置に一致したとき、同じ指摘の位置を 1 つに絞る。絞れなければ候補を複数のまま返す。
+
+    空白を正規化した 1 行の snippet は、同じファイルの別の箇所 (字下げや揃えの空白だけが違う行) にも一致しやすい。
+    行番号は照合に使わないが、候補が複数あるときに限り、次の順で絞る。
+      1. scope (指摘を囲む Go の関数) が同じ候補に絞る
+      2. 前回位置を確かめたコミット (head_sha) のファイルの、前回の行に snippet があれば、前後の行の一致が最も多い候補に絞る
+      3. 前回の行に snippet がまだあれば、その候補に絞る
+    どれでも絞れないときに近い候補を選ぶことはしない。別の行へ付け替えるより、outdated にして verify で確かめるほうが安全なためである。
+    """
+    if record.get("scope"):
+        scoped = [h for h in hits if extract_scope(lines, h, record["file"]) == record["scope"]]
+        if scoped:
+            hits = scoped
+    if len(hits) <= 1 or record.get("line") is None:
+        return hits
+
+    start, _ = line_range(record["line"])
+    n = len(target)
+    if (record.get("side") or "new") == "new" and record.get("head_sha"):
+        previous = read_file_lines(worktree, record["file"], "new", base_sha, record["head_sha"])
+        # 前回のコミットに前回の行の snippet が無ければ (未コミットの変更を見ていたなど)、前回の前後の行として使えない
+        if previous is not None and start in snippet_hits(previous, target):
+            scores = {h: context_score(previous, start, lines, h, n) for h in hits}
+            best = max(scores.values())
+            hits = [h for h in hits if scores[h] == best]
+    if len(hits) > 1 and start in hits:
+        return [start]
+    return hits
+
+
 def relocate_record(record: dict, worktree: str, base_sha: str | None = None) -> dict:
-    """snippet を現在のファイル (side が old なら base_sha のファイル) から探し、一意に見つかれば line を更新する。"""
+    """snippet を現在のファイル (side が old なら base_sha のファイル) から探し、位置を 1 つに決められれば line を更新する。
+
+    snippet が複数の位置に一致したときは narrow_hits で絞る。
+    """
     out = dict(record)
     if not record.get("snippet"):
         out["relocated"] = False
@@ -582,10 +636,11 @@ def relocate_record(record: dict, worktree: str, base_sha: str | None = None) ->
         out["relocated"] = False
         return out
     target = [normalize_line(l) for l in record["snippet"].split("\n")]
-    n = len(target)
-    hits = [i + 1 for i in range(len(lines) - n + 1) if [normalize_line(l) for l in lines[i : i + n]] == target]
+    hits = snippet_hits(lines, target)
+    if len(hits) > 1:
+        hits = narrow_hits(record, lines, hits, target, worktree, base_sha)
     if len(hits) == 1:
-        out["line"] = line_value(hits[0], hits[0] + n - 1)
+        out["line"] = line_value(hits[0], hits[0] + len(target) - 1)
         out["relocated"] = True
     else:
         out["relocated"] = False

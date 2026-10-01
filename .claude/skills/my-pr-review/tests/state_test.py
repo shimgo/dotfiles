@@ -578,6 +578,88 @@ class RelocateTest(unittest.TestCase):
         self.assertFalse(out["records"][0]["relocated"])
 
 
+class RelocateDuplicateSnippetTest(unittest.TestCase):
+    """snippet がファイル内の複数の行に一致するときに、同じ指摘の位置を 1 つに絞れることを確認する。"""
+
+    # 5 行目と 11 行目が、空白の正規化後に同じ行になる。
+    SRC = "\n".join([
+        "package p",
+        "",
+        "func TestA(t *testing.T) {",
+        "\tsetup := Input{",
+        "\t\tPurchasePrice:            1000,",
+        "\t\tPointValue:               2,",
+        "\t}",
+        "",
+        "\tupdate := Input{",
+        "\t\tID:            id,",
+        "\t\tPurchasePrice: 1000,",
+        "\t\tPointValue:    3,",
+        "\t}",
+        "}",
+        "",
+    ])
+    SCOPE_A = "func TestA(t *testing.T)"
+    # SRC の前に置く別の関数。3 行目が SRC の重複行と同じ行になり、SRC の各行は 6 行後ろへずれる。
+    OTHER = "\n".join(["func TestB(t *testing.T) {", "\tx := Input{", "\t\tPurchasePrice: 1000,", "\t}", "}", ""])
+    SCOPE_B = "func TestB(t *testing.T)"
+
+    def setUp(self):
+        self.tmp = tempfile.TemporaryDirectory()
+        self.wt = self.tmp.name
+        subprocess.run(["git", "init", "-q", self.wt], check=True)
+        self.write(self.SRC)
+        self.old_sha = self.commit("old")
+
+    def tearDown(self):
+        self.tmp.cleanup()
+
+    def write(self, src):
+        with open(os.path.join(self.wt, "a_test.go"), "w", encoding="utf-8") as f:
+            f.write(src)
+
+    def commit(self, message):
+        git = ["git", "-C", self.wt, "-c", "user.name=t", "-c", "user.email=t@example.com"]
+        subprocess.run([*git, "add", "."], check=True)
+        subprocess.run([*git, "commit", "-qm", message], check=True)
+        return subprocess.run(["git", "-C", self.wt, "rev-parse", "HEAD"], capture_output=True, text=True, check=True).stdout.strip()
+
+    def relocate(self, **kw):
+        base = dict(key="k", file="a_test.go", side="new", line=11, snippet="\t\tPurchasePrice: 1000,", scope=self.SCOPE_A, head_sha=self.old_sha, status="open", summary="s")
+        base.update(kw)
+        return run(["relocate", "--worktree", self.wt], json.dumps([state.new_record(**base)]))["records"][0]
+
+    def test_unchanged_file_keeps_the_recorded_line(self):
+        out = self.relocate()
+        self.assertTrue(out["relocated"])
+        self.assertEqual(out["line"], 11)
+
+    def test_recorded_line_is_kept_without_the_previous_commit(self):
+        out = self.relocate(head_sha=None)
+        self.assertTrue(out["relocated"])
+        self.assertEqual(out["line"], 11)
+
+    def test_context_of_the_previous_commit_wins_over_the_recorded_line(self):
+        # 関数の先頭に 6 行を足すと、setup 側の行が前回の行番号 (11) へ移る。前後の行が前回と一致する update 側 (17) を選ぶ
+        lines = self.SRC.split("\n")
+        self.write("\n".join(lines[:3] + [f"\t// 追加 {i}" for i in range(6)] + lines[3:]))
+        out = self.relocate()
+        self.assertTrue(out["relocated"])
+        self.assertEqual(out["line"], 17)
+
+    def test_scope_narrows_hits_to_the_same_function(self):
+        self.write(self.OTHER + "\n" + self.SRC)
+        out = self.relocate(head_sha=None, line=99, scope=self.SCOPE_B)
+        self.assertTrue(out["relocated"])
+        self.assertEqual(out["line"], 3)
+
+    def test_ambiguous_hits_without_evidence_are_not_relocated(self):
+        # TestA の中の一致は 11 行目と 17 行目の 2 か所で、前回の行番号 (3) はどちらでもなく、前回のコミットも使えない
+        self.write(self.OTHER + "\n" + self.SRC)
+        out = self.relocate(head_sha=None, line=3, scope=self.SCOPE_A)
+        self.assertFalse(out["relocated"])
+
+
 class RebuildTest(unittest.TestCase):
     def test_rebuild_records_user_threads_and_replays_replies(self):
         with tempfile.TemporaryDirectory() as d:

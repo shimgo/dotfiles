@@ -33,6 +33,7 @@ $SKILL_DIR/scripts/sync.sh <state-dir>
 
 - difit のスレッドは head が変わると行番号がずれるため、差分更新はせず `--clean` で作り直している。
   GitHub にあるスレッドは GitHub の行番号で、ローカルにしかないスレッドは snippet の検索で位置を決め直す。
+  snippet が複数の行に一致したときの絞り込みは `reference/state.md` の 6 章を参照する。
 - GitHub に投稿した指摘は GitHub のスレッドとして取り込み、停止前の difit にあった投稿前のスレッドは再投入しない。
   `from-github` がレコードの `difit_thread_id` を GitHub の id へ置き換えた後も、前の id が状態ファイルの履歴に残るため、
   `rebuild` は投稿前のスレッドを状態ファイルに無いスレッドと取り違えない。
