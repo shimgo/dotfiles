@@ -47,12 +47,12 @@ worktree の削除や head の更新をまたいで信頼できないためで�
 追記のみにするのは、複数の worktree で並行してセッションを動かしても互いを上書きしないためである。
 
 ```json
-{"schema_version":1,"key":"7c1e...","repo":"<owner>/<repo>","pr":1234,"head_sha":"a1b2c3d","file":"internal/point/offset.go","side":"new","line":{"start":42,"end":44},"scope":"func (s *Service) Offset(ctx context.Context, in Input) error","snippet":"\tif user.NewFlag {\n\t\treturn nil\n\t}","snippet_sha256":"9f2a...","perspective":"観点5: 破壊的な変更の確認","summary":"既存ユーザーで NewFlag が暗黙的に false になる","body":"...","reason":"マイグレーション 0042 でバックフィル済み","fingerprint":"7c1e...","origin":"claude","difit_thread_id":"claude-3f9a1c2b7d4e","github_thread_id":null,"github_comment_id":null,"status":"dismissed","created_at":"2026-09-08T17:30:00+09:00","updated_at":"2026-09-08T17:45:00+09:00"}
+{"schema_version":1,"key":"claude-3f9a1c2b7d4e","repo":"<owner>/<repo>","pr":1234,"head_sha":"a1b2c3d","file":"internal/point/offset.go","side":"new","line":{"start":42,"end":44},"scope":"func (s *Service) Offset(ctx context.Context, in Input) error","snippet":"\tif user.NewFlag {\n\t\treturn nil\n\t}","snippet_sha256":"9f2a...","perspective":"観点5: 破壊的な変更の確認","summary":"既存ユーザーで NewFlag が暗黙的に false になる","body":"...","reason":"マイグレーション 0042 でバックフィル済み","fingerprint":"7c1e...","origin":"claude","difit_thread_id":"claude-3f9a1c2b7d4e","github_thread_id":null,"github_comment_id":null,"status":"dismissed","created_at":"2026-09-08T17:30:00+09:00","updated_at":"2026-09-08T17:45:00+09:00"}
 ```
 
 | フィールド | 内容 |
 | --- | --- |
-| `key` | レコードの識別子。Claude の指摘は `fingerprint`、GitHub 由来は GitHub の thread id、ユーザーが difit に書いたものは difit の thread id |
+| `key` | レコードの識別子。Claude の指摘は `to-difit` が払い出す difit の thread id (`claude-<12 桁の 16 進数>`。difit に投稿しない `overruled` の指摘にも同じ形式で払い出す)、GitHub 由来は GitHub の thread id、ユーザーが difit に書いたものは difit の thread id。`fingerprint` を key にしないのは、観点と要約が同じ別の箇所への指摘で key が重なり、後の行が前の行を上書きして片方の記録が消えるためである。以前の版が作った状態ファイルには `fingerprint` を key に持つ Claude の指摘が残るが、key は識別子としてだけ使うのでそのまま扱える |
 | `head_sha` | 最後に位置を確認した head |
 | `file`, `side`, `line` | 位置。`line` は照合には使わず、difit への再投入にだけ使う |
 | `scope` | 指摘箇所を囲む Go 関数のシグネチャ。取得できなければ null |

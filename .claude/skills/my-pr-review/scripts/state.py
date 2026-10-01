@@ -632,12 +632,15 @@ def cmd_to_difit(a):
     for f in findings:
         if f.get("decision") == "suppress":
             continue
+        # key は指摘ごとに一意にする。fingerprint は観点と要約だけから作るため、別の箇所への同じ文面の指摘で重なり、
+        # key にすると後の行が前の行を上書きして片方の記録が消える。
+        thread_id = f"claude-{uuid.uuid4().hex[:12]}"
         if f.get("decision") == "overruled":
             # difit には投稿せず、対応不要の記録だけを残す。次回以降は同じ箇所・同じ観点の照合でも抑止できる
             prior = f.get("prior") or {}
             records.append(
                 new_record(
-                    key=f["fingerprint"],
+                    key=thread_id,
                     repo=a.repo,
                     pr=a.pr,
                     head_sha=a.head_sha,
@@ -658,7 +661,6 @@ def cmd_to_difit(a):
                 )
             )
             continue
-        thread_id = f"claude-{uuid.uuid4().hex[:12]}"
         body = f["body"]
         if f.get("decision") == "annotate" and f.get("prior"):
             body = annotation_for(f["prior"]) + "\n\n" + body
@@ -674,7 +676,7 @@ def cmd_to_difit(a):
         )
         records.append(
             new_record(
-                key=f["fingerprint"],
+                key=thread_id,
                 repo=a.repo,
                 pr=a.pr,
                 head_sha=a.head_sha,

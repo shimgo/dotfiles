@@ -122,8 +122,23 @@ class MatchTest(unittest.TestCase):
         self.assertTrue(out["imports"][0]["body"].startswith("> 過去の判断: 対応不要と判断済み"))
         self.assertIn("> 理由: バックフィル済み", out["imports"][0]["body"])
         self.assertEqual(out["imports"][0]["author"], "claude")
-        self.assertEqual(out["records"][1]["key"], "z")
+        self.assertEqual(out["records"][1]["key"], out["imports"][1]["id"])
         self.assertEqual(out["records"][1]["difit_thread_id"], out["imports"][1]["id"])
+        self.assertEqual(out["records"][1]["fingerprint"], "z")
+
+    def test_findings_with_the_same_fingerprint_keep_separate_records(self):
+        # 観点と要約が同じでも、別の箇所への指摘は別のレコードとして残す (key を fingerprint にすると 1 件にまとまる)
+        decided = {"findings": [
+            dict(self.finding(file="a_test.go"), decision="report", fingerprint="same", prior=None),
+            dict(self.finding(file="b_test.go"), decision="report", fingerprint="same", prior=None),
+        ]}
+        out = run(["to-difit", "--repo", "o/r", "--pr", "1", "--head-sha", "abc"], json.dumps(decided))
+        run(["append", "--state", self.state_file], json.dumps(out["records"]))
+        keys = [r["key"] for r in out["records"]]
+        self.assertEqual(len(set(keys)), 2)
+        self.assertEqual(keys, [i["id"] for i in out["imports"]])
+        latest = run(["latest", "--state", self.state_file])
+        self.assertEqual(sorted(r["file"] for r in latest if r["fingerprint"] == "same"), ["a_test.go", "b_test.go"])
 
 
 class DirectiveTest(unittest.TestCase):
@@ -179,6 +194,7 @@ class DirectiveTest(unittest.TestCase):
         self.assertEqual(record["status"], "dismissed")
         self.assertEqual(record["overrules"], "d1")
         self.assertIsNone(record["difit_thread_id"])
+        self.assertNotEqual(record["key"], record["fingerprint"])
         self.assertIn("兄弟と揃えて", record["reason"])
         self.assertIn("abc1234", record["reason"])
 
