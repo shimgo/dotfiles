@@ -11,3 +11,4 @@
 .vim/UltiSnips/*stack*
 .agents/skills/
 __pycache__/
+.claude/skills/synced/
