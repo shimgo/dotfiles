@@ -12,6 +12,7 @@ GitHub 上のコメント状況が正本になるため、ローカルの状態�
 
 0. 先に `phases/triage.md` を済ませる。作り直すと、GitHub にあるスレッド (他人のスレッドと、GitHub に投稿した指摘) は GitHub の内容に置き換わり、difit 上で付けた返信は消える。
    GitHub に投稿していない Claude の指摘とユーザー自身のスレッドは、`sync.sh` が返信ごと再投入するので、返信も残る。
+   ただし、修正で対象の行が書き換わり位置を特定できなくなったスレッドは再投入しない。ユーザーの発言を含むものは手順 2 の `needs_restore` に出るので、`phases/restore.md` で戻す。
 
 1. 実行する。
 
@@ -23,11 +24,17 @@ $SKILL_DIR/scripts/sync.sh <state-dir>
 
 - `reconciled`: status が変わったレコード。`resolved` は GitHub 上で解決済みになったもの、`dismissed` はレビュアーが pending から送信までの間に削除したもの (再指摘防止の対象になる)。
 - `warnings`: pending review が残っているため判断を保留したものなど。ユーザーが送信を忘れている可能性を伝える。
-- `reimported.outdated`: head が変わって位置を特定できなくなった未投稿の指摘。修正で消えた行に対する指摘なら対応済みの可能性が高い。verify で扱う。
+- `reimported.outdated`: head が変わって位置を特定できなくなった未投稿のスレッド。difit には再投入していない。
+  Claude の発言だけのスレッドは、修正で消えた行に対する指摘なら対応済みの可能性が高いので verify で扱う。
+- `reimported.needs_restore`: `outdated` のうち、ユーザーの発言 (ユーザーが書いたスレッド、または Claude の指摘へのユーザーの返信) を含むもの。
+  このままではユーザーの発言が difit から消えたままになる。`sync.sh` が発言を状態ファイルに残しているので、`phases/restore.md` で位置を決め直して difit に戻す。
+  件数と各スレッドの元の行・要約をユーザーに伝え、黙って次のフェーズへ進まない。
 - `session.difit.url`: 新しい difit の URL。ポートが変わっていることがあるので必ず伝える。
   起動直後に `difit ready: <URL>` として標準エラーへ出るので、残りの出力を読むより先に、また後続のフェーズに進む前に伝える。
 
-3. `$SKILL_DIR/scripts/phase-done.sh <state-dir> sync` を実行し、`scripts/next.sh` を再実行して `phase` が `wait` でなければ同じターンで続ける。head が変わっていれば `verify` になるので、`phases/verify.md` で指摘箇所の修正を確認する。
+3. `$SKILL_DIR/scripts/phase-done.sh <state-dir> sync` を実行し、`scripts/next.sh` を再実行して `phase` が `wait` でなければ同じターンで続ける。
+   `needs_restore` があれば `restore` になるので、`phases/restore.md` でスレッドを戻す。head が変わっていれば `verify` になるので、`phases/verify.md` で指摘箇所の修正を確認する。
+   review の手順 1 の中で `sync.sh` を実行した場合も、`needs_restore` があれば review に進む前に `phases/restore.md` を済ませる。
 
 ## 補足
 

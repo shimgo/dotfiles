@@ -18,6 +18,7 @@ threads.jsonl は追記のみのファイルであり、同じ key を持つ行�
   register     状態ファイルのどの行にも thread id が現れない difit のスレッド (ユーザーが書いたもの) のレコードを生成する
   relocate     有効な open レコードの位置を現在のファイル内容から特定し直す
   rebuild      difit 再構築時に再投入する import と追記行を生成する (relocate を内包する)
+  restore      位置を特定できずに outdated にしたスレッドを、指定した行で difit に戻す import と追記行を生成する
 """
 
 from __future__ import annotations
@@ -190,6 +191,7 @@ def new_record(**fields) -> dict:
         "difit_thread_id": None,
         "github_thread_id": None,
         "github_comment_id": None,
+        "messages": None,
         "status": "open",
         "created_at": now_iso(),
         "updated_at": now_iso(),
@@ -277,6 +279,19 @@ def enrich_one(item: dict, worktree: str, base_sha: str | None, new_rev: str | N
 def is_directive(record: dict) -> bool:
     """ユーザーの指示で実装した変更のレコードかを返す。triage のケース 2 が fix_commit を記録する。"""
     return record.get("status") == "resolved" and bool(record.get("fix_commit"))
+
+
+def needs_restore(record: dict) -> bool:
+    """sync が位置を特定できずに outdated にしたスレッドのうち、difit へ戻す必要があるものかを返す。
+
+    ユーザーが書いたスレッドと、ユーザーの返信を含む Claude の指摘が該当する。ユーザーの発言は difit にしか無いため、
+    戻さないとユーザーはその発言を失う。Claude の発言だけのスレッドは、修正で消えた行への指摘として verify で確かめる。
+    """
+    if record.get("status") != "outdated":
+        return False
+    if record.get("origin") == "user":
+        return True
+    return any((m.get("author") or "") != CLAUDE_AUTHOR for m in (record.get("messages") or []))
 
 
 def find_directive(ref: str, records: list[dict]) -> dict | None:
@@ -780,6 +795,8 @@ def cmd_latest(a):
         rows = [r for r in rows if r.get("status") in a.status]
     if a.origin:
         rows = [r for r in rows if r.get("origin") in a.origin]
+    if a.needs_restore:
+        rows = [r for r in rows if needs_restore(r)]
     write_json(rows)
 
 
@@ -1005,8 +1022,15 @@ def cmd_rebuild(a):
             continue
         rel = relocate_record(r, a.worktree, a.base_sha)
         if not rel.pop("relocated", False):
-            outdated.append({"key": r["key"], "file": r.get("file"), "summary": r.get("summary")})
-            updates.append(dict(r, status="outdated", updated_at=now))
+            # 位置を特定できないスレッドは difit に再投入しないため、difit にしか無い発言 (root と返信) を残す。
+            # restore はこの発言を使って、Claude が決め直した位置へスレッドを戻す
+            messages = [
+                compact({"id": m.get("id"), "body": m.get("body") or "", "author": m.get("author"), "createdAt": m.get("createdAt")})
+                for m in (snapshot_by_id.get(r["difit_thread_id"], {}).get("messages") or [])
+            ]
+            rec = dict(r, status="outdated", messages=messages or r.get("messages"), updated_at=now)
+            outdated.append({"key": r["key"], "file": r.get("file"), "line": r.get("line"), "summary": r.get("summary"), "needs_restore": needs_restore(rec)})
+            updates.append(rec)
             continue
         position = {"side": r.get("side") or "new", "line": rel["line"]}
         imports.append(
@@ -1039,6 +1063,72 @@ def cmd_rebuild(a):
     write_json({"imports": imports, "records": new_records + updates, "outdated": outdated})
 
 
+def cmd_restore(a):
+    """sync が位置を特定できずに outdated にしたスレッドを、指定した行で difit に戻す import と追記行を生成する。
+
+    行は Claude がコードを読んで決める (phases/restore.md)。rebuild が残した発言 (messages) を root と返信の順に再投入し、
+    レコードの位置と snippet を指定した行のものに置き換える。次の sync はこの snippet で位置を特定し直す。
+    """
+    r = latest_records(load_records(a.state)).get(a.key)
+    if r is None:
+        die(f"key {a.key} のレコードがありません")
+    if r.get("status") != "outdated":
+        die(f"key {a.key} の status は {r.get('status')} です。restore できるのは outdated のレコードだけです")
+    start, _, end = a.line.partition("-")
+    try:
+        line = line_value(int(start), int(end or start))
+    except ValueError:
+        die(f"--line は 12 か 12-14 の形式で指定してください: {a.line}")
+    # ファイルを移動した場合は、移動先のファイルを --file で受け取る
+    file = a.file or r["file"]
+    enriched = enrich_one({"file": file, "side": r.get("side") or "new", "line": line, "summary": r.get("summary") or "", "perspective": r.get("perspective")}, a.worktree, a.base_sha)
+    if enriched["snippet"] is None:
+        die(f"{file} の {a.line} 行目を読めません。ファイルが無いか、行がファイルの範囲外です")
+    position = {"side": enriched["side"], "line": enriched["line"]}
+    messages = r.get("messages") or []
+    root = messages[0] if messages else {}
+    imports = [
+        compact(
+            {
+                "type": "thread",
+                "id": r["difit_thread_id"],
+                "filePath": file,
+                "position": position,
+                "body": root.get("body") or r.get("body") or "",
+                "author": CLAUDE_AUTHOR if r.get("origin") == "claude" else None,
+            }
+        )
+    ]
+    for m in messages[1:]:
+        imports.append(
+            compact(
+                {
+                    "type": "reply",
+                    "id": m.get("id"),
+                    "filePath": file,
+                    "position": position,
+                    "body": m.get("body") or "",
+                    "author": m.get("author"),
+                    "createdAt": m.get("createdAt"),
+                }
+            )
+        )
+    # 発言は difit に戻ったので、以降の sync は difit のスナップショットから返信を引き継ぐ。残すと古い発言で上書きしかねないため消す
+    rec = dict(
+        r,
+        status="open",
+        file=file,
+        line=enriched["line"],
+        snippet=enriched["snippet"],
+        snippet_sha256=enriched["snippet_sha256"],
+        scope=enriched["scope"],
+        head_sha=a.head_sha,
+        messages=None,
+        updated_at=now_iso(),
+    )
+    write_json({"imports": imports, "records": [rec]})
+
+
 def main(argv=None):
     p = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     sub = p.add_subparsers(dest="command", required=True)
@@ -1066,6 +1156,7 @@ def main(argv=None):
     s.add_argument("--state", required=True)
     s.add_argument("--status", action="append", choices=STATUSES)
     s.add_argument("--origin", action="append", choices=("claude", "user", "github"))
+    s.add_argument("--needs-restore", action="store_true", help="outdated のうち、ユーザーの発言を含むため difit へ戻す必要があるレコードに絞る")
     s.set_defaults(func=cmd_latest)
 
     s = sub.add_parser("directives")
@@ -1130,6 +1221,16 @@ def main(argv=None):
     s.add_argument("--snapshot", help="停止前の difit の comment get --format json の出力ファイル")
     s.add_argument("--snapshot-head-sha", help="スナップショット取得時の head。状態ファイルに無いスレッドの snippet はこのコミットから読む")
     s.set_defaults(func=cmd_rebuild)
+
+    s = sub.add_parser("restore")
+    s.add_argument("--state", required=True)
+    s.add_argument("--key", required=True, help="戻す outdated のレコードの key")
+    s.add_argument("--line", required=True, help="戻す行。12 または 12-14")
+    s.add_argument("--file", help="戻す先のファイル。省略するとレコードの file。ファイルを移動した場合に移動先を指定する")
+    s.add_argument("--head-sha", required=True)
+    s.add_argument("--worktree", required=True)
+    s.add_argument("--base-sha")
+    s.set_defaults(func=cmd_restore)
 
     a = p.parse_args(argv)
     a.func(a)

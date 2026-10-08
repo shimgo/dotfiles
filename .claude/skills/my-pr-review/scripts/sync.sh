@@ -10,8 +10,10 @@
 #      停止前のスレッドは difit-last.json に保存し、状態ファイルに無いユーザーのスレッドと返信を失わないようにする
 #   4. GitHub の未解決スレッドと、ローカルで open なスレッドを difit に再投入する
 #      ローカルのスレッドは snippet で位置を探し直し、見つからなければ status を outdated にする
+#      outdated にしたスレッドの発言 (root と返信) は状態ファイルに残す。ユーザーの発言を含むスレッドは
+#      needs_restore に出し、Claude が位置を決め直して difit-restore.sh で戻す (phases/restore.md)
 #
-# 出力 (JSON): status を変えたレコード、警告、再投入の内訳、更新後の session
+# 出力 (JSON): status を変えたレコード、警告、再投入の内訳 (needs_restore を含む)、更新後の session
 
 source "$(dirname "${BASH_SOURCE[0]}")/common.sh"
 need gh git jq difit python3 curl
@@ -95,5 +97,6 @@ jq -n --argjson r "${RECONCILED}" --argjson rb "${REBUILT}" --argjson c "${CONVE
   reconciled: $r.records, warnings: $r.warnings,
   reimported: {github: ($c.imports | map(select(.type == "thread")) | length),
                local: ($rb.imports | map(select(.type == "thread")) | length),
-               outdated: $rb.outdated},
+               outdated: $rb.outdated,
+               needs_restore: ($rb.outdated | map(select(.needs_restore)))},
   session: $s }'

@@ -69,6 +69,7 @@ worktree の削除や head の更新をまたいで信頼できないためで�
 | `difit_thread_id` | difit 上の thread id。GitHub に投稿した指摘は、sync が GitHub から取り込むときに GitHub の root comment id へ置き換える。置き換える前の id も履歴の行に残るので、difit のスレッドからレコードを引くときは履歴に現れたすべての id を使う (`state.py` の `records_by_difit_id`) |
 | `github_thread_id`, `github_comment_id` | GitHub の thread と root comment の node id |
 | `status` | `open` / `dismissed` / `posted` / `resolved` / `outdated` |
+| `messages` | sync が位置を特定できずに `outdated` にしたスレッドの、difit 上の発言 (root と返信。`id`、`body`、`author`、`createdAt`)。difit にしか無い発言を失わないために残し、restore が difit へ戻すときに使う。戻した後と、`outdated` にしていないレコードは null |
 
 正規化: 各行の行頭と行末の空白を除去し、連続する空白を 1 つに圧縮する。コメントは指摘対象になりうるので除去しない。
 
@@ -124,7 +125,9 @@ sync が difit を作り直すとき、GitHub に投稿していない open の�
 現在のファイル (`side` が old なら `base_sha` のファイル) から、各行を正規化した snippet と一致する位置を探す。
 
 - 一致が 1 か所なら、その位置にする
-- 一致が無ければ `outdated` にする。修正で行が消えた可能性があるので verify で確かめる
+- 一致が無ければ `outdated` にし、difit 上の発言 (root と返信) を `messages` に残す。
+  Claude の発言だけのスレッドは、修正で行が消えた可能性があるので verify で確かめる。
+  ユーザーの発言を含むスレッド (ユーザーが書いたスレッドと、ユーザーの返信を含む Claude の指摘) は、`state.py latest --needs-restore` と `sync.sh` の `needs_restore` に出し、restore で difit に戻す (下記)
 - 一致が複数なら、次の順で 1 か所に絞る (`narrow_hits`)
   1. `scope` が同じ候補に絞る
   2. `head_sha` のファイルの `line` に snippet があれば、前後 5 行のうち一致する行が最も多い候補に絞る
@@ -141,6 +144,20 @@ sync が difit を作り直すとき、GitHub に投稿していない open の�
 `}` のようにどこにでもある行へ付けた指摘を別の行へ付け替えやすく、付け替えを誤ると、ユーザーは別の行への指摘として判断してしまう。
 `outdated` にしておけば verify で確かめられる。
 
+### ユーザーの発言を含むスレッドを戻す (restore)
+
+`outdated` にしたスレッドは difit に再投入しないため、ユーザーの発言を含むスレッドを `outdated` のままにすると、ユーザーは自分の質問や判断を difit 上で見られなくなる。
+一方で、上のとおり行の候補をスクリプトが推測して付け替えることはしない。
+
+そこで、戻す行は Claude が修正の差分を読んで決める (`phases/restore.md`)。`state.py restore` (`scripts/difit-restore.sh`) は次を行う。
+
+- `messages` を root と返信の順に、元の thread id のまま difit へ再投入する
+- レコードの `status` を `open` に戻し、`line`・`snippet`・`snippet_sha256`・`scope` を指定した行のものに置き換え、`messages` を null に戻す。
+  ファイルを移動した場合は、指定した移動先のファイルで `file` も置き換える
+
+`snippet` を置き換えるので、次の sync はその位置からスレッドを探し直す。`fingerprint` は `perspective` と `summary` から作るので変わらない。
+Claude の判断は非決定的だが、戻さなければユーザーは発言を確実に失う。戻した行と選んだ理由をユーザーへ報告し、誤りがあればユーザーが気付けるようにする。
+
 ## 7. status の遷移
 
 ```
@@ -151,6 +168,7 @@ open ──(triage: ケース1 pending 投稿)──▶ posted ──(sync: GitH
 open ──(triage: ケース2 実装)──▶ resolved (instruction と fix_commit を記録する)
 (新規) ──(review: ユーザーの指示で実装した変更を覆す指摘)──▶ dismissed (overrules を記録し、difit には投稿しない)
 open ──(sync: 位置を特定できない)──▶ outdated
+outdated ──(restore: ユーザーの発言を含むスレッドを Claude が決めた行へ戻す)──▶ open
 resolved ──(sync: GitHub で unresolve)──▶ posted
 ```
 

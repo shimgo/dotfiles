@@ -5,17 +5,19 @@
 # 出力 (JSON): {"phase": "...", "reason": "...", "mode": "...", "last_phase": "...", "difit": {分類ごとの件数}}
 #
 # 判定の優先順位:
-#   1. difit に未処理の Claude Code 宛ての本文 ("q ...") があれば answer
-#   2. difit に未処理の返信 (fix / dismiss / user_finding) があれば triage
+#   1. sync が位置を特定できずに difit から外した、ユーザーの発言を含むスレッドがあれば restore
+#      ユーザーの発言は difit に戻すまで見えないため、answer や triage より先に戻す
+#   2. difit に未処理の Claude Code 宛ての本文 ("q ...") があれば answer
+#   3. difit に未処理の返信 (fix / dismiss / user_finding) があれば triage
 #      GitHub への投稿などで処理済みのスレッドは processed に分類するので数えない
-#   3. local モードで reviewed_head_sha 以降にコミットを積んでいれば review (先に sync.sh で difit と session.json の head を合わせる)
+#   4. local モードで reviewed_head_sha 以降にコミットを積んでいれば review (先に sync.sh で difit と session.json の head を合わせる)
 #      answer / triage で実装したコミットを再レビューするため。直前のフェーズが review のときは判定しない (review が reviewed_head_sha を更新する)
-#   4. それ以外は直前のフェーズから決める
+#   5. それ以外は直前のフェーズから決める
 #        start / なし → review
 #        review / answer → wait (ユーザーが difit で対応要否を付けるのを待つ)
 #        triage (worktree) → sync。ただし pending review が未送信なら wait
 #        triage (local) → review (差分の再レビュー)
-#        sync → verify (posted / outdated があれば)、無ければ review
+#        sync / restore → verify (posted / outdated があれば)、無ければ review
 #        verify → review
 
 source "$(dirname "${BASH_SOURCE[0]}")/common.sh"
@@ -38,6 +40,8 @@ emit() {
   exit 0
 }
 
+RESTORE_N="$(python3 "${STATE_PY}" latest --state "${STATE_FILE}" --needs-restore | jq 'length')"
+[ "${RESTORE_N}" -gt 0 ] && emit restore "sync が位置を特定できずに difit から外した、ユーザーの発言を含むスレッドが ${RESTORE_N} 件ある"
 [ "$(count to_claude)" -gt 0 ] && emit answer "未処理の Claude Code 宛ての本文が $(count to_claude) 件ある"
 PENDING_REPLIES=$(( $(count fix) + $(count dismiss) + $(count user_finding) ))
 [ "${PENDING_REPLIES}" -gt 0 ] && emit triage "未処理の返信が ${PENDING_REPLIES} 件ある"
@@ -62,7 +66,7 @@ case "${LAST}" in
     fi
     emit sync "GitHub のレビュー状態を取り込み difit を作り直す"
     ;;
-  sync)
+  sync|restore)
     N="$(python3 "${STATE_PY}" latest --state "${STATE_FILE}" --status posted --status outdated | jq 'length')"
     if [ "${N}" -gt 0 ]; then
       emit verify "修正を確認する指摘が ${N} 件ある"

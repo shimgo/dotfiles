@@ -28,6 +28,7 @@ difit は表示層として毎ラウンド作り直す。設計の背景は `ref
 | `answer` | `phases/answer.md` | ユーザーが difit 上に書いた Claude Code 宛ての本文 (`q ...`) に応答する。指示なら実行して resolve する。triage より優先する |
 | `triage` | `phases/triage.md` | ユーザーが difit 上で付けた対応要否を処理する。GitHub への pending 投稿や実装もここ |
 | `sync` | `phases/sync.md` | レビュー送信後や PR 作者の修正後に、GitHub の状態を取り込んで difit を作り直す |
+| `restore` | `phases/restore.md` | sync が位置を特定できずに difit から外した、ユーザーの発言を含むスレッドを戻す。answer より優先する |
 | `verify` | `phases/verify.md` | 指摘が修正されたかを確認し、GitHub と difit の両方で resolve する |
 
 ### `next` の動き
@@ -76,6 +77,8 @@ start → review ─┬→ answer (随時)
 - **difit 上のスレッドは resolve すると消える。** resolved という状態は difit に存在しない。
   したがって resolve や削除の前に必ず `state.py set-status` で記録を残す。順序を逆にすると判断が失われる。
   `state.py set-status` は状態ファイルへ自分で追記し、追記したレコードを標準出力へ出す。`append` へパイプしない。
+- **ユーザーの発言を difit から消したままにしない。** 修正で行が書き換わると、sync はそのスレッドの位置を特定できずに difit から外す。
+  ユーザーの発言を含むスレッドは `next.sh` が `restore` を返すので、`phases/restore.md` で位置を決め直して戻す。
 - **Claude が difit に書くときは `author` を `claude` にする。** `scripts/state.py` はこの値でユーザーの発言と区別する。
   返信を直接 `difit comment add` で書く場合も `"author":"claude"` を付ける。
 - **ユーザーの返信書式** は `reference/reply-convention.md` に従って解釈する。先頭語は `q` (Claude Code 宛て) と `+` `-` (対応要否。`対応` `不要` も同じ) だけである。
@@ -103,6 +106,7 @@ start → review ─┬→ answer (随時)
 | `scripts/github-pending.sh <state-dir> < items.json` | difit のスレッドを GitHub の pending review に追加する |
 | `scripts/github-resolve.sh <state-dir> <thread-id>...` | GitHub のスレッドを resolve する |
 | `scripts/sync.sh <state-dir> [--no-restart]` | GitHub との突き合わせと difit の再構築 |
+| `scripts/difit-restore.sh <state-dir> <key> <line> [<file>]` | sync が位置を特定できずに外したスレッドを、Claude が決めた行で返信ごと difit に戻す |
 | `scripts/next.sh <state-dir>` | 次のフェーズを判定する |
 | `scripts/phase-done.sh <state-dir> <phase>` | フェーズの完了を session.json に記録する |
 | `scripts/state.py <subcommand>` | 状態ファイルの操作。`--help` で一覧。`directives` はユーザーの指示で実装した変更の一覧を返す |

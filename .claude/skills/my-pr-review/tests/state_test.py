@@ -707,6 +707,102 @@ class RebuildTest(unittest.TestCase):
         self.assertEqual(recs["fp"]["line"], 14)
         self.assertEqual(recs["fp"]["head_sha"], "new")
         self.assertEqual([o["key"] for o in out["outdated"]], ["user-gone"])
+        # difit に再投入しない outdated のスレッドは、difit にしか無い発言を状態ファイルに残す
+        self.assertEqual(recs["user-gone"]["messages"], [{"id": "u2", "body": "消える行"}])
+        self.assertTrue(out["outdated"][0]["needs_restore"])
+
+    def _rebuild_with_missing_snippet(self, messages):
+        with tempfile.TemporaryDirectory() as d:
+            state_file = os.path.join(d, "threads.jsonl")
+            snapshot = os.path.join(d, "difit-last.json")
+            rec = state.new_record(key="fp", file="offset.go", side="new", line=14, snippet="\tx := removedLine()", body="指摘", origin="claude", difit_thread_id="claude-1", status="open", summary="s")
+            state.append_records(state_file, [rec])
+            with open(snapshot, "w", encoding="utf-8") as f:
+                json.dump({"threads": [{"id": "claude-1", "filePath": "offset.go", "position": {"side": "new", "line": 14}, "messages": messages}]}, f)
+            return run(["rebuild", "--state", state_file, "--repo", "o/r", "--pr", "1", "--head-sha", "new", "--worktree", FIXTURES, "--snapshot", snapshot])
+
+    def test_rebuild_does_not_flag_claude_only_thread_for_restore(self):
+        out = self._rebuild_with_missing_snippet([{"id": "m1", "body": "指摘", "author": "claude"}])
+        self.assertEqual(out["imports"], [])
+        self.assertFalse(out["outdated"][0]["needs_restore"])
+        self.assertEqual(out["records"][0]["messages"], [{"id": "m1", "body": "指摘", "author": "claude"}])
+
+    def test_rebuild_flags_claude_thread_with_user_reply_for_restore(self):
+        out = self._rebuild_with_missing_snippet([{"id": "m1", "body": "指摘", "author": "claude"}, {"id": "m2", "body": "q なぜ？", "author": "User"}])
+        self.assertTrue(out["outdated"][0]["needs_restore"])
+        self.assertEqual([m["id"] for m in out["records"][0]["messages"]], ["m1", "m2"])
+
+
+class RestoreTest(unittest.TestCase):
+    def _state_with(self, d, **fields):
+        state_file = os.path.join(d, "threads.jsonl")
+        base = dict(key="u1", file="offset.go", side="new", line=3, snippet="import \"context\"", body="なぜ？", origin="user", difit_thread_id="u1", status="outdated", summary="q",
+                    messages=[{"id": "u1", "body": "q\nなぜ？"}, {"id": "c1", "body": "理由は…", "author": "claude", "createdAt": "2026-01-01T00:00:00Z"}])
+        base.update(fields)
+        state.append_records(state_file, [state.new_record(**base)])
+        return state_file
+
+    def test_restore_reimports_messages_at_given_line_and_reopens_record(self):
+        with tempfile.TemporaryDirectory() as d:
+            state_file = self._state_with(d)
+            out = run(["restore", "--state", state_file, "--key", "u1", "--line", "14-16", "--head-sha", "new", "--worktree", FIXTURES])
+            latest = run(["latest", "--state", state_file])
+        position = {"side": "new", "line": {"start": 14, "end": 16}}
+        self.assertEqual(out["imports"], [
+            {"type": "thread", "id": "u1", "filePath": "offset.go", "position": position, "body": "q\nなぜ？"},
+            {"type": "reply", "id": "c1", "filePath": "offset.go", "position": position, "body": "理由は…", "author": "claude", "createdAt": "2026-01-01T00:00:00Z"},
+        ])
+        rec = out["records"][0]
+        self.assertEqual(rec["status"], "open")
+        self.assertEqual(rec["line"], {"start": 14, "end": 16})
+        self.assertEqual(rec["snippet"], "\tif user.NewFlag {\n\t\treturn nil\n\t}")
+        self.assertEqual(rec["snippet_sha256"], state.sha256("if user.NewFlag {\nreturn nil\n}"))
+        self.assertEqual(rec["scope"], "func (s *Service) Offset(ctx context.Context, in Input) error")
+        self.assertEqual(rec["head_sha"], "new")
+        self.assertIsNone(rec["messages"])
+        # restore は状態ファイルに書かない (difit-restore.sh が import の後に append する)
+        self.assertEqual(latest[0]["status"], "outdated")
+
+    def test_restore_uses_body_when_messages_are_missing(self):
+        with tempfile.TemporaryDirectory() as d:
+            state_file = self._state_with(d, messages=None, origin="claude")
+            out = run(["restore", "--state", state_file, "--key", "u1", "--line", "14", "--head-sha", "new", "--worktree", FIXTURES])
+        self.assertEqual(out["imports"], [{"type": "thread", "id": "u1", "filePath": "offset.go", "position": {"side": "new", "line": 14}, "body": "なぜ？", "author": "claude"}])
+
+    def test_restore_moves_thread_to_given_file(self):
+        with tempfile.TemporaryDirectory() as d:
+            state_file = self._state_with(d)
+            wt = os.path.join(d, "wt"); os.makedirs(os.path.join(wt, "pkg"))
+            with open(os.path.join(FIXTURES, "offset.go"), encoding="utf-8") as src, open(os.path.join(wt, "pkg", "moved.go"), "w", encoding="utf-8") as dst:
+                dst.write(src.read())
+            out = run(["restore", "--state", state_file, "--key", "u1", "--line", "14", "--file", "pkg/moved.go", "--head-sha", "new", "--worktree", wt])
+        self.assertEqual({i["filePath"] for i in out["imports"]}, {"pkg/moved.go"})
+        self.assertEqual(out["records"][0]["file"], "pkg/moved.go")
+        self.assertEqual(out["records"][0]["snippet"], "\tif user.NewFlag {")
+
+    def test_restore_rejects_non_outdated_record_and_out_of_range_line(self):
+        with tempfile.TemporaryDirectory() as d:
+            open_state = self._state_with(d, status="open")
+            p = subprocess.run([sys.executable, STATE_PY, "restore", "--state", open_state, "--key", "u1", "--line", "14", "--head-sha", "new", "--worktree", FIXTURES], capture_output=True, text=True)
+            self.assertNotEqual(p.returncode, 0)
+            self.assertIn("outdated", p.stderr)
+        with tempfile.TemporaryDirectory() as d:
+            outdated_state = self._state_with(d)
+            p = subprocess.run([sys.executable, STATE_PY, "restore", "--state", outdated_state, "--key", "u1", "--line", "9999", "--head-sha", "new", "--worktree", FIXTURES], capture_output=True, text=True)
+            self.assertNotEqual(p.returncode, 0)
+            self.assertIn("範囲外", p.stderr)
+
+    def test_latest_needs_restore_selects_outdated_threads_with_user_messages(self):
+        with tempfile.TemporaryDirectory() as d:
+            state_file = os.path.join(d, "threads.jsonl")
+            state.append_records(state_file, [
+                state.new_record(key="user", origin="user", status="outdated", messages=[{"id": "u", "body": "q"}]),
+                state.new_record(key="claude-with-reply", origin="claude", status="outdated", messages=[{"id": "c", "body": "指摘", "author": "claude"}, {"id": "u", "body": "+", "author": "User"}]),
+                state.new_record(key="claude-only", origin="claude", status="outdated", messages=[{"id": "c", "body": "指摘", "author": "claude"}]),
+                state.new_record(key="user-open", origin="user", status="open"),
+            ])
+            rows = run(["latest", "--state", state_file, "--needs-restore"])
+        self.assertEqual(sorted(r["key"] for r in rows), ["claude-with-reply", "user"])
 
 
 if __name__ == "__main__":

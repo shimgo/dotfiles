@@ -16,6 +16,7 @@
 
 `reviewed_head_sha` は前回のレビュー時の head であり、session.json に入っている。null なら初回である。
 ケース 2 でコミットを積んだ後は、先に `scripts/sync.sh <state-dir>` を実行して difit と session.json の head を新しい HEAD に合わせる。
+`sync.sh` の出力の `reimported.needs_restore` が空でなければ、レビューの前に `phases/restore.md` でスレッドを difit に戻す。
 
 ### 2. リポジトリ固有のレビュースキルを実行する
 
