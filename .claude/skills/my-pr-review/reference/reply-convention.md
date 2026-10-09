@@ -55,7 +55,7 @@ GitHub へ載せる本文からは先頭語を落とす (`+ ただしログは w
 | `user_finding` | ユーザー自身のレビューコメント |
 | `github` | GitHub から取り込んだスレッドで、ユーザーの返信が無い |
 | `none` | Claude が最後に発言しており、次の返信待ち |
-| `processed` | 対応要否を処理済み。Claude の指摘とユーザー自身のスレッドのうち、状態ファイルの status が `posted` / `resolved` / `dismissed` のもの。返信を分類し直さない (処理した後に書いた `q` だけは `to_claude` になる) |
+| `processed` | 対応要否を処理済み。Claude の指摘とユーザー自身のスレッドのうち、状態ファイルの status が `posted` / `resolved` / `dismissed` / `superseded` のもの。返信を分類し直さない (処理した後に書いた `q` だけは `to_claude` になる) |
 
 `processed` は、GitHub に投稿した後や実装した後のスレッドを分類し直さないための値である。
 GitHub に投稿した後も、sync で作り直すまで difit には `+` の返信が付いた投稿前のスレッドが残る。作り直した後は、PR 作者の返信が付いた GitHub のスレッドが並ぶ。

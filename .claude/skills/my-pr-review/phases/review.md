@@ -96,3 +96,29 @@ $SKILL_DIR/scripts/phase-done.sh <state-dir> review
 
 投稿件数、抑止件数、ユーザーの指示を覆すため投稿しなかった指摘 (件数と 1 件 1 行の要約)、difit の URL を伝える。ユーザーは difit 上で各指摘に対応要否を返信するので、
 `reference/reply-convention.md` の書式 (`+` で対応、`-` で不要、`不要: 理由` で理由付き) を一言添える。
+
+## 指摘を付け直す
+
+ユーザーが「スレッドが長いので、議論を踏まえて指摘をまとめ直して」のように、既存の指摘を閉じて書き直すよう求めたときの手順。
+レビュースキルは実行しない。置き換え先の指摘は、それまでの議論 (`q` への応答と、ユーザーの返信) を反映して Claude が書く。
+
+1. 置き換え元を決める。対象は Claude の指摘とユーザー自身のスレッドで、`difit-fetch.sh` の `difit_thread_id` を使う。
+   GitHub から取り込んだ他人のスレッド (`origin` が `github`) は置き換え元にできない。ユーザーが閉じるよう求めたら、
+   `state.py set-status --status dismissed --reason <理由>` で記録してから difit で resolve し、GitHub 上のスレッドには触れないことを報告する。
+2. 置き換え元を閉じる。
+
+```bash
+$SKILL_DIR/scripts/difit-supersede.sh <state-dir> --reason "<置き換える理由>" <difit_thread_id>...
+```
+
+   - 置き換え元が GitHub の未送信の pending review にあれば、スクリプトがそのコメントを削除する。空になった pending review も削除する。
+     残すと、置き換え先を投稿したときに同じ箇所へ新旧のコメントが並ぶ。
+   - 置き換え元のコメントが GitHub に送信済みなら、スクリプトは何も変更せずに中断する。PR 作者が既に読んでいるので、
+     置き換えではなく GitHub 上の返信で補足するようユーザーに伝える。
+   - status を `superseded` にしてから difit で resolve する。照合は `superseded` のレコードを対象にしないので、
+     置き換え先を同じ箇所・同じ観点で投稿しても抑止しない。`resolved` や `dismissed` にすると抑止する。
+3. 置き換え先の findings を書き、手順 5 と同じく `difit-post.sh` で投稿する。
+   - 1 スレッドで 1 つの話題にする。置き換え元の議論から結論だけを残し、修正案はそのまま差し替えられる文で書く。
+   - `perspective` は、同じ話題を扱っていた置き換え元と同じ語を使う。次回以降の再指摘防止は置き換え先のレコードが担う。
+4. `phase-done.sh <state-dir> review` を実行する。置き換え先はユーザーの対応要否の返信を待つ。`reviewed_head_sha` は変えない。
+5. 置き換え元の件数、削除した pending コメントの件数、置き換え先の要約を報告する。

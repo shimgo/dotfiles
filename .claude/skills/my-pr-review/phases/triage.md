@@ -23,7 +23,7 @@ $SKILL_DIR/scripts/difit-fetch.sh <state-dir>
 | `pending` | ユーザーがまだ返信していない | 何もしない |
 | `github` | GitHub 由来で返信なし | 何もしない |
 | `none` | Claude が最後に発言済み | 何もしない |
-| `processed` | 対応要否を処理済み (GitHub に投稿した、実装した、または対応不要と記録した) | 何もしない。GitHub に投稿した指摘の議論は GitHub で続ける |
+| `processed` | 対応要否を処理済み (GitHub に投稿した、実装した、対応不要と記録した、または別の指摘に置き換えた) | 何もしない。GitHub に投稿した指摘の議論は GitHub で続ける |
 
 ### 2. 対応不要の記録と resolve
 

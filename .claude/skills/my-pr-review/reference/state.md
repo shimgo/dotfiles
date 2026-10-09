@@ -68,14 +68,14 @@ worktree の削除や head の更新をまたいで信頼できないためで�
 | `origin` | `claude` / `user` / `github` |
 | `difit_thread_id` | difit 上の thread id。GitHub に投稿した指摘は、sync が GitHub から取り込むときに GitHub の root comment id へ置き換える。置き換える前の id も履歴の行に残るので、difit のスレッドからレコードを引くときは履歴に現れたすべての id を使う (`state.py` の `records_by_difit_id`) |
 | `github_thread_id`, `github_comment_id` | GitHub の thread と root comment の node id |
-| `status` | `open` / `dismissed` / `posted` / `resolved` / `outdated` |
+| `status` | `open` / `dismissed` / `posted` / `resolved` / `outdated` / `superseded`。`superseded` はユーザーの指示で別の指摘にまとめ直して置き換えたレコード (`scripts/difit-supersede.sh`) |
 | `messages` | sync が位置を特定できずに `outdated` にしたスレッドの、difit 上の発言 (root と返信。`id`、`body`、`author`、`createdAt`)。difit にしか無い発言を失わないために残し、restore が difit へ戻すときに使う。戻した後と、`outdated` にしていないレコードは null |
 
 正規化: 各行の行頭と行末の空白を除去し、連続する空白を 1 つに圧縮する。コメントは指摘対象になりうるので除去しない。
 
 ## 4. 照合ロジック (再指摘防止)
 
-`state.py match` が新しい指摘を有効なレコード全件と突き合わせる。status は問わない (open や posted も「既出」として抑止の対象になる)。
+`state.py match` が新しい指摘を有効なレコードと突き合わせる。`superseded` を除き、status は問わない (open や posted も「既出」として抑止の対象になる)。
 
 | 条件 | decision | 挙動 |
 | --- | --- | --- |
@@ -90,6 +90,9 @@ worktree の削除や head の更新をまたいで信頼できないためで�
 
 コードが変われば `snippet_sha256` が変わり、過去の判断は自動抑止から外れる。
 「かつて不要と判断したが、その後の修正で有効になった指摘」を握りつぶさないための設計である。
+
+`superseded` のレコードを照合しないのは、置き換え先の指摘を投稿するときに置き換え元が抑止してしまうためである。
+置き換え元の判断は置き換え先のレコードが引き継ぐので、次回以降の抑止は置き換え先が担う。
 
 origin が `github` のレコード (GitHub から取り込んだ他人のスレッド) は、注記の材料にだけ使い、抑止には使わない。
 他人のコメントは Claude の指摘への判断ではないためである。注記も「過去の判断」とは書かず、
@@ -175,9 +178,15 @@ open ──(triage: ケース2 実装)──▶ resolved (instruction と fix_co
 open ──(sync: 位置を特定できない)──▶ outdated
 outdated ──(restore: ユーザーの発言を含むスレッドを Claude が決めた行へ戻す)──▶ open
 resolved ──(sync: GitHub で unresolve)──▶ posted
+(superseded 以外) ──(ユーザーの指示で別の指摘にまとめ直す)──▶ superseded
 ```
 
-Claude の指摘とユーザー自身のスレッドのうち、status が `posted` / `resolved` / `dismissed` のレコードは対応要否の返信を処理済みである。
+`superseded` にするのは Claude の指摘とユーザー自身のスレッドだけで、`scripts/difit-supersede.sh` が行う (`phases/review.md`「指摘を付け直す」)。
+GitHub に送信済みのコメントを持つレコードは `superseded` にしない。PR 作者が読んでいるコメントを、置き換えのために消さないためである。
+未送信の pending コメントを持つレコードは、そのコメントを削除してから `superseded` にする。
+`reconcile` は `superseded` のレコードを GitHub と突き合わせない。削除した pending コメントが GitHub に無くても、`dismissed` へ変えない。
+
+Claude の指摘とユーザー自身のスレッドのうち、status が `posted` / `resolved` / `dismissed` / `superseded` のレコードは対応要否の返信を処理済みである。
 `state.py triage` はそのスレッドの返信を分類し直さず、`processed` に分類する (`reference/reply-convention.md`)。
 
 GitHub から取り込んだ他人のスレッドは、`from-github` が `github` origin の `open` または `resolved` として記録する。

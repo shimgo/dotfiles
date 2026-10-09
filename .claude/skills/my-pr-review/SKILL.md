@@ -90,6 +90,10 @@ start → review ─┬→ answer (随時)
   review は投稿の前に `state.py directives` の一覧と指摘を突き合わせ、指示で実装した変更の取り消し・逆の方針の提案・判断理由の問い直しに当たる指摘には findings の `overrules` を書いて投稿から除く。
   除いた指摘は件数と要約を報告に載せる。指示が持ち込んだ不具合と、揃える作業の漏れは、指示を維持する修正案で投稿する。詳細は `phases/review.md` の手順 4。
 - **GitHub へ書き込むのは pending review へのコメント追加と resolve だけ**。レビューの送信 (submit) はユーザーが GitHub 上で行う。
+  例外は、ユーザーの指示で指摘を付け直すときに `scripts/difit-supersede.sh` が行う、自分の未送信の pending コメント (と、それで空になった pending review) の削除だけである。
+  送信済みのコメントはこのスクリプトも削除せず、中断する。
+- **ユーザーが既存の指摘をまとめ直して付け直すよう求めたら** `phases/review.md`「指摘を付け直す」に従う。
+  閉じたスレッドを `resolved` や `dismissed` にしてから同じ箇所に投稿し直すと、照合が過去の判断として抑止する。置き換え元は必ず `superseded` にする。
 - **ケース 1 では PR の body を編集しない。** 他人が書いた PR の説明を書き換えることになるためである。
   `gh pr edit --body` / `--body-file` も、`gh api` による PR の更新 (REST の `PATCH /repos/<owner>/<repo>/pulls/<番号>`、GraphQL の `updatePullRequest`) も実行しない。
   ユーザーが `q` で body の編集を指示しても実行せず、ケース 1 では禁止されていることを返信する。body への意見は、レビューコメントとして pending review に投稿する。
@@ -108,6 +112,7 @@ start → review ─┬→ answer (随時)
 | `scripts/github-resolve.sh <state-dir> <thread-id>...` | GitHub のスレッドを resolve する |
 | `scripts/sync.sh <state-dir> [--no-restart]` | GitHub との突き合わせと difit の再構築 |
 | `scripts/difit-restore.sh <state-dir> <key> <line> [<file>]` | sync が位置を特定できずに外したスレッドを、Claude が決めた行で返信ごと difit に戻す |
+| `scripts/difit-supersede.sh <state-dir> --reason <理由> <difit-thread-id>...` | ユーザーの指示で付け直す指摘の置き換え元を閉じる。未送信の pending コメントを削除し、`superseded` を記録してから difit で resolve する |
 | `scripts/next.sh <state-dir>` | 次のフェーズを判定する |
 | `scripts/phase-done.sh <state-dir> <phase>` | フェーズの完了を session.json に記録する |
 | `scripts/state.py <subcommand>` | 状態ファイルの操作。`--help` で一覧。`directives` はユーザーの指示で実装した変更の一覧を返す |

@@ -35,9 +35,10 @@ import uuid
 
 SCHEMA_VERSION = 1
 CLAUDE_AUTHOR = "claude"
-STATUSES = ("open", "dismissed", "posted", "resolved", "outdated")
-# 対応要否の返信を処理済みの status。GitHub への投稿 (posted)、実装や指示の実行 (resolved)、対応不要の記録 (dismissed) を終えている。
-PROCESSED_STATUSES = ("posted", "resolved", "dismissed")
+STATUSES = ("open", "dismissed", "posted", "resolved", "outdated", "superseded")
+# 対応要否の返信を処理済みの status。GitHub への投稿 (posted)、実装や指示の実行 (resolved)、対応不要の記録 (dismissed)、
+# 別の指摘への置き換え (superseded) を終えている。
+PROCESSED_STATUSES = ("posted", "resolved", "dismissed", "superseded")
 
 # difit 上の返信書式。reference/reply-convention.md と一致させること。
 FIX_PREFIXES = ("対応",)
@@ -309,12 +310,15 @@ def decide(finding: dict, latest: dict[str, dict]) -> tuple[str, dict | None]:
     戻り値は (decision, prior)。decision は suppress / annotate / report。
     overrules を持つ指摘は cmd_match がこの関数より先に overruled と判定する。
 
+    superseded のレコードは照合しない。ユーザーの指示で別の指摘に置き換えたものであり、判断は置き換え先のレコードが引き継ぐ。
+    照合すると、置き換え先の指摘を投稿するときに置き換え元が抑止してしまう。
     GitHub から取り込んだ他人のスレッド (origin が github) は注記の材料にだけ使い、抑止には使わない。
     他人のコメントは Claude の指摘への判断ではないためである。
     """
+    candidates = [r for r in latest.values() if r.get("status") != "superseded"]
     same_snippet = [
         r
-        for r in latest.values()
+        for r in candidates
         if r.get("file") == finding["file"]
         and r.get("snippet_sha256")
         and r.get("snippet_sha256") == finding.get("snippet_sha256")
@@ -329,7 +333,7 @@ def decide(finding: dict, latest: dict[str, dict]) -> tuple[str, dict | None]:
     if finding.get("scope"):
         same_scope = [
             r
-            for r in latest.values()
+            for r in candidates
             if r.get("file") == finding["file"]
             and r.get("scope") == finding["scope"]
             and r.get("fingerprint") == finding["fingerprint"]
@@ -925,6 +929,9 @@ def cmd_reconcile(a):
     for r in latest.values():
         gid = r.get("github_thread_id")
         if not gid:
+            continue
+        # superseded は置き換えのために未送信の pending コメントを削除済みのレコードなので、GitHub に無くても状態を変えない
+        if r.get("status") == "superseded":
             continue
         t = by_id.get(gid)
         if t is None:

@@ -140,6 +140,12 @@ class MatchTest(unittest.TestCase):
         latest = run(["latest", "--state", self.state_file])
         self.assertEqual(sorted(r["file"] for r in latest if r["fingerprint"] == "same"), ["a_test.go", "b_test.go"])
 
+    def test_superseded_prior_is_not_matched(self):
+        # superseded のレコードは照合の候補から外すため、同じ箇所・同じ観点でも report になる
+        state.append_records(self.state_file, [dict(self.prior, status="superseded")])
+        f = self.enrich_and_match(self.finding())
+        self.assertEqual(f["decision"], "report")
+
     def test_github_origin_prior_is_annotated_not_suppressed(self):
         # 他人の GitHub スレッドは perspective が一致 (どちらも None) しても suppress の根拠にしない
         self.tmp.cleanup()
@@ -276,6 +282,12 @@ class StatusTest(unittest.TestCase):
         p = subprocess.run([sys.executable, STATE_PY, "append", "--state", self.state_file], input=json.dumps([{"key": "x", "status": "bogus"}]), capture_output=True, text=True)
         self.assertNotEqual(p.returncode, 0)
 
+    def test_superseded_status_is_accepted(self):
+        run(["set-status", "--state", self.state_file, "--difit-id", "d1", "--status", "superseded"])
+        latest = run(["latest", "--state", self.state_file, "--status", "superseded"])
+        self.assertEqual([r["key"] for r in latest], ["k"])
+        self.assertEqual(run(["latest", "--state", self.state_file, "--status", "open"]), [])
+
 
 class GithubTest(unittest.TestCase):
     def setUp(self):
@@ -345,6 +357,14 @@ class GithubTest(unittest.TestCase):
         out = run(["reconcile", "--state", self.state_file], json.dumps(payload))
         self.assertEqual(out["records"], [])
         self.assertEqual(len(out["warnings"]), 1)
+
+    def test_reconcile_skips_superseded_record_missing_on_github(self):
+        # superseded は GitHub にスレッドが無くても dismissed にしない。pending review が無い payload で確認する
+        state.append_records(self.state_file, [state.new_record(key="s", origin="claude", github_thread_id="PRRT_gone", status="superseded", summary="s")])
+        payload = json.loads(self.payload)
+        self.assertFalse(payload.get("viewer_pending_review_id"))
+        out = run(["reconcile", "--state", self.state_file], json.dumps(payload))
+        self.assertEqual(out["records"], [])
 
 
 class GithubThreadPositionTest(unittest.TestCase):
@@ -509,6 +529,12 @@ class ProcessedTriageTest(unittest.TestCase):
         got = self.triage([{"id": "PRRC_9", "filePath": "offset.go", "position": {"side": "new", "line": 14},
                             "messages": [{"id": "PRRC_9", "body": "NewFlag の意味は？", "author": "alice"}]}])
         self.assertEqual(got["PRRC_9"]["classification"], "github")
+
+    def test_superseded_claude_thread_is_processed(self):
+        state.append_records(self.state_file, [state.new_record(key="fp", origin="claude", difit_thread_id="claude-1", status="superseded", summary="s")])
+        got = self.triage([{"id": "claude-1", "filePath": "offset.go", "position": {"side": "new", "line": 14},
+                            "messages": [{"id": "m1", "body": "指摘", "author": "claude"}, {"id": "m2", "body": "+", "author": None}]}])
+        self.assertEqual(got["claude-1"]["classification"], "processed")
 
 
 class FormerDifitIdTest(unittest.TestCase):
