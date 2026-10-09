@@ -15,7 +15,10 @@
 #   5. それ以外は直前のフェーズから決める
 #        start / なし → review
 #        review / answer → wait (ユーザーが difit で対応要否を付けるのを待つ)
-#        triage (worktree) → sync。ただし pending review が未送信なら wait
+#        triage (worktree) → sync。ただし次のときは wait
+#          - pending review が未送信 (ユーザーが GitHub で送信するのを待つ)
+#          - 返信待ちの Claude の指摘 (pending / none) が残っている (作り直すとポートが変わり、ユーザーが開いている difit を失う)
+#          - GitHub に投稿した指摘 (posted) が無く、PR の head も変わっていない (取り込むものが無い)
 #        triage (local) → review (差分の再レビュー)
 #        sync / restore → verify (posted / outdated があれば)、無ければ review
 #        verify → review
@@ -63,6 +66,15 @@ case "${LAST}" in
     PENDING_ID="$("${SCRIPT_DIR}/github-fetch-threads.sh" "${REPO}" "${PR}" | jq -r '.viewer_pending_review_id // empty')"
     if [ -n "${PENDING_ID}" ]; then
       emit wait "GitHub に未送信の pending review がある。送信後に sync する"
+    fi
+    AWAITING=$(( $(count pending) + $(count none) ))
+    if [ "${AWAITING}" -gt 0 ]; then
+      emit wait "difit で対応要否 (+ / -) が付くのを待つ。返信を待っているスレッド: ${AWAITING} 件"
+    fi
+    POSTED_N="$(python3 "${STATE_PY}" latest --state "${STATE_FILE}" --status posted | jq 'length')"
+    REMOTE_HEAD="$(gh pr view "${PR}" --repo "${REPO}" --json headRefOid -q .headRefOid)"
+    if [ "${POSTED_N}" -eq 0 ] && [ "${REMOTE_HEAD}" = "${HEAD_SHA}" ]; then
+      emit wait "GitHub に投稿した指摘が無く、PR の head も変わっていない。PR 作者の更新を待つ"
     fi
     emit sync "GitHub のレビュー状態を取り込み difit を作り直す"
     ;;

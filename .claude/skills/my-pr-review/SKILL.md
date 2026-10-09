@@ -45,7 +45,8 @@ $SKILL_DIR/scripts/next.sh <state-dir>
 ユーザーは `next` を 1 回打てば、自分の入力を待つ状態になるまで工程が進むことを期待している。
 
 `phase` が `wait` のときは実行するものが無いので、`reason` を伝えて終わる
-(ユーザーが difit で対応要否を付けている途中、または GitHub で pending review を送信していない)。
+(ユーザーが difit で対応要否を付けている途中、GitHub で pending review を送信していない、
+または GitHub に投稿した指摘が無く PR の head も変わっていないので PR 作者の更新を待っている)。
 報告は `wait` に到達した時点で、そのターンに実行したフェーズすべての結果をまとめて行う。
 ただし difit の URL だけは例外で、作り直すたびにその場で伝える (ポートが変わるため、古い URL のままではユーザーが見られない)。
 判定は difit の未処理の返信と `session.json` の `last_phase` から行うので、各フェーズの最後に必ず `scripts/phase-done.sh` を実行して `last_phase` を更新する。
