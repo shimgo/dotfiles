@@ -140,6 +140,55 @@ class MatchTest(unittest.TestCase):
         latest = run(["latest", "--state", self.state_file])
         self.assertEqual(sorted(r["file"] for r in latest if r["fingerprint"] == "same"), ["a_test.go", "b_test.go"])
 
+    def test_github_origin_prior_is_annotated_not_suppressed(self):
+        # 他人の GitHub スレッドは perspective が一致 (どちらも None) しても suppress の根拠にしない
+        self.tmp.cleanup()
+        self.tmp = tempfile.TemporaryDirectory()
+        self.state_file = os.path.join(self.tmp.name, "threads.jsonl")
+        github_prior = state.new_record(
+            key="PRRT_g", file="offset.go", scope=self.prior["scope"],
+            snippet="\tif user.NewFlag {", snippet_sha256=state.sha256("if user.NewFlag {"),
+            perspective=None, summary="他人の指摘", origin="github", difit_thread_id="PRRC_g", github_thread_id="PRRT_g", status="open",
+        )
+        state.append_records(self.state_file, [github_prior])
+        f = self.enrich_and_match(self.finding(perspective=None))
+        self.assertEqual(f["decision"], "annotate")
+        self.assertEqual(f["prior"]["key"], "PRRT_g")
+        self.assertEqual(f["prior"]["origin"], "github")
+
+    def test_annotation_prefers_judged_record_over_newer_github_thread(self):
+        # 同じ箇所に過去の判断と他人の GitHub スレッドがあれば、GitHub のスレッドの方が新しくても過去の判断を注記に使う
+        github_prior = state.new_record(
+            key="PRRT_g", file="offset.go", snippet="\tif user.NewFlag {", snippet_sha256=state.sha256("if user.NewFlag {"),
+            summary="他人の指摘", origin="github", status="open", updated_at="2999-01-01T00:00:00+09:00",
+        )
+        state.append_records(self.state_file, [github_prior])
+        f = self.enrich_and_match(self.finding(perspective="観点1"))
+        self.assertEqual(f["decision"], "annotate")
+        self.assertEqual(f["prior"]["key"], "k1")
+
+    def test_to_difit_annotates_github_prior_with_thread_label(self):
+        github_prior = state.new_record(key="PRRT_g", origin="github", status="open", summary="他人の指摘")
+        decided = {"findings": [dict(self.finding(), decision="annotate", fingerprint="y", prior=github_prior)]}
+        out = run(["to-difit", "--repo", "o/r", "--pr", "1", "--head-sha", "abc"], json.dumps(decided))
+        body = out["imports"][0]["body"]
+        self.assertTrue(body.startswith("> 同じ箇所の GitHub のスレッド: 未解決"))
+        self.assertIn("> 内容: 他人の指摘", body)
+        self.assertNotIn("過去の判断", body)
+
+    def test_to_difit_labels_resolved_github_prior(self):
+        github_prior = state.new_record(key="PRRT_g", origin="github", status="resolved", summary="他人の指摘")
+        decided = {"findings": [dict(self.finding(), decision="annotate", fingerprint="y", prior=github_prior)]}
+        out = run(["to-difit", "--repo", "o/r", "--pr", "1", "--head-sha", "abc"], json.dumps(decided))
+        self.assertTrue(out["imports"][0]["body"].startswith("> 同じ箇所の GitHub のスレッド: 解決済み"))
+
+    def test_strip_annotation_removes_github_annotation(self):
+        # GitHub へ投稿する本文に注記を残さない
+        github_prior = state.new_record(key="PRRT_g", origin="github", status="dismissed", summary="他人の指摘", reason="仕様")
+        annotated = state.annotation_for(github_prior) + "\n\n指摘の本文"
+        self.assertTrue(annotated.startswith("> 同じ箇所の GitHub のスレッド: 対応不要と判断済み"))
+        self.assertEqual(state.strip_annotation(annotated), "指摘の本文")
+
 
 class DirectiveTest(unittest.TestCase):
     def setUp(self):

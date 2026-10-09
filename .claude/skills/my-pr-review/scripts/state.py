@@ -308,6 +308,9 @@ def decide(finding: dict, latest: dict[str, dict]) -> tuple[str, dict | None]:
 
     戻り値は (decision, prior)。decision は suppress / annotate / report。
     overrules を持つ指摘は cmd_match がこの関数より先に overruled と判定する。
+
+    GitHub から取り込んだ他人のスレッド (origin が github) は注記の材料にだけ使い、抑止には使わない。
+    他人のコメントは Claude の指摘への判断ではないためである。
     """
     same_snippet = [
         r
@@ -317,10 +320,12 @@ def decide(finding: dict, latest: dict[str, dict]) -> tuple[str, dict | None]:
         and r.get("snippet_sha256") == finding.get("snippet_sha256")
     ]
     if same_snippet:
-        same_perspective = [r for r in same_snippet if r.get("perspective") == finding.get("perspective")]
+        same_perspective = [r for r in same_snippet if r.get("origin") != "github" and r.get("perspective") == finding.get("perspective")]
         if same_perspective:
             return "suppress", newest(same_perspective)
-        return "annotate", newest(same_snippet)
+        # 注記には判断を持つレコード (Claude の指摘とユーザーのスレッド) を優先する。GitHub のスレッドは他に無いときだけ使う
+        judged = [r for r in same_snippet if r.get("origin") != "github"]
+        return "annotate", newest(judged or same_snippet)
     if finding.get("scope"):
         same_scope = [
             r
@@ -339,6 +344,15 @@ def newest(records: list[dict]) -> dict:
 
 
 def annotation_for(prior: dict) -> str:
+    if prior.get("origin") == "github":
+        # 他人が GitHub に書いたスレッドは過去の判断ではないため、同じ箇所に議論があることだけを伝える
+        github_label = {"resolved": "解決済み", "dismissed": "対応不要と判断済み"}.get(prior.get("status"), "未解決")
+        parts = [f"> 同じ箇所の GitHub のスレッド: {github_label}"]
+        if prior.get("summary"):
+            parts.append(f"> 内容: {prior['summary']}")
+        if prior.get("reason"):
+            parts.append(f"> 理由: {prior['reason']}")
+        return "\n".join(parts)
     label = {
         "dismissed": "対応不要と判断済み",
         "resolved": "GitHub 上で解決済み",
@@ -455,7 +469,7 @@ def is_claude(message: dict) -> bool:
 
 
 def strip_annotation(body: str) -> str:
-    """to-difit が先頭に付けた過去の判断の注記 ("> " で始まる行) を取り除く。GitHub には載せない内部情報のため。"""
+    """to-difit が先頭に付けた注記 (過去の判断、または同じ箇所の GitHub のスレッド。"> " で始まる行) を取り除く。GitHub には載せない内部情報のため。"""
     lines = body.split("\n")
     i = 0
     while i < len(lines) and lines[i].startswith("> "):

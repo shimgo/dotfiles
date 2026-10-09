@@ -79,8 +79,8 @@ worktree の削除や head の更新をまたいで信頼できないためで�
 
 | 条件 | decision | 挙動 |
 | --- | --- | --- |
-| `file` と `snippet_sha256` が一致し、`perspective` も一致 | `suppress` | 投稿しない。過去の判断をユーザーに報告する |
-| `file` と `snippet_sha256` が一致するが `perspective` が異なる | `annotate` | 過去の判断を注記して投稿する |
+| `file` と `snippet_sha256` が一致し、`perspective` も一致 (origin が `github` のレコードを除く) | `suppress` | 投稿しない。過去の判断をユーザーに報告する |
+| `file` と `snippet_sha256` が一致するが、`perspective` が異なる、または origin が `github` | `annotate` | 過去の判断 (origin が `github` なら同じ箇所の GitHub のスレッド) を注記して投稿する |
 | `snippet_sha256` は不一致だが `file`、`scope`、`fingerprint` が一致 | `annotate` | 同上 |
 | 上記以外 | `report` | 通常どおり投稿する |
 
@@ -90,6 +90,11 @@ worktree の削除や head の更新をまたいで信頼できないためで�
 
 コードが変われば `snippet_sha256` が変わり、過去の判断は自動抑止から外れる。
 「かつて不要と判断したが、その後の修正で有効になった指摘」を握りつぶさないための設計である。
+
+origin が `github` のレコード (GitHub から取り込んだ他人のスレッド) は、注記の材料にだけ使い、抑止には使わない。
+他人のコメントは Claude の指摘への判断ではないためである。注記も「過去の判断」とは書かず、
+`> 同じ箇所の GitHub のスレッド: 未解決` (status が `resolved` なら `解決済み`、`dismissed` なら `対応不要と判断済み`) と `> 内容: <要約>` を付ける。
+同じ箇所に Claude の指摘やユーザーのスレッドのレコードもあれば、GitHub のスレッドの方が新しくても、そちら (過去の判断) を注記に使う。
 
 ### ユーザーの指示で実装した変更を覆す指摘
 
