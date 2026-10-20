@@ -19,6 +19,15 @@ state_dir_for() {
   echo "${STATE_ROOT}/${repo}/pr-${pr}"
 }
 
+# PR を作る前のセルフレビューの状態ディレクトリ: <STATE_ROOT>/<owner>/<repo>/branch-<ブランチ名>
+# ブランチ名の "/" で階層が深くならないよう、"%" と "/" をパーセントエンコードする。
+# PR を作った後に session-start.sh を実行すると、pr-<番号> へ移す。
+branch_state_dir_for() {
+  local repo="$1" branch="$2"
+  branch="${branch//%/%25}"
+  echo "${STATE_ROOT}/${repo}/branch-${branch//\//%2F}"
+}
+
 # 引数で渡された状態ディレクトリを検証し、session.json の各値を変数に読み込む。
 load_session() {
   STATE_DIR="$1"
@@ -26,8 +35,9 @@ load_session() {
   STATE_FILE="${STATE_DIR}/threads.jsonl"
   [ -f "${SESSION}" ] || { echo "error: ${SESSION} がありません。session-start.sh を先に実行してください" >&2; exit 1; }
   REPO="$(jq -r '.repo' "${SESSION}")"
-  PR="$(jq -r '.pr' "${SESSION}")"
-  PR_URL="$(jq -r '.pr_url' "${SESSION}")"
+  # PR を作る前のセルフレビューでは pr と pr_url が null なので、空文字にする
+  PR="$(jq -r '.pr // empty' "${SESSION}")"
+  PR_URL="$(jq -r '.pr_url // empty' "${SESSION}")"
   MODE="$(jq -r '.mode' "${SESSION}")"
   # 以前の版は github モードを worktree と呼び、PR の head を別の worktree に checkout していた
   if [ "${MODE}" = "worktree" ]; then MODE="github"; fi

@@ -53,3 +53,6 @@ $SKILL_DIR/scripts/sync.sh <state-dir>
   指摘へ対応するたびにコミットしなくても、コミット前に自分で確認できる。github モード (他人の PR) は head と base の SHA をそのまま対象にする。
 - **github モードでは、PR の作者が push した head へ現在のブランチを fast-forward で追従させる。** force push で fast-forward できないとき、
   または未コミットの変更があるときは `sync.sh` が中断する。Claude はブランチを書き換えず、エラーの内容をユーザーに伝える。
+- **PR を作る前のセッション (`session.json` の `pr` が null) では GitHub を使わない。** `sync.sh` は GitHub との突き合わせと GitHub のスレッドの取り込みを省略し、
+  difit の作り直しと GitHub 未投稿のスレッドの再投入だけを行う。`reconciled` は空、`reimported.github` は 0 になる。
+  セッションの途中で PR を作っても、`sync.sh` は PR を使わない。PR のセッションへ移るには `session-start.sh` を実行する (`phases/start.md` 手順 1)。

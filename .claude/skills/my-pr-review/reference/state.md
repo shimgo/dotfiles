@@ -18,7 +18,7 @@
 | 場所 | 役割 |
 | --- | --- |
 | GitHub | レビュー送信後の正本。open / resolved の状態は GraphQL で取得する |
-| `~/.local/state/claude/review/<owner>/<repo>/pr-<番号>/` | GitHub に記録が残らないもの (対応不要の判断、未投稿の指摘) と、GitHub のスレッドを照合キーに結び付ける索引 |
+| `~/.local/state/claude/review/<owner>/<repo>/pr-<番号>/` | GitHub に記録が残らないもの (対応不要の判断、未投稿の指摘) と、GitHub のスレッドを照合キーに結び付ける索引。PR を作る前のセルフレビューでは `branch-<ブランチ名>/` (下記) |
 
 difit には状態を持たせない。difit のコメントはサーバのメモリとブラウザの localStorage にしか無く、
 difit の再起動や head の更新をまたいで信頼できないためである。difit は毎ラウンド `--clean` で作り直す。
@@ -26,15 +26,25 @@ difit の再起動や head の更新をまたいで信頼できないためで�
 `~/.local/state` は XDG Base Directory の `XDG_STATE_HOME` であり、XDG Base Directory の仕様はこの場所を「再起動をまたいで保持したいが設定でもユーザー資産でもない状態」を置く場所と定めている。
 リポジトリ内にコミットしないのは、対応不要の判断がレビュアー個人のものであり、PR ブランチにノイズを乗せないためである。
 
+### PR を作る前のセルフレビュー
+
+PR が無いセッションの状態ディレクトリは `branch-<ブランチ名>/` である。ブランチ名の `%` と `/` はパーセントエンコードする (`feature/foo` は `branch-feature%2Ffoo`)。
+PR 番号が無いのでブランチ名を識別子にする。
+
+自分の PR を作った後に `session-start.sh` を実行すると、`pr-<番号>/` が無く同じブランチの `branch-<ブランチ名>/` があれば、ディレクトリごと `pr-<番号>/` へ移し、
+`session.json` の `pr`、`pr_url`、`base_ref`、`state_dir` を PR のものに書き換える。PR を作る前に対応不要とした判断と指示で実装した変更の記録を、PR のセッションでも照合に使うためである。
+移さずに新しく始めると、同じ指摘が PR のセッションで再び投稿される。threads.jsonl のレコードの `pr` は null のまま残すが、照合は `pr` を使わないので影響は無い。
+他人の PR (github モード) では移さない。同じ名前のブランチで行った自分のセッションを、他人の PR のものとして取り違えるおそれがあるためである。
+
 ## 2. session.json
 
 | フィールド | 内容 |
 | --- | --- |
 | `repo` | `gh repo view --json nameWithOwner` の値 |
-| `pr`, `pr_url` | PR 番号と URL |
-| `mode` | `local` (PR の作者が `gh` のログイン中のアカウント。ケース 2) か `github` (それ以外。ケース 1)。`session-start.sh` が決める。以前の版が書いた `worktree` は `github` として読む |
-| `worktree` | レビュー対象のディレクトリ。`session-start.sh` を実行したリポジトリのルート (PR のブランチを checkout した作業ツリー) |
-| `base_ref`, `head_ref` | ブランチ名 |
+| `pr`, `pr_url` | PR 番号と URL。PR を作る前のセルフレビューでは null |
+| `mode` | `local` (PR の作者が `gh` のログイン中のアカウント、または PR が無い。ケース 2) か `github` (それ以外。ケース 1)。`session-start.sh` が決める。以前の版が書いた `worktree` は `github` として読む |
+| `worktree` | レビュー対象のディレクトリ。`session-start.sh` を実行したリポジトリのルート (PR があれば PR のブランチを checkout した作業ツリー) |
+| `base_ref`, `head_ref` | ブランチ名。PR が無ければ `base_ref` は `--base` の値、前回のセッションの値、リポジトリのデフォルトブランチの順に決め、`head_ref` は現在のブランチ |
 | `base_sha`, `head_sha` | 現在の diff の両端。`base_sha` は merge-base |
 | `reviewed_head_sha` | 最後にレビュースキルを実行したときの head。差分のみの再レビューの起点 |
 | `last_phase` | 最後に完了したフェーズ。`next.sh` の判定に使う |
@@ -198,4 +208,5 @@ GitHub から取り込んだ他人のスレッドは、`from-github` が `github
 
 ```bash
 rm -r ~/.local/state/claude/review/<owner>/<repo>/pr-1234
+rm -r ~/.local/state/claude/review/<owner>/<repo>/branch-feature%2Ffoo   # PR を作らなかったブランチ
 ```

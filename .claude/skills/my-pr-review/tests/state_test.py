@@ -126,6 +126,17 @@ class MatchTest(unittest.TestCase):
         self.assertEqual(out["records"][1]["difit_thread_id"], out["imports"][1]["id"])
         self.assertEqual(out["records"][1]["fingerprint"], "z")
 
+    def test_to_difit_records_pr_number(self):
+        decided = {"findings": [dict(self.finding(), decision="report", fingerprint="z", prior=None)]}
+        out = run(["to-difit", "--repo", "o/r", "--pr", "1", "--head-sha", "abc"], json.dumps(decided))
+        self.assertEqual(out["records"][0]["pr"], 1)
+
+    def test_to_difit_with_empty_pr_records_null_pr(self):
+        # PR を作る前のセルフレビューでは --pr に空文字が渡される
+        decided = {"findings": [dict(self.finding(), decision="report", fingerprint="z", prior=None)]}
+        out = run(["to-difit", "--repo", "o/r", "--pr", "", "--head-sha", "abc"], json.dumps(decided))
+        self.assertIsNone(out["records"][0]["pr"])
+
     def test_findings_with_the_same_fingerprint_keep_separate_records(self):
         # 観点と要約が同じでも、別の箇所への指摘は別のレコードとして残す (key を fingerprint にすると 1 件にまとまる)
         decided = {"findings": [
@@ -252,6 +263,12 @@ class DirectiveTest(unittest.TestCase):
         self.assertNotEqual(record["key"], record["fingerprint"])
         self.assertIn("兄弟と揃えて", record["reason"])
         self.assertIn("abc1234", record["reason"])
+
+    def test_to_difit_records_overruled_with_null_pr_when_pr_is_empty(self):
+        decided = self.match(self.finding(overrules="d1"))
+        out = run(["to-difit", "--repo", "o/r", "--pr", "", "--head-sha", "abc"], json.dumps(decided))
+        self.assertEqual(out["records"][0]["status"], "dismissed")
+        self.assertIsNone(out["records"][0]["pr"])
 
     def test_overruled_record_suppresses_the_same_finding_next_time(self):
         decided = self.match(self.finding(overrules="d1"))
@@ -589,6 +606,25 @@ class RegisterTest(unittest.TestCase):
         self.assertEqual(recs["user-finding"]["origin"], "user")
         self.assertEqual(recs["user-finding"]["snippet"], "\tif err != nil {")
         self.assertEqual(recs["claude-dismiss"]["origin"], "claude")
+
+    def register_with_pr(self, pr):
+        with open(os.path.join(FIXTURES, "difit-comments.json"), encoding="utf-8") as f:
+            payload = f.read()
+        with tempfile.TemporaryDirectory() as d:
+            state_file = os.path.join(d, "threads.jsonl")
+            out = run(["register", "--state", state_file, "--repo", "o/r", "--pr", pr, "--head-sha", "h", "--worktree", FIXTURES], payload)
+        return out["records"]
+
+    def test_register_records_pr_number(self):
+        records = self.register_with_pr("1")
+        self.assertTrue(records)
+        self.assertEqual({r["pr"] for r in records}, {1})
+
+    def test_register_with_empty_pr_records_null_pr(self):
+        # PR を作る前のセルフレビューでは --pr に空文字が渡される
+        records = self.register_with_pr("")
+        self.assertTrue(records)
+        self.assertEqual({r["pr"] for r in records}, {None})
 
 
 class GithubBodyTest(unittest.TestCase):

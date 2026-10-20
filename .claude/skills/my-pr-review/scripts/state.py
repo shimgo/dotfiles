@@ -1150,6 +1150,11 @@ def cmd_restore(a):
     write_json({"imports": imports, "records": [rec]})
 
 
+def optional_int(value: str) -> int | None:
+    """--pr の値を変換する。PR を作る前のセルフレビューではスクリプトが空文字を渡すので、None にする。"""
+    return int(value) if value else None
+
+
 def main(argv=None):
     p = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     sub = p.add_subparsers(dest="command", required=True)
@@ -1165,7 +1170,7 @@ def main(argv=None):
 
     s = sub.add_parser("to-difit")
     s.add_argument("--repo", required=True)
-    s.add_argument("--pr", type=int, required=True)
+    s.add_argument("--pr", type=optional_int, required=True)
     s.add_argument("--head-sha", required=True)
     s.set_defaults(func=cmd_to_difit)
 
@@ -1203,7 +1208,7 @@ def main(argv=None):
     s = sub.add_parser("from-github")
     s.add_argument("--state", required=True)
     s.add_argument("--repo", required=True)
-    s.add_argument("--pr", type=int, required=True)
+    s.add_argument("--pr", type=optional_int, required=True)
     s.add_argument("--head-sha", required=True)
     s.add_argument("--worktree")
     s.add_argument("--base-sha")
@@ -1226,7 +1231,7 @@ def main(argv=None):
     s = sub.add_parser("register")
     s.add_argument("--state", required=True)
     s.add_argument("--repo", required=True)
-    s.add_argument("--pr", type=int, required=True)
+    s.add_argument("--pr", type=optional_int, required=True)
     s.add_argument("--head-sha", required=True)
     s.add_argument("--worktree", required=True)
     s.add_argument("--base-sha")
@@ -1235,7 +1240,7 @@ def main(argv=None):
     s = sub.add_parser("rebuild")
     s.add_argument("--state", required=True)
     s.add_argument("--repo", required=True)
-    s.add_argument("--pr", type=int, required=True)
+    s.add_argument("--pr", type=optional_int, required=True)
     s.add_argument("--head-sha", required=True)
     s.add_argument("--worktree", required=True)
     s.add_argument("--base-sha")

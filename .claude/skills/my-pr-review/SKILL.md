@@ -2,8 +2,9 @@
 name: my-pr-review
 description: |
   GitHub の PR を difit (ローカルの diff ビューア) 上でレビューし、Claude の指摘とユーザーのコメントを difit と GitHub の間で往復させる個人用のレビューワークフロー。
+  PR を作る前の自分のブランチのセルフレビューにも使う。
   次のような依頼のときに必ず使う: 「この PR をレビューして difit で見せて」「PR #1234 のレビューセッションを始めて」「difit の返信を見て対応して」
-  「difit のコメントを GitHub に反映して」「GitHub の最新コメントを difit に同期して」「指摘が直ったか確認して resolve して」「セルフレビューを始めて」
+  「difit のコメントを GitHub に反映して」「GitHub の最新コメントを difit に同期して」「指摘が直ったか確認して resolve して」「セルフレビューを始めて」「PR を作る前にセルフレビューして」
   「再指摘防止リスト」「対応不要にした指摘」「レビューの続き」など、PR レビューを difit や再指摘防止リストと組み合わせて進める文脈なら、
   ユーザーがスキル名を挙げなくても使う。単に「このコードをレビューして」と言われただけで difit も PR も出てこない場合は使わない。
 allowed-tools: ["Read", "Glob", "Grep", "Bash", "Skill", "Edit", "Write", "AskUserQuestion"]
@@ -12,7 +13,7 @@ allowed-tools: ["Read", "Glob", "Grep", "Bash", "Skill", "Edit", "Write", "AskUs
 # my-pr-review
 
 PR レビューを difit と GitHub の間で往復させるワークフロー。状態は GitHub (レビュー送信後の正本) と
-`~/.local/state/claude/review/<owner>/<repo>/pr-<番号>/` (session.json と threads.jsonl) の 2 か所だけに置き、
+`~/.local/state/claude/review/<owner>/<repo>/pr-<番号>/` (session.json と threads.jsonl。PR を作る前のセルフレビューでは `branch-<ブランチ名>/`) の 2 か所だけに置き、
 difit は表示層として毎ラウンド作り直す。設計の背景は `reference/state.md` を参照。
 
 ## フェーズの選び方
@@ -23,7 +24,7 @@ difit は表示層として毎ラウンド作り直す。設計の背景は `ref
 | フェーズ | 手順書 | 使う場面 |
 | --- | --- | --- |
 | `next` | (下記) | 次の工程へ進む。difit の状態と直前のフェーズから次のフェーズを判定して実行し、`wait` になるまで同じターンで続ける |
-| `start` | `phases/start.md` | レビュー依頼を受けた、または自分の PR を作った直後。現在のチェックアウトを検証し、difit とセッションを準備する |
+| `start` | `phases/start.md` | レビュー依頼を受けた、自分の PR を作った直後、または PR を作る前にセルフレビューする。現在のチェックアウトを検証し、difit とセッションを準備する |
 | `review` | `phases/review.md` | リポジトリ固有のレビュースキルを実行し、指摘を difit に投稿する。再レビューもここ |
 | `answer` | `phases/answer.md` | ユーザーが difit 上に書いた Claude Code 宛ての本文 (`q ...`) に応答する。指示なら実行して resolve する。triage より優先する |
 | `triage` | `phases/triage.md` | ユーザーが difit 上で付けた対応要否を処理する。GitHub への pending 投稿や実装もここ |
@@ -54,8 +55,9 @@ $SKILL_DIR/scripts/next.sh <state-dir>
 
 ## 全体像
 
-ケース 1 (他人の PR。session.json の `mode` が `github`) と ケース 2 (自分の PR。`mode` が `local`) で流れが違うのは triage 以降だけである。
-ケースは `session-start.sh` が PR の作者から決める (`phases/start.md`)。どちらのケースも、PR のブランチを checkout した現在のディレクトリをレビュー対象にする。
+ケース 1 (他人の PR。session.json の `mode` が `github`) と ケース 2 (自分の PR、または PR を作る前の自分のブランチ。`mode` が `local`) で流れが違うのは triage 以降だけである。
+ケースは `session-start.sh` が PR の作者から決め、PR が無ければケース 2 にする (`phases/start.md`)。どちらのケースも、現在のディレクトリ (PR があれば PR のブランチを checkout したもの) をレビュー対象にする。
+PR が無いセッションでは GitHub を使わず、`session.json` の `pr` は null になる。PR を作った後に `session-start.sh` を実行すると、PR を作る前の判断を PR のセッションへ引き継ぐ。
 
 ```
 start → review ─┬→ answer (随時)
@@ -107,7 +109,7 @@ start → review ─┬→ answer (随時)
 
 | スクリプト | 役割 |
 | --- | --- |
-| `scripts/session-start.sh <PR> [--review-skill NAME]` | セッション開始。現在のブランチが PR のブランチかを検証し、PR の作者からモードを決め、difit の起動と GitHub スレッドの取り込みを行う |
+| `scripts/session-start.sh [<PR>] [--base BRANCH] [--review-skill NAME]` | セッション開始。PR を省略すると現在のブランチの PR を探し、無ければ PR なしの local モードにする。現在のブランチが PR のブランチかを検証し、PR の作者からモードを決め、difit の起動と GitHub スレッドの取り込みを行う |
 | `scripts/difit-post.sh <state-dir> <findings.json>` | 指摘を照合して difit に投稿し、記録する |
 | `scripts/difit-fetch.sh <state-dir> [--raw]` | difit のスレッドを取得し、返信を分類する |
 | `scripts/github-pending.sh <state-dir> < items.json` | difit のスレッドを GitHub の pending review に追加する |

@@ -4,11 +4,11 @@
 # 使い方: sync.sh <状態ディレクトリ> [--no-restart] [--allow-empty-snapshot]
 #
 # 実施内容:
-#   1. GitHub の reviewThreads を取得し、resolved / 削除されたスレッドの status を更新する
+#   1. GitHub の reviewThreads を取得し、resolved / 削除されたスレッドの status を更新する (PR が無ければ省略)
 #   2. PR の head を取得し直す (github モードでは現在のブランチを PR の head へ fast-forward、local モードでは現在の HEAD を採用)
 #   3. difit を停止し、新しい head と base で --clean 起動して URL を標準エラーへ出す (--no-restart で省略)
 #      停止前のスレッドは difit-last.json に保存し、状態ファイルに無いユーザーのスレッドと返信を失わないようにする
-#   4. GitHub の未解決スレッドと、ローカルで open なスレッドを difit に再投入する
+#   4. GitHub の未解決スレッド (PR が無ければ省略) と、ローカルで open なスレッドを difit に再投入する
 #      ローカルのスレッドは snippet で位置を探し直し、見つからなければ status を outdated にする
 #      outdated にしたスレッドの発言 (root と返信) は状態ファイルに残す。ユーザーの発言を含むスレッドは
 #      needs_restore に出し、Claude が位置を決め直して difit-restore.sh で戻す (phases/restore.md)
@@ -30,10 +30,13 @@ while [ $# -gt 0 ]; do
   shift
 done
 
-# 1. GitHub との突き合わせ
-THREADS_JSON="$("${SCRIPT_DIR}/github-fetch-threads.sh" "${REPO}" "${PR}")"
-RECONCILED="$(printf '%s' "${THREADS_JSON}" | python3 "${STATE_PY}" reconcile --state "${STATE_FILE}")"
-jq -c '.records' <<<"${RECONCILED}" | python3 "${STATE_PY}" append --state "${STATE_FILE}"
+# 1. GitHub との突き合わせ。PR を作る前のセルフレビューでは GitHub にスレッドが無い
+RECONCILED='{"records":[],"warnings":[]}'
+if [ -n "${PR}" ]; then
+  THREADS_JSON="$("${SCRIPT_DIR}/github-fetch-threads.sh" "${REPO}" "${PR}")"
+  RECONCILED="$(printf '%s' "${THREADS_JSON}" | python3 "${STATE_PY}" reconcile --state "${STATE_FILE}")"
+  jq -c '.records' <<<"${RECONCILED}" | python3 "${STATE_PY}" append --state "${STATE_FILE}"
+fi
 
 # 2. head の更新
 OLD_HEAD="${HEAD_SHA}"
@@ -95,10 +98,13 @@ wait_difit_ready "${DIFIT_PORT}"
 announce_difit_url "$(jq -r '.url' <<<"${DIFIT_JSON}")"
 
 # 4a. GitHub の未解決スレッド
-CONVERTED="$(printf '%s' "${THREADS_JSON}" | python3 "${STATE_PY}" from-github \
-  --state "${STATE_FILE}" --repo "${REPO}" --pr "${PR}" --head-sha "${HEAD_SHA}" --worktree "${WORKTREE}" --base-sha "${BASE_SHA}")"
-difit_import "${DIFIT_PORT}" "$(jq -c '.imports' <<<"${CONVERTED}")"
-jq -c '.records' <<<"${CONVERTED}" | python3 "${STATE_PY}" append --state "${STATE_FILE}"
+CONVERTED='{"imports":[],"records":[]}'
+if [ -n "${PR}" ]; then
+  CONVERTED="$(printf '%s' "${THREADS_JSON}" | python3 "${STATE_PY}" from-github \
+    --state "${STATE_FILE}" --repo "${REPO}" --pr "${PR}" --head-sha "${HEAD_SHA}" --worktree "${WORKTREE}" --base-sha "${BASE_SHA}")"
+  difit_import "${DIFIT_PORT}" "$(jq -c '.imports' <<<"${CONVERTED}")"
+  jq -c '.records' <<<"${CONVERTED}" | python3 "${STATE_PY}" append --state "${STATE_FILE}"
+fi
 
 # 4b. GitHub 未投稿でローカルに open なスレッド (Claude の指摘と、ユーザーが difit 上で書いたもの)。返信も一緒に再投入する
 REBUILT="$(python3 "${STATE_PY}" rebuild --state "${STATE_FILE}" --repo "${REPO}" --pr "${PR}" --head-sha "${HEAD_SHA}" \
