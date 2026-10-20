@@ -4,13 +4,15 @@
 # 使い方:
 #   session-start.sh <PR の URL または番号> [--review-skill <スキル名>]
 #
-# モードは PR の作者と現在のブランチから決める。
-#   local:    PR の作者が gh のログイン中のアカウントで、現在のブランチがその PR のブランチ。
-#             現在のチェックアウトをそのまま使う (自分の PR のセルフレビュー。ケース 2)
-#   worktree: それ以外。PR の head を fetch し、リポジトリの隣に <repo>-pr-<番号> という worktree を作る (ケース 1)
+# レビュー対象は常に現在のチェックアウトであり、現在のブランチが PR のブランチでなければ中断する。
+# モードは PR の作者から決める。
+#   local:  PR の作者が gh のログイン中のアカウント (自分の PR のセルフレビュー。ケース 2)。
+#           指摘への対応を現在のブランチへコミットする
+#   github: それ以外 (ケース 1)。指摘を GitHub の pending review に投稿し、コミットしない。
+#           HEAD が PR の head と一致し、未コミットの変更が無いことを求める
 #
 # 実施内容:
-#   1. PR 情報の取得と worktree の準備
+#   1. PR 情報の取得と現在のチェックアウトの検証
 #   2. difit をバックグラウンドで起動し、応答を待って session.json を書き出す
 #   3. difit の URL を標準エラーへ出す (以降の取り込みを待たずにユーザーがレビューを始められるようにする)
 #   4. GitHub 上の未解決スレッドを difit に取り込み、状態ファイルに記録
@@ -50,10 +52,14 @@ BASE_REF="$(jq -r '.baseRefName' <<<"${PR_JSON}")"
 PR_AUTHOR="$(jq -r '.author.login' <<<"${PR_JSON}")"
 VIEWER="$(gh api user -q .login)"
 CURRENT_BRANCH="$(git branch --show-current)"
-if [ "${PR_AUTHOR}" = "${VIEWER}" ] && [ "${CURRENT_BRANCH}" = "${HEAD_REF}" ]; then
+if [ "${CURRENT_BRANCH}" != "${HEAD_REF}" ]; then
+  echo "error: 現在のブランチ (${CURRENT_BRANCH:-(detached)}) が PR のブランチ (${HEAD_REF}) ではありません。gh pr checkout ${PR_ARG} で切り替えてから実行してください" >&2
+  exit 1
+fi
+if [ "${PR_AUTHOR}" = "${VIEWER}" ]; then
   MODE="local"
 else
-  MODE="worktree"
+  MODE="github"
 fi
 echo "info: ${MODE} モードで開始します (PR の作者: ${PR_AUTHOR}, gh のログイン: ${VIEWER}, 現在のブランチ: ${CURRENT_BRANCH:-(detached)}, PR のブランチ: ${HEAD_REF})" >&2
 
@@ -73,22 +79,25 @@ if [ -f "${SESSION}" ]; then
 fi
 
 git fetch --quiet origin "${BASE_REF}"
+WORKTREE="${REPO_ROOT}"
+LOCAL_HEAD="$(git rev-parse HEAD)"
 if [ "${MODE}" = "local" ]; then
-  WORKTREE="${REPO_ROOT}"
-  LOCAL_HEAD="$(git rev-parse HEAD)"
   if [ "${LOCAL_HEAD}" != "${HEAD_SHA}" ]; then
     echo "warning: ローカル HEAD (${LOCAL_HEAD:0:7}) が PR の head (${HEAD_SHA:0:7}) と異なります。ローカルを対象にします" >&2
     HEAD_SHA="${LOCAL_HEAD}"
   fi
 else
+  # github モードの difit は head と base の SHA の差分を表示するが、レビュースキルは作業ツリーのファイルを読む。
+  # 両者が食い違うと、GitHub の PR に無いコードへ指摘を付けることになるため、作業ツリーが PR の head そのものであることを求める。
   git fetch --quiet origin "refs/pull/${PR}/head"
   HEAD_SHA="$(git rev-parse FETCH_HEAD)"
-  WORKTREE="$(dirname "${REPO_ROOT}")/$(basename "${REPO_ROOT}")-pr-${PR}"
-  if [ -d "${WORKTREE}" ]; then
-    echo "info: 既存の worktree ${WORKTREE} を ${HEAD_SHA:0:7} に更新します" >&2
-    git -C "${WORKTREE}" checkout --quiet --detach "${HEAD_SHA}"
-  else
-    git worktree add --quiet --detach "${WORKTREE}" "${HEAD_SHA}"
+  if [ "${LOCAL_HEAD}" != "${HEAD_SHA}" ]; then
+    echo "error: ローカル HEAD (${LOCAL_HEAD:0:7}) が PR の head (${HEAD_SHA:0:7}) と異なります。git pull --ff-only で揃えてから実行してください" >&2
+    exit 1
+  fi
+  if [ -n "$(git status --porcelain)" ]; then
+    echo "error: 未コミットの変更があります。他人の PR のレビューでは作業ツリーを PR の head と一致させる必要があるため、変更を退避してから実行してください" >&2
+    exit 1
   fi
 fi
 BASE_SHA="$(git -C "${WORKTREE}" merge-base "${HEAD_SHA}" "origin/${BASE_REF}")"

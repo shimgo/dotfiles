@@ -50,4 +50,6 @@ $SKILL_DIR/scripts/sync.sh <state-dir>
   difit が動いているのにスレッドを 0 件しか取得できないときは、`sync.sh` が中断して返信の消失を防ぐ。
   取得の失敗ではなく本当に 0 件だと確かめたときだけ `--allow-empty-snapshot` を付けて再実行する。
 - **local モードでは difit を `difit . origin/<base_ref> --merge-base` で起動する。** difit が作業ツリーの変更を差分に含めるので、
-  指摘へ対応するたびにコミットしなくても、コミット前に自分で確認できる。worktree モード (他人の PR) は他人の head と base の SHA をそのまま対象にする。
+  指摘へ対応するたびにコミットしなくても、コミット前に自分で確認できる。github モード (他人の PR) は head と base の SHA をそのまま対象にする。
+- **github モードでは、PR の作者が push した head へ現在のブランチを fast-forward で追従させる。** force push で fast-forward できないとき、
+  または未コミットの変更があるときは `sync.sh` が中断する。Claude はブランチを書き換えず、エラーの内容をユーザーに伝える。

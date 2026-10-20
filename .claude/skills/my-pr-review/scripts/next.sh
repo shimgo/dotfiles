@@ -15,7 +15,7 @@
 #   5. それ以外は直前のフェーズから決める
 #        start / なし → review
 #        review / answer → wait (ユーザーが difit で対応要否を付けるのを待つ)
-#        triage (worktree) → sync。ただし次のときは wait
+#        triage (github) → sync。ただし次のときは wait
 #          - pending review が未送信 (ユーザーが GitHub で送信するのを待つ)
 #          - 返信待ちの Claude の指摘 (pending / none) が残っている (作り直すとポートが変わり、ユーザーが開いている difit を失う)
 #          - GitHub に投稿した指摘 (posted) が無く、PR の head も変わっていない (取り込むものが無い)

@@ -1,11 +1,11 @@
 {
   "skill_name": "my-pr-review",
-  "note": "このスキルは実在の PR、worktree、difit サーバ、GitHub の pending review を操作するため、自動評価は実行していない。手動で試すときの想定プロンプトを残す。",
+  "note": "このスキルは実在の PR、作業ツリー、difit サーバ、GitHub の pending review を操作するため、自動評価は実行していない。手動で試すときの想定プロンプトを残す。",
   "evals": [
     {
       "id": 1,
       "prompt": "https://github.com/<owner>/<repo>/pull/1234 のレビュー依頼が来た。difit でレビューセッションを始めて、リポジトリのレビュースキルで指摘を出して difit に載せて。",
-      "expected_output": "session-start.sh を worktree モードで実行し、difit の URL と GitHub 取り込み件数を報告する。worktree で Claude を起動し直す案内をしてから、リポジトリ固有のレビュースキルを実行し findings JSON に変換して difit-post.sh で投稿し、投稿・抑止件数を報告する。",
+      "expected_output": "現在のブランチが PR のブランチでなければ gh pr checkout を案内する。session-start.sh を github モードで実行し、difit の URL と GitHub 取り込み件数を報告してから、リポジトリ固有のレビュースキルを実行し findings JSON に変換して difit-post.sh で投稿し、投稿・抑止件数を報告する。",
       "files": []
     },
     {
@@ -29,7 +29,7 @@
     {
       "id": 5,
       "prompt": "next",
-      "expected_output": "next.sh の判定に従う。difit に \"q \" で始まる未処理のスレッドがあれば answer フェーズを先に実行し、worktree のコードを読んで difit に author=claude の返信を投稿する。GitHub への pending 投稿は行わない。未処理の q が無くなってから triage に進む。",
+      "expected_output": "next.sh の判定に従う。difit に \"q \" で始まる未処理のスレッドがあれば answer フェーズを先に実行し、現在のディレクトリのコードを読んで difit に author=claude の返信を投稿する。GitHub への pending 投稿は行わない。未処理の q が無くなってから triage に進む。",
       "files": []
     },
     {
@@ -40,7 +40,7 @@
     },
     {
       "id": 7,
-      "prompt": "next (worktree モードのセッションで、difit に \"q PR の説明に動作確認の手順を追記しておいて\" というスレッドがある)",
+      "prompt": "next (github モードのセッションで、difit に \"q PR の説明に動作確認の手順を追記しておいて\" というスレッドがある)",
       "expected_output": "answer フェーズで応答するが、ケース 1 なので gh pr edit などで PR の body を編集しない。実行しなかったことと理由を difit に返信し、スレッドは open のまま残す。",
       "files": []
     }

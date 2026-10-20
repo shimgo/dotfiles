@@ -5,7 +5,7 @@
 #
 # 実施内容:
 #   1. GitHub の reviewThreads を取得し、resolved / 削除されたスレッドの status を更新する
-#   2. PR の head を取得し直す (worktree モードでは detach で checkout、local モードでは現在の HEAD を採用)
+#   2. PR の head を取得し直す (github モードでは現在のブランチを PR の head へ fast-forward、local モードでは現在の HEAD を採用)
 #   3. difit を停止し、新しい head と base で --clean 起動して URL を標準エラーへ出す (--no-restart で省略)
 #      停止前のスレッドは difit-last.json に保存し、状態ファイルに無いユーザーのスレッドと返信を失わないようにする
 #   4. GitHub の未解決スレッドと、ローカルで open なスレッドを difit に再投入する
@@ -43,8 +43,21 @@ if [ "${MODE}" = "local" ]; then
 else
   git -C "${WORKTREE}" fetch --quiet origin "refs/pull/${PR}/head"
   HEAD_SHA="$(git -C "${WORKTREE}" rev-parse FETCH_HEAD)"
-  if [ "${HEAD_SHA}" != "${OLD_HEAD}" ]; then
-    git -C "${WORKTREE}" checkout --quiet --detach "${HEAD_SHA}"
+  if [ "${HEAD_SHA}" != "$(git -C "${WORKTREE}" rev-parse HEAD)" ]; then
+    # PR の作者が push した head へ、現在のブランチを fast-forward で追従させる。
+    # force push で履歴が書き換わった場合や未コミットの変更がある場合は、ユーザーの変更を壊さないよう中断する。
+    if [ "$(git -C "${WORKTREE}" branch --show-current)" != "${HEAD_REF}" ]; then
+      echo "error: 現在のブランチが PR のブランチ (${HEAD_REF}) ではありません。切り替えてから再実行してください" >&2
+      exit 1
+    fi
+    if [ -n "$(git -C "${WORKTREE}" status --porcelain)" ]; then
+      echo "error: 未コミットの変更があるため、PR の head (${HEAD_SHA:0:7}) へ追従できません。変更を退避してから再実行してください" >&2
+      exit 1
+    fi
+    if ! git -C "${WORKTREE}" merge --quiet --ff-only "${HEAD_SHA}"; then
+      echo "error: PR の head (${HEAD_SHA:0:7}) へ fast-forward できません (force push の可能性があります)。ブランチを PR の head に合わせてから再実行してください" >&2
+      exit 1
+    fi
   fi
 fi
 BASE_SHA="$(git -C "${WORKTREE}" merge-base "${HEAD_SHA}" "origin/${BASE_REF}")"

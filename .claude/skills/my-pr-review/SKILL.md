@@ -23,7 +23,7 @@ difit は表示層として毎ラウンド作り直す。設計の背景は `ref
 | フェーズ | 手順書 | 使う場面 |
 | --- | --- | --- |
 | `next` | (下記) | 次の工程へ進む。difit の状態と直前のフェーズから次のフェーズを判定して実行し、`wait` になるまで同じターンで続ける |
-| `start` | `phases/start.md` | レビュー依頼を受けた、または自分の PR を作った直後。worktree と difit とセッションを準備する |
+| `start` | `phases/start.md` | レビュー依頼を受けた、または自分の PR を作った直後。現在のチェックアウトを検証し、difit とセッションを準備する |
 | `review` | `phases/review.md` | リポジトリ固有のレビュースキルを実行し、指摘を difit に投稿する。再レビューもここ |
 | `answer` | `phases/answer.md` | ユーザーが difit 上に書いた Claude Code 宛ての本文 (`q ...`) に応答する。指示なら実行して resolve する。triage より優先する |
 | `triage` | `phases/triage.md` | ユーザーが difit 上で付けた対応要否を処理する。GitHub への pending 投稿や実装もここ |
@@ -54,8 +54,8 @@ $SKILL_DIR/scripts/next.sh <state-dir>
 
 ## 全体像
 
-ケース 1 (他人の PR。session.json の `mode` が `worktree`) と ケース 2 (自分の PR。`mode` が `local`) で流れが違うのは triage 以降だけである。
-ケースは `session-start.sh` が PR の作者と現在のブランチから決める (`phases/start.md`)。
+ケース 1 (他人の PR。session.json の `mode` が `github`) と ケース 2 (自分の PR。`mode` が `local`) で流れが違うのは triage 以降だけである。
+ケースは `session-start.sh` が PR の作者から決める (`phases/start.md`)。どちらのケースも、PR のブランチを checkout した現在のディレクトリをレビュー対象にする。
 
 ```
 start → review ─┬→ answer (随時)
@@ -97,15 +97,17 @@ start → review ─┬→ answer (随時)
 - **ケース 1 では PR の body を編集しない。** 他人が書いた PR の説明を書き換えることになるためである。
   `gh pr edit --body` / `--body-file` も、`gh api` による PR の更新 (REST の `PATCH /repos/<owner>/<repo>/pulls/<番号>`、GraphQL の `updatePullRequest`) も実行しない。
   ユーザーが `q` で body の編集を指示しても実行せず、ケース 1 では禁止されていることを返信する。body への意見は、レビューコメントとして pending review に投稿する。
-- **作業ディレクトリ**: リポジトリ固有のレビュースキルは現在のディレクトリを対象にする。ケース 1 では worktree で Claude Code を起動しているか、
-  `session.json` の `worktree` と現在のディレクトリが一致しているかを review の前に確認する。
+- **作業ディレクトリ**: リポジトリ固有のレビュースキルは現在のディレクトリを対象にする。`session-start.sh` は現在のディレクトリを
+  `session.json` の `worktree` に記録するので、review の前に現在のディレクトリと一致しているかを確認する。
+- **ケース 1 ではコミットしない。** 現在のブランチは他人の PR のブランチである。ケース 1 の作業ツリーは PR の head と一致させておく必要があり、
+  `sync.sh` は PR の作者の push に fast-forward で追従する。
 - 秘密情報 (トークン、鍵、パスワード) を difit のコメントやコマンド引数に含めない。
 
 ## スクリプト一覧
 
 | スクリプト | 役割 |
 | --- | --- |
-| `scripts/session-start.sh <PR> [--review-skill NAME]` | セッション開始。PR の作者と現在のブランチからモードを決め、worktree、difit、GitHub スレッドの取り込みを行う |
+| `scripts/session-start.sh <PR> [--review-skill NAME]` | セッション開始。現在のブランチが PR のブランチかを検証し、PR の作者からモードを決め、difit の起動と GitHub スレッドの取り込みを行う |
 | `scripts/difit-post.sh <state-dir> <findings.json>` | 指摘を照合して difit に投稿し、記録する |
 | `scripts/difit-fetch.sh <state-dir> [--raw]` | difit のスレッドを取得し、返信を分類する |
 | `scripts/github-pending.sh <state-dir> < items.json` | difit のスレッドを GitHub の pending review に追加する |

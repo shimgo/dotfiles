@@ -21,7 +21,7 @@
 | `~/.local/state/claude/review/<owner>/<repo>/pr-<番号>/` | GitHub に記録が残らないもの (対応不要の判断、未投稿の指摘) と、GitHub のスレッドを照合キーに結び付ける索引 |
 
 difit には状態を持たせない。difit のコメントはサーバのメモリとブラウザの localStorage にしか無く、
-worktree の削除や head の更新をまたいで信頼できないためである。difit は毎ラウンド `--clean` で作り直す。
+difit の再起動や head の更新をまたいで信頼できないためである。difit は毎ラウンド `--clean` で作り直す。
 
 `~/.local/state` は XDG Base Directory の `XDG_STATE_HOME` であり、XDG Base Directory の仕様はこの場所を「再起動をまたいで保持したいが設定でもユーザー資産でもない状態」を置く場所と定めている。
 リポジトリ内にコミットしないのは、対応不要の判断がレビュアー個人のものであり、PR ブランチにノイズを乗せないためである。
@@ -32,8 +32,8 @@ worktree の削除や head の更新をまたいで信頼できないためで�
 | --- | --- |
 | `repo` | `gh repo view --json nameWithOwner` の値 |
 | `pr`, `pr_url` | PR 番号と URL |
-| `mode` | `local` (PR の作者が `gh` のログイン中のアカウントで、現在のブランチがその PR のブランチ。ケース 2) か `worktree` (それ以外。ケース 1)。`session-start.sh` が決める |
-| `worktree` | レビュー対象のディレクトリ |
+| `mode` | `local` (PR の作者が `gh` のログイン中のアカウント。ケース 2) か `github` (それ以外。ケース 1)。`session-start.sh` が決める。以前の版が書いた `worktree` は `github` として読む |
+| `worktree` | レビュー対象のディレクトリ。`session-start.sh` を実行したリポジトリのルート (PR のブランチを checkout した作業ツリー) |
 | `base_ref`, `head_ref` | ブランチ名 |
 | `base_sha`, `head_sha` | 現在の diff の両端。`base_sha` は merge-base |
 | `reviewed_head_sha` | 最後にレビュースキルを実行したときの head。差分のみの再レビューの起点 |
@@ -45,7 +45,7 @@ worktree の削除や head の更新をまたいで信頼できないためで�
 ## 3. threads.jsonl のレコード
 
 1 行 1 レコード、追記のみ。同じ `key` の行のうち最後の行が有効である。status の変更は新しい行の追記で表す。
-追記のみにするのは、複数の worktree で並行してセッションを動かしても互いを上書きしないためである。
+追記のみにするのは、複数のセッションを並行して動かしても互いを上書きしないためである。
 
 ```json
 {"schema_version":1,"key":"claude-3f9a1c2b7d4e","repo":"<owner>/<repo>","pr":1234,"head_sha":"a1b2c3d","file":"internal/point/offset.go","side":"new","line":{"start":42,"end":44},"scope":"func (s *Service) Offset(ctx context.Context, in Input) error","snippet":"\tif user.NewFlag {\n\t\treturn nil\n\t}","snippet_sha256":"9f2a...","perspective":"観点5: 破壊的な変更の確認","summary":"既存ユーザーで NewFlag が暗黙的に false になる","body":"...","reason":"マイグレーション 0042 でバックフィル済み","fingerprint":"7c1e...","origin":"claude","difit_thread_id":"claude-3f9a1c2b7d4e","github_thread_id":null,"github_comment_id":null,"status":"dismissed","created_at":"2026-09-08T17:30:00+09:00","updated_at":"2026-09-08T17:45:00+09:00"}

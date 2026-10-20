@@ -16,7 +16,7 @@ GitHub に投稿済みで未解決の指摘が出る。`outdated` も対象に�
 python3 $SKILL_DIR/scripts/state.py latest --state <state-dir>/threads.jsonl --status outdated
 ```
 
-2. 各指摘について、worktree の現在のコードと `git -C <worktree> diff <前回の head_sha>..HEAD -- <file>` を読み、
+2. 各指摘について、現在のディレクトリのコードと `git -C <worktree> diff <前回の head_sha>..HEAD -- <file>` を読み、
    指摘の趣旨が満たされているかを判断する。`summary` と `body` に指摘内容がある。
    PR 作者が GitHub 上で返信していれば `difit-fetch.sh --raw` で本文を読み、反論に妥当性があるかも判断する。
 

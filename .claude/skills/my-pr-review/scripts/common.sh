@@ -29,6 +29,8 @@ load_session() {
   PR="$(jq -r '.pr' "${SESSION}")"
   PR_URL="$(jq -r '.pr_url' "${SESSION}")"
   MODE="$(jq -r '.mode' "${SESSION}")"
+  # 以前の版は github モードを worktree と呼び、PR の head を別の worktree に checkout していた
+  if [ "${MODE}" = "worktree" ]; then MODE="github"; fi
   WORKTREE="$(jq -r '.worktree' "${SESSION}")"
   BASE_REF="$(jq -r '.base_ref' "${SESSION}")"
   HEAD_REF="$(jq -r '.head_ref' "${SESSION}")"
@@ -50,9 +52,9 @@ difit_alive() {
 # local モード (自分の PR のセルフレビュー) では head ではなく作業ツリー (".") を、base には origin/<base_ref> を --merge-base で渡す。
 # 指摘へ対応するたびにコミットしなくても差分へ反映されるうえ、difit の画面で選べる "origin/<base_ref>...Uncommitted Changes (merge-base)" と
 # 同じ対象になる。difit はコメントを差分の対象ごとに持つため、起動時の対象と画面で選ぶ対象がずれるとコメントが表示されない。
-# worktree モード (他人の PR) は他人の head を detach で見ているだけなので、head と base の SHA をそのまま対象にする。
+# github モード (他人の PR) は作業ツリーを変更しないので、head と base の SHA をそのまま対象にする。
 start_difit() {
-  local worktree="$1" head="$2" base="$3" mode="${4:-worktree}" base_ref="${5:-}"
+  local worktree="$1" head="$2" base="$3" mode="${4:-github}" base_ref="${5:-}"
   if [ "${mode}" = "local" ] && [ -n "${base_ref}" ]; then
     (cd "${worktree}" && difit . "origin/${base_ref}" --merge-base --background --clean)
     return
