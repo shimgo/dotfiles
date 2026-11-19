@@ -11,7 +11,8 @@
 #   3. difit に未処理の返信 (fix / dismiss / user_finding) があれば triage
 #      GitHub への投稿などで処理済みのスレッドは processed に分類するので数えない
 #   4. local モードで reviewed_head_sha 以降にコミットを積んでいれば review (先に sync.sh で difit と session.json の head を合わせる)
-#      answer / triage で実装したコミットを再レビューするため。直前のフェーズが review のときは判定しない (review が reviewed_head_sha を更新する)
+#      answer / triage で実装したコミットと、review の後にスキルの外で積んだコミットを再レビューするため。
+#      review は reviewed_head_sha を head_sha (local モードでは git の HEAD) に揃えるので、レビュー直後には一致し、review を繰り返さない
 #   5. それ以外は直前のフェーズから決める
 #        start / なし → review
 #        review / answer → wait (ユーザーが difit で対応要否を付けるのを待つ)
@@ -49,7 +50,7 @@ RESTORE_N="$(python3 "${STATE_PY}" latest --state "${STATE_FILE}" --needs-restor
 PENDING_REPLIES=$(( $(count fix) + $(count dismiss) + $(count user_finding) ))
 [ "${PENDING_REPLIES}" -gt 0 ] && emit triage "未処理の返信が ${PENDING_REPLIES} 件ある"
 
-if [ "${MODE}" = "local" ] && [ "${LAST}" != "review" ] && [ -n "${REVIEWED_HEAD_SHA}" ]; then
+if [ "${MODE}" = "local" ] && [ -n "${REVIEWED_HEAD_SHA}" ]; then
   CURRENT_HEAD="$(git -C "${WORKTREE}" rev-parse HEAD)"
   if [ "${CURRENT_HEAD}" != "${REVIEWED_HEAD_SHA}" ]; then
     emit review "reviewed_head_sha 以降にコミットを積んでいる。sync.sh で difit を作り直してから差分を再レビューする"

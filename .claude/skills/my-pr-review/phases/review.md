@@ -12,9 +12,10 @@
 | 状況 | 範囲 |
 | --- | --- |
 | 初回、または PR 作者が修正した後 (ケース 1) | `base_sha..head_sha` の PR 全体 |
-| ケース 2 で自分が指摘対応のコミットを積んだ後 | `reviewed_head_sha..HEAD` の差分のみ |
+| ケース 2 でコミットを積んだ後 (指摘対応のコミットと、前回のレビューの後にスキルの外で積んだコミット) | `reviewed_head_sha..HEAD` の差分のみ |
 
 `reviewed_head_sha` は前回のレビュー時の head であり、session.json に入っている。null なら初回である。
+範囲に base ブランチのマージコミットが入るときは、`git log --first-parent --no-merges reviewed_head_sha..HEAD` が返すコミットだけをレビューする。マージコミットの差分は base ブランチの変更で、PR の変更ではない。ただし、コンフリクトを解消したマージコミットは、解消した箇所 (`git show --remerge-diff <マージコミット>` の差分) もレビューする。
 ケース 2 でコミットを積んだ後は、先に `scripts/sync.sh <state-dir>` を実行して difit と session.json の head を新しい HEAD に合わせる。
 `sync.sh` の出力の `reimported.needs_restore` が空でなければ、レビューの前に `phases/restore.md` でスレッドを difit に戻す。
 
