@@ -65,6 +65,74 @@ class EnrichTest(unittest.TestCase):
         self.assertIsNone(out["findings"][0]["snippet_sha256"])
 
 
+class DiffLinesTest(unittest.TestCase):
+    DIFF = "\n".join([
+        "diff --git a/a.go b/a.go",
+        "--- a/a.go",
+        "+++ b/a.go",
+        "@@ -10,2 +10,3 @@ func f() {",
+        "@@ -20 +21,0 @@ func g() {",
+        "diff --git a/old.go b/new.go",
+        "--- a/old.go",
+        "+++ b/new.go",
+        "@@ -5,0 +6 @@",
+        "diff --git a/gone.go b/gone.go",
+        "--- a/gone.go",
+        "+++ /dev/null",
+        "@@ -1,2 +0,0 @@",
+    ])
+
+    def test_parse_collects_changed_lines_without_context(self):
+        changed = state.parse_changed_lines(self.DIFF)
+        self.assertEqual(changed["a.go"], {"new": {10, 11, 12}, "old": {10, 11, 20}})
+        # 名前を変えたファイルの削除行は、変更前と変更後の両方のパスに入る
+        self.assertEqual(changed["new.go"], {"new": {6}, "old": set()})
+        self.assertEqual(changed["old.go"], {"new": set(), "old": set()})
+        self.assertEqual(changed["gone.go"], {"new": set(), "old": {1, 2}})
+
+    def test_in_diff_requires_a_changed_line_on_the_finding_side(self):
+        changed = state.parse_changed_lines(self.DIFF)
+        cases = [
+            ({"file": "a.go", "line": 11}, True),
+            ({"file": "a.go", "line": {"start": 8, "end": 10}}, True),
+            ({"file": "a.go", "line": 13}, False),
+            ({"file": "a.go", "side": "old", "line": 20}, True),
+            ({"file": "a.go", "side": "old", "line": 12}, False),
+            ({"file": "gone.go", "side": "old", "line": 2}, True),
+            ({"file": "unchanged.go", "line": 1}, False),
+        ]
+        for finding, want in cases:
+            with self.subTest(finding=finding):
+                self.assertEqual(state.in_diff(finding, changed), want)
+
+    def test_split_diff_separates_findings_outside_the_diff(self):
+        with tempfile.TemporaryDirectory() as d:
+            def git(*args):
+                subprocess.run(["git", "-C", d, *args], check=True, capture_output=True)
+
+            git("init", "-q", "-b", "main")
+            git("config", "user.email", "t@example.com")
+            git("config", "user.name", "t")
+            with open(os.path.join(d, "x.txt"), "w") as f:
+                f.write("a\nb\nc\n")
+            git("add", ".")
+            git("commit", "-q", "-m", "base")
+            base = subprocess.run(["git", "-C", d, "rev-parse", "HEAD"], check=True, capture_output=True, text=True).stdout.strip()
+            git("update-ref", "refs/remotes/origin/main", base)
+            with open(os.path.join(d, "x.txt"), "w") as f:
+                f.write("a\nB\nc\n")
+            with open(os.path.join(d, "new.txt"), "w") as f:
+                f.write("1\n2\n")
+            findings = {"findings": [
+                {"file": "x.txt", "line": 2, "perspective": "p", "summary": "changed", "body": "b"},
+                {"file": "x.txt", "line": 1, "perspective": "p", "summary": "context", "body": "b"},
+                {"file": "new.txt", "line": 2, "perspective": "p", "summary": "untracked", "body": "b"},
+            ]}
+            out = run(["split-diff", "--worktree", d, "--mode", "local", "--base-ref", "main"], json.dumps(findings))
+        self.assertEqual([f["summary"] for f in out["findings"]], ["changed", "untracked"])
+        self.assertEqual([f["summary"] for f in out["out_of_diff"]], ["context"])
+
+
 class MatchTest(unittest.TestCase):
     def setUp(self):
         self.tmp = tempfile.TemporaryDirectory()

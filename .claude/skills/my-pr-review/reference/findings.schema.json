@@ -14,7 +14,7 @@
           "file": { "type": "string", "description": "リポジトリルートからの相対パス" },
           "side": { "type": "string", "enum": ["new", "old"], "default": "new", "description": "new は変更後のファイルの行、old は削除された行" },
           "line": {
-            "description": "指摘対象の行番号。範囲なら {start, end}",
+            "description": "指摘対象の行番号。範囲なら {start, end}。PR の差分の変更行 (side が old なら削除した行) を 1 行以上含める。含まない指摘を difit-post.sh は投稿せず out_of_diff に出す",
             "oneOf": [
               { "type": "integer", "minimum": 1 },
               {

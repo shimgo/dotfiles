@@ -80,6 +80,8 @@ start → review ─┬→ answer (随時)
 - **difit 上のスレッドは resolve すると消える。** resolved という状態は difit に存在しない。
   したがって resolve や削除の前に必ず `state.py set-status` で記録を残す。順序を逆にすると判断が失われる。
   `state.py set-status` は状態ファイルへ自分で追記し、追記したレコードを標準出力へ出す。`append` へパイプしない。
+- **指摘は PR の差分の変更行に付ける。** difit と GitHub の PR は差分の外の行を表示しないため、差分の外の指摘はユーザーに届かない。
+  `difit-post.sh` は差分の変更行を指さない指摘を投稿せず、`out_of_diff` に出す。直すべき位置が差分の外にあるときは、問題を生んだ差分の中の行に付けて直す先を本文に書くか、ユーザーへの報告に含める (`phases/review.md` の手順 3 と手順 5)。
 - **ユーザーの発言を difit から消したままにしない。** 修正で行が書き換わると、sync はそのスレッドの位置を特定できずに difit から外す。
   ユーザーの発言を含むスレッドは `next.sh` が `restore` を返すので、`phases/restore.md` で位置を決め直して戻す。
 - **Claude が difit に書くときは `author` を `claude` にする。** `scripts/state.py` はこの値でユーザーの発言と区別する。
@@ -115,7 +117,7 @@ start → review ─┬→ answer (随時)
 | スクリプト | 役割 |
 | --- | --- |
 | `scripts/session-start.sh [<PR>] [--base BRANCH] [--review-skill NAME]` | セッション開始。PR を省略すると現在のブランチの PR を探し、無ければ PR なしの local モードにする。現在のブランチが PR のブランチかを検証し、PR の作者からモードを決め、difit の起動と GitHub スレッドの取り込みを行う |
-| `scripts/difit-post.sh <state-dir> <findings.json>` | 指摘を照合して difit に投稿し、記録する |
+| `scripts/difit-post.sh <state-dir> <findings.json>` | 差分の変更行を指さない指摘を `out_of_diff` に分け、残りを照合して difit に投稿し、記録する |
 | `scripts/difit-fetch.sh <state-dir> [--raw]` | difit のスレッドを取得し、返信を分類する |
 | `scripts/github-pending.sh <state-dir> < items.json` | difit のスレッドを GitHub の pending review に追加する |
 | `scripts/github-resolve.sh <state-dir> <thread-id>...` | GitHub のスレッドを resolve する |

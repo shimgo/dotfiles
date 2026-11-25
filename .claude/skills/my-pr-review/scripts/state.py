@@ -5,6 +5,7 @@ threads.jsonl は追記のみのファイルであり、同じ key を持つ行�
 レコードの定義は reference/state.md を参照。
 
 サブコマンド:
+  split-diff   findings を、difit が表示する差分の変更行を指すものと指さないもの (out_of_diff) に分ける
   enrich       findings JSON に snippet / scope / ハッシュ を付与する
   match        enrich 済み findings を状態ファイルと照合し decision を付与する
   to-difit     decision 済み findings から difit の comment import JSON とレコードを生成する
@@ -270,6 +271,92 @@ def enrich_one(item: dict, worktree: str, base_sha: str | None, new_rev: str | N
     out["scope"] = scope
     out["fingerprint"] = fingerprint_of(item.get("perspective"), item["summary"])
     return out
+
+
+# ---------------------------------------------------------------------------
+# 差分の変更行
+# ---------------------------------------------------------------------------
+
+DIFF_HUNK = re.compile(r"^@@ -(\d+)(?:,(\d+))? \+(\d+)(?:,(\d+))? @@")
+
+
+def diff_path(header: str, prefix: str) -> str | None:
+    """`--- a/x` / `+++ b/x` の行からパスを返す。`/dev/null` なら None。"""
+    path = header[4:].rstrip("\n")
+    if path == "/dev/null":
+        return None
+    if path.startswith(prefix):
+        return path[len(prefix) :]
+    return path
+
+
+def parse_changed_lines(diff_text: str) -> dict[str, dict[str, set[int]]]:
+    """`git diff -U0` の出力から、ファイルごとの変更行を返す。
+
+    戻り値は {パス: {"new": 追加・変更した行の番号, "old": 削除した行の番号}}。
+    -U0 で取るため、hunk の行はすべて変更行である。前後の文脈の行は含めない。
+    名前を変えたファイルの削除行は、変更前と変更後の両方のパスに入れる。指摘は変更後のパスで書くことが多いためである。
+    """
+    changed: dict[str, dict[str, set[int]]] = {}
+    old_path = new_path = None
+
+    def entry(path: str) -> dict[str, set[int]]:
+        return changed.setdefault(path, {"new": set(), "old": set()})
+
+    for line in diff_text.split("\n"):
+        if line.startswith("--- "):
+            old_path = diff_path(line, "a/")
+            continue
+        if line.startswith("+++ "):
+            new_path = diff_path(line, "b/")
+            continue
+        m = DIFF_HUNK.match(line)
+        if not m:
+            continue
+        old_start, old_count = int(m.group(1)), int(m.group(2) if m.group(2) is not None else 1)
+        new_start, new_count = int(m.group(3)), int(m.group(4) if m.group(4) is not None else 1)
+        for path in {p for p in (old_path, new_path) if p}:
+            entry(path)["old"].update(range(old_start, old_start + old_count))
+        if new_path:
+            entry(new_path)["new"].update(range(new_start, new_start + new_count))
+    return changed
+
+
+def run_git(worktree: str, args: list[str]) -> str:
+    try:
+        return subprocess.run(["git", "-C", worktree, "-c", "core.quotePath=false", *args], capture_output=True, text=True, check=True).stdout
+    except subprocess.CalledProcessError as e:
+        die(f"git {' '.join(args)} が失敗しました: {e.stderr.strip()}")
+    return ""
+
+
+def diff_changed_lines(worktree: str, mode: str, base_ref: str | None, base_sha: str | None, head_sha: str | None) -> dict[str, dict[str, set[int]]]:
+    """difit が表示する差分の変更行を返す。
+
+    local モードの difit は `difit . origin/<base_ref> --merge-base` で、merge-base と作業ツリーの差分を表示する。
+    そのため、`git diff --merge-base origin/<base_ref>` の差分に、未追跡のファイルの全行を加える。
+    github モードの difit は base と head の SHA を対象にするため、GitHub の PR と同じく merge-base からの差分 (`base...head`) を使う。
+    """
+    common = ["diff", "-U0", "--no-color", "--no-ext-diff", "-M"]
+    if mode == "local" and base_ref:
+        changed = parse_changed_lines(run_git(worktree, [*common, "--merge-base", f"origin/{base_ref}"]))
+        for path in run_git(worktree, ["ls-files", "--others", "--exclude-standard"]).split("\n"):
+            if not path:
+                continue
+            lines = read_file_lines(worktree, path, "new", None) or []
+            changed.setdefault(path, {"new": set(), "old": set()})["new"].update(range(1, len(lines) + 1))
+        return changed
+    return parse_changed_lines(run_git(worktree, [*common, f"{base_sha}...{head_sha}"]))
+
+
+def in_diff(finding: dict, changed: dict[str, dict[str, set[int]]]) -> bool:
+    """指摘の行の範囲が、指摘の side の変更行を 1 行以上含むかを返す。"""
+    entry = changed.get(finding["file"])
+    if entry is None:
+        return False
+    start, end = line_range(finding["line"])
+    lines = entry[finding.get("side") or "new"]
+    return any(n in lines for n in range(start, end + 1))
 
 
 # ---------------------------------------------------------------------------
@@ -683,6 +770,20 @@ def relocate_record(record: dict, worktree: str, base_sha: str | None = None) ->
 # ---------------------------------------------------------------------------
 # サブコマンド
 # ---------------------------------------------------------------------------
+
+
+def cmd_split_diff(a):
+    """findings を、差分の変更行を指すもの (findings) と指さないもの (out_of_diff) に分ける。
+
+    difit と GitHub の PR は差分の外の行を表示しないため、差分の外へ付けた指摘はユーザーが見落とすか、GitHub に投稿できない。
+    """
+    payload = read_json() or {}
+    findings = payload["findings"] if isinstance(payload, dict) else payload
+    changed = diff_changed_lines(a.worktree, a.mode, a.base_ref, a.base_sha, a.head_sha)
+    inside, outside = [], []
+    for f in findings:
+        (inside if in_diff(f, changed) else outside).append(f)
+    write_json({"findings": inside, "out_of_diff": outside})
 
 
 def cmd_enrich(a):
@@ -1158,6 +1259,14 @@ def optional_int(value: str) -> int | None:
 def main(argv=None):
     p = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     sub = p.add_subparsers(dest="command", required=True)
+
+    s = sub.add_parser("split-diff")
+    s.add_argument("--worktree", required=True)
+    s.add_argument("--mode", required=True)
+    s.add_argument("--base-ref")
+    s.add_argument("--base-sha")
+    s.add_argument("--head-sha")
+    s.set_defaults(func=cmd_split_diff)
 
     s = sub.add_parser("enrich")
     s.add_argument("--worktree", required=True)
