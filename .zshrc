@@ -293,3 +293,6 @@ alias c="claude"
 # Deno settings
 . "/Users/shimgo/.deno/env"
 if [[ ":$FPATH:" != *":/Users/shimgo/.zsh/completions:"* ]]; then export FPATH="/Users/shimgo/.zsh/completions:$FPATH"; fi
+
+# Go: worktree 間でビルドキャッシュを共有するため、ビルドのキャッシュキーから絶対パスを除く
+export GOFLAGS=-trimpath
